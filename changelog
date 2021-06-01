@@ -1,0 +1,2 @@
+guiver = "1.4.6"
+#Fixed analogue pzt driver bugs. Fixed temp changing when PID changed on graph.
