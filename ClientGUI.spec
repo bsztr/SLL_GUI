@@ -3,7 +3,7 @@
 block_cipher = None
 
 
-a = Analysis(['MainGUI.py'],
+a = Analysis(['ClientGUI.py'],
              pathex=['C:\\Users\\Ben\\OneDrive - Mrs\\Unik_GUI'],
              binaries=[],
              datas=[("UKL.ico","."), ("tcl86t.dll","."), ("tk86t.dll","."), ("dict",".")],

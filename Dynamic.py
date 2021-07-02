@@ -5,6 +5,35 @@ import Globals
 import time
 import math
 from init_start import *
+from tkinter.messagebox import askyesnocancel
+from tkinter import messagebox
+import pandas, os, sys, clr, time
+#from LDPanel import compensation
+import serial
+from serial.tools.list_ports import comports
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+
+        return base_path + relative_path
+    except Exception:
+        base_path = os.getcwd()
+
+        return base_path + relative_path
+
+
+Globals.shiftenabled = getvalue(getaddress("gui", "shift_enable"))["value"]
+if Globals.shiftenabled == 1:
+
+    targetpath = resource_path(r"\DLLs")
+    sys.path.append(targetpath)
+    clr.AddReference("Thorlabs.MotionControl.DeviceManagerCLI")
+    clr.AddReference("Thorlabs.MotionControl.KCube.InertialMotorCLI")
+    clr.AddReference("System")
+    from Thorlabs.MotionControl.DeviceManagerCLI import DeviceManagerCLI
+    from Thorlabs.MotionControl.KCube.InertialMotorCLI import KCubeInertialMotor, InertialMotorStatus
+    from System import Decimal
 
 class temp_label(tk.Label):
     def __init__(self, parent):
@@ -35,7 +64,7 @@ class temp_label(tk.Label):
 
         if eval("Globals." + base + "threshold_main" ) != 0:
             self.threshold = eval("Globals." + base + "threshold_main" )
-            print(self.threshold)
+            #print(self.threshold)
             exec("Globals." + base + "threshold_main = 0")
 
         address=getaddress(base, rel)
@@ -97,6 +126,15 @@ class ld_label(tk.Label):
         self.timer=self.after(2000, lambda: self.update_ld_main(base, rel))
         Globals.runnning_PROC.append(self.timer)
 
+        if Globals.engineer == 0 and Globals.shiftpopup==0 and Globals.shiftenabled==1:
+            if eval("Globals."+base+"_d")[0] > Globals.shiftlimit:
+                Globals.shiftpopup=1
+                bool = askyesnocancel("Confirm to proceed", "The crystal needs to be shifted. \nReady to shift crystal?")
+                if bool:
+                    comp = compensation(self.parent, base)
+                else:
+                    Globals.shiftpopup =0
+
 
 
     def update_status(self, address, rel="", loc="slot"):
@@ -114,11 +152,14 @@ class ld_label(tk.Label):
         self.readin_ld_after = self.after(3000, lambda: self.readin_ld(bas))
         Globals.runnning_PROC.append(self.readin_ld_after)
 
+
+
+
     def getcolour(self, result):
-        if result > 6:
-            return Colours['red']
-        else:
-            return Colours['green']
+            if result > 6:
+                return Colours['red']
+            else:
+                return Colours['green']
 
     def stop_ld_main(self):
         self.configure(text="")
@@ -219,7 +260,7 @@ class pzt_label_bit(tk.Label):
         else:
             nd="_d"
         address = getaddress(bas, rel)
-        print(address)
+        #print(address)
 
         self.result = getbit(address, bit)
         if self.result == "1":
@@ -378,7 +419,7 @@ class iterate(tk.Label):
             self.steping = 1
         #self.timing=self.steping
         self.step=(int(round(self.max-self.min,0)))/(self.steping)
-        print(self.step)
+        #print(self.step)
 
         self.arg1=arg1
         self.arg2=arg2
@@ -423,4 +464,551 @@ class Logo(tk.Label):
 
 def getNames():
 
-    return Globals.Names
+   return Globals.Names
+
+
+class compensation(tk.Toplevel):
+
+    def __init__(self, master, b):
+        tk.Toplevel.__init__(self)
+        # self.grab_set()
+        self.configure(background=Background['main'])
+        self.geometry("750x520")
+        self.title("LD advanced settings")
+        self.pady = 3
+
+        self.c_data = tk.Canvas(self, width=300, height=500, scrollregion=(0, 0, 300, 1500))
+        self.vbar_data = tk.Scrollbar(self, orient=tk.VERTICAL)
+
+        self.vbar_data.config(command=self.c_data.yview)
+        self.c_data.config(yscrollcommand=self.vbar_data.set)
+        self.c_data.create_window(0, 0, anchor="nw", width=700, height=1200, window=clpdata(self, b))
+
+        self.c_data.grid(row=2, column=2, sticky="nwse")
+        self.vbar_data.grid(row=2, column=1, sticky='nsw', padx=5)
+
+
+class clpdata(tk.Frame):
+    def __init__(self, master, b):
+        tk.Frame.__init__(self, master)
+        self.configure(bg=Background['main'])
+        self.pady = 3
+
+        if Globals.engineer == 1:
+
+            self.title = tk.Label(self, text="CLP compensation settings", font=fonts['title'], bg=Background['main'])
+
+            self.l_clpe = tk.Label(self, text="Enable compensation (1-on)", font=fonts['main'], bg=Background['main'])
+            self.t_clp_enable = tk.Text(self, width=6, height=1)
+            self.s_clp_enable = ld_label(self)
+            self.s_clp_enable.update_status(getaddress("ld_d", "clp_enable"), "clp_enable", "driver")
+            self.b_clpe = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                    bg=Background['submit'],
+                                    command=lambda: self.enableclp())
+
+            self.l_clp_target = tk.Label(self, text="CLP target level (V)", font=fonts['main'], bg=Background['main'])
+            self.t_clp_target = tk.Text(self, width=6, height=1)
+            self.s_clp_target = ld_label(self)
+            self.s_clp_target.update_status(getaddress("ld_d", "clp_target"), "clp_target", "driver")
+            self.b_clp_target = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                          bg=Background['submit'],
+                                          command=lambda: submit(self, "ld_d", "clp_target"))
+
+            self.l_clp_repeat = tk.Label(self, text="CLP repeat interval (s)", font=fonts['main'],
+                                         bg=Background['main'])
+            self.t_clp_repeat = tk.Text(self, width=6, height=1)
+            self.s_clp_repeat = ld_label(self)
+            self.s_clp_repeat.update_status(getaddress("ld_d", "clp_repeat"), "clp_repeat", "driver")
+            self.b_clp_repeat = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                          bg=Background['submit'],
+                                          command=lambda: submit(self, "ld_d", "clp_repeat", min=59, max=3600))
+
+            self.l_clp_constant = tk.Label(self, text="CLP C constant", font=fonts['main'], bg=Background['main'])
+            self.t_clp_constant = tk.Text(self, width=6, height=1)
+            self.s_clp_constant = ld_label(self)
+            self.s_clp_constant.update_status(getaddress("ld_d", "clp_constant"), "clp_constant", "driver")
+            self.b_clp_constant = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                            bg=Background['submit'],
+                                            command=lambda: submit(self, "ld_d", "clp_constant"))
+
+            self.l_clp_step = tk.Label(self, text="CLP current step (uA)", font=fonts['main'], bg=Background['main'])
+            self.t_clp_step = tk.Text(self, width=6, height=1)
+            self.s_clp_step = ld_label(self)
+            self.s_clp_step.update_status(getaddress("ld_d", "clp_step"), "clp_step", "driver")
+            self.retrieveclpstep()
+            self.b_clp_step = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                        bg=Background['submit'],
+                                        command=lambda: self.setclpstep())
+
+            self.l_clp_power = tk.Label(self, text="CLP level (mV)", font=fonts['main'], bg=Background['main'])
+            # self.t_clp_power = tk.Text(self, width=6, height=1)
+            self.s_clp_power = pzt_label(self)
+            self.s_clp_power.update_status(getaddress("pzt0", "clp_power"), "clp_power", "slot")
+            self.b_clp_power = tk.Button(self, width=3, height=1, text="GET", font=fonts['submit'],
+                                         bg="blue", fg="white",
+                                         command=lambda: self.getclplevel())
+
+            self.title2 = tk.Label(self, text="Crystal shifter settings (2-Stage, 1-Screw)", font=fonts['title'], bg=Background['main'])
+
+            self.l_shifte = tk.Label(self, text="Enable shifting (1-on)", font=fonts['main'], bg=Background['main'])
+            self.t_shift_enable = tk.Text(self, width=6, height=1)
+            self.s_shift_enable = gui_label(self)
+            self.s_shift_enable.update_status(getaddress("gui", "shift_enable"), "shift_enable")
+            self.b_shifte = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                      bg=Background['submit'],
+                                      command=lambda: submit(self, "gui", "shift_enable", min=-0.1, max=2.1))
+
+            self.retrieveclp()
+            self.retrieveclpstep()
+
+            self.l_shifts = tk.Label(self, text="Shift step", font=fonts['main'], bg=Background['main'])
+            self.t_shift_step = tk.Text(self, width=6, height=1)
+            self.s_shift_step = gui_label(self)
+            self.s_shift_step.update_status(getaddress("gui", "shift_step"), "shift_step")
+            self.b_shifts = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                      bg=Background['submit'],
+                                      command=lambda: submit(self, "gui", "shift_step"))
+
+            self.l_shiftser = tk.Label(self, text="Driver serial no", font=fonts['main'], bg=Background['main'])
+            self.t_shift_serial = tk.Text(self, width=6, height=1)
+            self.s_shift_serial = gui_label(self)
+            self.s_shift_serial.update_status(getaddress("gui", "shift_serial"), "shift_serial")
+            self.b_shiftser = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                        bg=Background['submit'],
+                                        command=lambda: submit(self, "gui", "shift_serial"))
+
+            self.l_shiftth = tk.Label(self, text="Max LD current", font=fonts['main'], bg=Background['main'])
+            self.t_shift_threshold = tk.Text(self, width=6, height=1)
+            self.s_shift_threshold = gui_label(self)
+            self.s_shift_threshold.update_status(getaddress("gui", "shift_threshold"), "shift_threshold")
+            self.b_shiftth = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                       bg=Background['submit'],
+                                       command=lambda: submit(self, "gui", "shift_threshold"))
+
+            self.l_shiftc = tk.Label(self, text="Shift count", font=fonts['main'], bg=Background['main'])
+            self.t_shift_count = tk.Text(self, width=6, height=1)
+            self.s_shift_count = gui_label(self)
+            self.s_shift_count.update_status(getaddress("gui", "shift_count"), "shift_count")
+            # self.b_shiftc = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+            #                           bg=Background['submit'],
+            #                           command=lambda: submit(self, "gui", "shift_count"))
+
+            self.l_shiftpos = tk.Label(self, text="Shifter position", font=fonts['main'], bg=Background['main'])
+            self.t_shift_position = tk.Text(self, width=6, height=1)
+            self.s_shift_position = gui_label(self)
+            self.s_shift_position.update_status(getaddress("gui", "shift_position"), "shift_position")
+            self.b_shiftpos = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                        bg=Background['submit'],
+                                        command=lambda: self.submit_q())
+
+            self.b_connect = tk.Button(self, text="CONNECT", bg=Colours['green'], width=12, font=fonts['main'],
+                                       command=lambda: self.connectit())
+
+            self.b_shift = tk.Button(self, text="SHIFT", bg=Colours['amber'], width=5, font=fonts['main'],
+                                     command=lambda: self.shiftit())
+
+            self.disc = tk.Label(self, text="", font=fonts['main'], bg=Background['main'])
+            self.cdisc = tk.Label(self, text="", font=fonts['main'], bg=Background['main'])
+
+            self.title.grid(row=1, column=1, columnspan=2, sticky="nw", pady=self.pady)
+
+            self.l_clpe.grid(row=2, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_clp_enable.grid(row=2, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_clp_enable.grid(row=2, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_clpe.grid(row=2, column=4, columnspan=1, sticky="nw", pady=self.pady)
+
+            self.l_clp_target.grid(row=3, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_clp_target.grid(row=3, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_clp_target.grid(row=3, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_clp_target.grid(row=3, column=4, columnspan=1, sticky="nw", pady=self.pady)
+
+            self.l_clp_repeat.grid(row=4, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_clp_repeat.grid(row=4, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_clp_repeat.grid(row=4, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_clp_repeat.grid(row=4, column=4, columnspan=1, sticky="nw", pady=self.pady)
+
+            self.l_clp_constant.grid(row=5, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_clp_constant.grid(row=5, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_clp_constant.grid(row=5, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_clp_constant.grid(row=5, column=4, columnspan=1, sticky="nw", pady=self.pady)
+
+            self.l_clp_step.grid(row=6, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_clp_step.grid(row=6, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_clp_step.grid(row=6, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_clp_step.grid(row=6, column=4, columnspan=1, sticky="nw", pady=self.pady)
+            self.l_clp_power.grid(row=7, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            # self.t_clp_step.grid(row=5, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_clp_power.grid(row=7, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_clp_power.grid(row=7, column=4, columnspan=1, sticky="nw", pady=self.pady)
+            self.cdisc.grid(row=8, column=1, columnspan=4, sticky="nw", pady=self.pady)
+
+            self.title2.grid(row=10, column=1, columnspan=2, sticky="nw", pady=self.pady)
+
+            self.l_shifte.grid(row=11, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_shift_enable.grid(row=11, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_shift_enable.grid(row=11, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_shifte.grid(row=11, column=4, columnspan=1, sticky="nw", pady=self.pady)
+
+            self.l_shifts.grid(row=12, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_shift_step.grid(row=12, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_shift_step.grid(row=12, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_shifts.grid(row=12, column=4, columnspan=1, sticky="nw", pady=self.pady)
+
+            self.l_shiftser.grid(row=13, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_shift_serial.grid(row=13, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_shift_serial.grid(row=13, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_shiftser.grid(row=13, column=4, columnspan=1, sticky="nw", pady=self.pady)
+
+            self.l_shiftth.grid(row=14, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_shift_threshold.grid(row=14, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_shift_threshold.grid(row=14, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_shiftth.grid(row=14, column=4, columnspan=1, sticky="nw", pady=self.pady)
+
+            self.l_shiftc.grid(row=15, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            # self.t_shift_count.grid(row=15, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_shift_count.grid(row=15, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            # self.b_shiftc.grid(row=15, column=4, columnspan=1, sticky="nw", pady=self.pady)
+
+            self.l_shiftpos.grid(row=16, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_shift_position.grid(row=16, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_shift_position.grid(row=16, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_shiftpos.grid(row=16, column=4, columnspan=1, sticky="nw", pady=self.pady)
+
+            self.b_shift.grid(row=20, column=2, columnspan=2, sticky="nw", pady=self.pady)
+            self.b_connect.grid(row=20, column=3, columnspan=2, sticky="nw", pady=self.pady)
+            self.disc.grid(row=21, column=1, columnspan=4, sticky="nw", pady=self.pady)
+        else:
+            self.l_disc1 = tk.Label(self,
+                                    text="Please connect the shifter USB cable, and power supply.\nAfter the cables are connected, click the connect button.",
+                                    font=fonts['main'], bg=Background['main'])
+            self.l_disc2 = tk.Label(self, text="Once the shifter connects, click on shift.", font=fonts['main'],
+                                    bg=Background['main'])
+            self.l_disc3 = tk.Label(self, text="The laser will restart.", font=fonts['main'], bg=Background['main'])
+
+            self.disc = tk.Label(self, text="", font=fonts['main'], bg=Background['main'])
+            # self.cdisc = tk.Label(self, text="", font=fonts['main'], bg=Background['main'])
+            self.b_connect = tk.Button(self, text="CONNECT", bg=Colours['green'], width=12, font=fonts['main'],
+                                       command=lambda: self.connectit(user=0))
+
+            self.b_shift = tk.Button(self, text="SHIFT", bg=Colours['amber'], width=5, font=fonts['main'],
+                                     command=lambda: self.shiftit(user=0))
+            self.b_shift.grid(row=20, column=2, columnspan=2, sticky="nw", pady=self.pady)
+            self.b_connect.grid(row=20, column=3, columnspan=2, sticky="nw", pady=self.pady)
+            self.disc.grid(row=21, column=1, columnspan=4, sticky="nw", pady=self.pady)
+            self.l_disc1.grid(row=16, column=1, columnspan=4, sticky="nw", pady=self.pady)
+            self.l_disc2.grid(row=17, column=1, columnspan=4, sticky="nw", pady=self.pady)
+            self.l_disc3.grid(row=18, column=1, columnspan=4, sticky="nw", pady=self.pady)
+        self.shifter_connect = 0
+        self.seron = 0
+
+    def geths(self, parent):
+        hs = ttk.Separator(parent, orient=tk.HORIZONTAL)
+        return hs
+
+    def retrieveclp(self):
+        try:
+            val = getvalue(getaddress("ld_d", "clp_enable"), "1", "1")["value"]
+            instr = int(val[6:7])
+        except:
+            instr = 0
+            setvalue(getaddress("ld_d", "clp_enable"), "0x55500AAA", "1", "1")
+
+        if instr == 2:
+            self.s_clp_enable.configure(text="on")
+        else:
+            self.s_clp_enable.configure(text="off")
+
+    def enableclp(self):
+        try:
+            val = getvalue(getaddress("ld_d", "clp_enable"), "1", "1")["value"]
+            instr = int(val[6:7])
+            vall = int(retrieve(self.t_clp_enable))
+        except:
+            instr = 0
+            setvalue(getaddress("ld_d", "clp_enable"), "0x55500AAA", "1", "1")
+        # print(val, instr, vall)
+        if vall == 1:
+            if instr == 2:
+                self.s_clp_enable.configure(text="Already on")
+            else:
+                setvalue(getaddress("ld_d", "clp_enable"), "0x55502AAA", "1", "1")
+                self.s_clp_enable.configure(text="Activated")
+        elif vall == 0:
+            if instr == 0:
+                self.s_clp_enable.configure(text="Already off")
+            else:
+                setvalue(getaddress("ld_d", "clp_enable"), "0x55500AAA", "1", "1")
+                self.s_clp_enable.configure(text="Turned off")
+        else:
+            self.s_clp_enable.configure(text="Error")
+            self.cdisc.configure(text="Use 1 or 0 to turn compensation on or off.")
+
+    def setclpstep(self):
+        vall = retrieve(self.t_clp_step)
+        # val = 1000000*val
+        if vall > 30000 or vall < -30000:
+            self.cdisc.configure(text="Step size is out of limit.")
+            self.s_clp_step.configure(text="error")
+        elif vall < 100 and vall > -100:
+            self.cdisc.configure(text="Min step size is abs(100).")
+            self.s_clp_step.configure(text="error")
+        else:
+            val = int(vall / 100)
+            val = self.int2hex4(val)
+            # val = val[:-4]
+            subval = "0x55" + val + "AA"
+            setvalue(getaddress("ld_d", "clp_step"), subval, "1", "1")
+            self.cdisc.configure(text=f"Step set to {str(vall)} uA.")
+            self.retrieveclpstep()
+
+    def int2hex4(self, hx):
+
+        if isinstance(hx, int):
+
+            val = int(round(hx, 0))
+        else:
+            val = int(round(int(hx), 0))
+        if val == 0:
+            val = ctypes.c_uint32(val).value
+            val = "%04x" % val
+            return val
+        else:
+
+            if val > 1:
+                val = ctypes.c_uint32(val).value
+                val = "%04x" % val
+            else:
+                # print(hex((1 << 32) + val))
+                val = format((1 << 32) + val, '04x')[4:8]
+                # val = hex((1 << 32) + val)[9:12]
+                # print(format(float((1 << 32) + val), '04x'))
+            return val
+
+    def retrieveclpstep(self):
+        steps = getvalue(getaddress("ld_d", "clp_step"), "1", "1")["value"]
+        step = steps[4:8]
+        # print(steps, step)
+        val = hex2signed(step)
+        if val > 2 ** 15:
+            val = -(2 ** 16 - val)
+        self.s_clp_step.configure(text=100 * val)
+
+    def getshifterstatus(self):
+        bool1 = int(getvalue(getaddress("gui", "shift_enable"))["value"])
+        if bool1 == 1 and self.shifter_connect == 1:
+            return 1
+        else:
+            return 0
+
+    def shiftit(self, user=1):
+        if self.getshifterstatus() == 1:
+            if self.stageon == 0:
+                stp = getvalue(getaddress("gui", "shift_step"), "i", "1")["value"]
+                self.dev.move(stp)
+
+                pos = getvalue(getaddress("gui", "shift_position"), "i", "1")["value"]
+                newpos = pos + stp
+                setvalue(getaddress("gui", "shift_position"), newpos, "i", "1")
+                if user == 1:
+                    self.s_shift_position.configure(text=str(newpos))
+
+                c = getvalue(getaddress("gui", "shift_count"), "u", "1")["value"]
+                newc = c + 1
+                setvalue(getaddress("gui", "shift_count"), newc, "u", "1")
+                if user == 1:
+                    self.s_shift_count.configure(text=str(newc))
+                if user == 0:
+                    current_ld = getvalue(getaddress("ld", "act"), "u", "u")["value"]
+                    new_current = current_ld - 0.1
+                    setvalue(getaddress("ld_d", "curr"), new_current, "u", "u")
+                    Globals.shiftpopup = 0
+                    if getbit(control['address'], 1) == "1":
+                        resvalue(control['address'], 2)
+                    if getbit(control['address'], 0) == "1":
+                        resvalue(control['address'], 1)
+                    if getbit(control['address'], 10) == "1":
+                        resvalue(control['address'], 1024)
+
+                    messagebox.showinfo("Laser restart", "Please wait until motor stops, then disconnect shifter cables.\nRestart GUI.")
+
+                    self.destroy()
+                else:
+                    stp = getvalue(getaddress("gui", "shift_step"), "i", "1")["value"]
+
+                    if stp > 0:
+                        direction = 1
+                    else:
+                        direction = 0
+                    if abs(stp) > 99:
+                        stp = 99
+                    self.ser.write(f"{abs(1)}{direction}\n".encode("UTF-8"))
+                    time.sleep(2)
+                    self.ser.write(f"{abs(stp)}{direction}\n".encode("UTF-8"))
+
+        else:
+            self.disc.configure(text="Connect driver first, enable shifting.")
+
+    def submit_q(self):
+        bool = askyesnocancel("Confirm to proceed",
+                              "Are you sure you want to move shifter reference position? \nThis will zero counter, the shifter will NOT actuate.")
+        if bool:
+            vall = retrieve(self.t_shift_position)
+            setvalue(getaddress("gui", "shift_position"), vall, "i", "1")
+            setvalue(getaddress("gui", "shift_count"), 0)
+            self.s_shift_position.configure(text=vall)
+            self.s_shift_count.configure(text=0)
+
+    def connectit(self, user=1):
+        if int(getvalue(getaddress("gui", "shift_enable"))["value"]) == 1:
+            self.dev = BenchtopPiezoWrapper(getvalue(getaddress("gui", "shift_serial"))["value"])
+            self.dev.connect()
+            self.disc.configure(text="Driver connected")
+        if int(getvalue(getaddress("gui", "shift_enable"))["value"]) == 2:
+            self.piezoserial()
+            if self.stageon==1:
+                self.disc.configure(text="Stage connected")
+            else:
+                return 0
+        self.b_connect.configure(text="DISCONNECT", command=lambda: self.disconnectit(), bg=Colours['red'], fg="white")
+        self.shifter_connect = 1
+
+    def piezoserial(self):
+        ports = comports()
+        selected_port = None
+
+        for port in ports:
+            if "Arduino Uno" in port.description:
+                selected_port = port.device
+
+        if selected_port == None:
+            self.stageon = 0
+        else:
+
+            ser = serial.Serial(
+                port=selected_port,
+                baudrate=19200,
+                parity=serial.PARITY_NONE,
+                stopbits=1,
+                bytesize=8,
+                timeout=10
+            )
+
+            self.ser = ser
+            self.stageon = 1
+
+    def disconnectit(self):
+        if self.stageon == 1:
+            self.ser.close()
+        else:
+            self.dev.close()
+        self.b_connect.configure(text="CONNECT", command=lambda: self.connectit(), bg=Colours['green'], fg="black")
+        self.shifter_connect = 0
+        self.disc.configure(text="Driver disconnected")
+
+    def getclplevel(self):
+        dset = 10  #
+        power = []
+        power2 = []
+        clp_pzt0 = ""
+        clp_pzt1 = ""
+        for i in range(dset):
+            if "PZT0" in Globals.available:
+                val = getvalue(getaddress("pzt0", "clp_power"))["value"]
+                power.append(val)
+            if "PZT1" in Globals.available:
+                val = getvalue(getaddress("pzt1", "clp_power"))["value"]
+                power2.append(val)
+        if "PZT0" in Globals.available:
+            clp_pzt0 = int(np.round(np.mean(power), 3) * 1)
+        if "PZT1" in Globals.available:
+            clp_pzt1 = int(np.round(np.mean(power2), 3) * 1)
+
+        self.s_clp_power.configure(text=f"{str(clp_pzt0)},{str(clp_pzt1)} V")
+
+
+class BenchtopPiezoWrapper():
+    def __init__(self, serial_number):
+        self._ser = str(serial_number)
+        # print("serial",self._ser)
+        DeviceManagerCLI.BuildDeviceList()
+        # print("avail device", DeviceManagerCLI.GetDeviceList())
+        self._pzt = KCubeInertialMotor.CreateKCubeInertialMotor(self._ser)
+        self.channels = []
+        self.connected = False
+
+    def connect(self):
+        """Initialise communications, populate channel list, etc."""
+        assert not self.connected
+        self._pzt.Connect(self._ser)
+        self.connected = True
+        # print(self._pzt.GetDeviceInfo().Name)
+        self._pzt.StartPolling(250)
+        self._pzt.EnableDevice()
+
+        assert len(self.channels) == 0, "Error connecting: we've already initialised channels!"
+        # #for i in range(self._piezo.ChannelCount):
+        # for i in range(1):
+        #     #chan = self._piezo.GetChannel(i + 1)  # Kinesis channels are one-indexed
+        #     chan = self._piezo.channel()
+        #     chan.WaitForSettingsInitialized(5000)
+        #     chan.StartPolling(250)  # getting the voltage only works if you poll!
+        #     time.sleep(0.5)  # ThorLabs have this in their example...
+        #     chan.EnableDevice()
+        #     # I don't know if the lines below are necessary or not - but removing them
+        #     # may or may not work...
+        #     time.sleep(0.5)
+        #     config = chan.GetPiezoConfiguration(chan.DeviceID)
+        #     info = chan.GetDeviceInfo()
+        #     max_v = Decimal.ToDouble(chan.GetMaxOutputVoltage())
+        #     self.channels.append(chan)
+        #     print("succes")
+
+    def close(self):
+        """Shut down communications"""
+        # if not self.connected:
+        #     print(f"Not closing piezo device {self._ser}, it's not open!")
+        #     return
+        self._pzt.StopPolling()
+        try:
+            self._pzt.Disconnect(True)
+        except:
+            pass
+        # for chan in self.channels:
+        #     chan.StopPolling()
+        # self.channels = []
+        # self._pzt.Disconnect(True)
+
+    def move(self, target):
+        self._pzt.SetPositionAs(InertialMotorStatus.MotorChannels.Channel1, 0);
+        self._pzt.MoveTo(InertialMotorStatus.MotorChannels.Channel1, target, 60000)
+        time.sleep(1)
+        curr = self._pzt.GetPosition(InertialMotorStatus.MotorChannels.Channel1)
+
+        return curr
+
+    def __del__(self):
+        try:
+            if self.connected:
+                self.close()
+        except:
+            print(f"Error closing communications on deletion of device {self._ser}")
+
+    def set_output_voltages(self, voltages):
+        """Set the output voltage"""
+        assert len(voltages) == len(self.channels), "You must specify exactly one voltage per channel"
+        for chan, v in zip(self.channels, voltages):
+            chan.SetOutputVoltage(Decimal(v))
+
+    def get_output_voltages(self):
+        """Retrieve the output voltages as a list of floating-point numbers"""
+        return [Decimal.ToDouble(chan.GetOutputVoltage()) for chan in self.channels]
+
+    # def resource_path(self, relative_path):
+    #     try:
+    #         base_path = sys._MEIPASS
+    #     except Exception:
+    #         base_path = os.path.abspath(".")
+    #
+    #     return os.path.join(base_path, relative_path)
+
+    output_voltages = property(get_output_voltages, set_output_voltages)

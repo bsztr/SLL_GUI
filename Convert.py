@@ -54,11 +54,11 @@ def signed2hex(hx):
         val= "0x%08x" % val
         return val
     else:
-        print(val)
+        #print(val)
         if val > 1:
             val = ctypes.c_uint32(val).value
             val = "0x%08x" % val
-            print(val)
+            #print(val)
         else:
             val=hex((1 << 32) + val)
         return val
@@ -67,7 +67,7 @@ def signed2hex(hx):
 def hex2signed(hx):
 
     val=int(hx,16)
-    print(val)
+    #print(val)
     val = ctypes.c_int32(val).value
     return val
 
@@ -161,7 +161,7 @@ def demicro(micro):
     result=float(micro)
     result=result*10e+5
     result=int(round(result,10))
-    print(result)
+    #print(result)
     return result
 
 def sci(val):

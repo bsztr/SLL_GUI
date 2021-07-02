@@ -47,7 +47,7 @@ class ClientPanel(tk.Frame):
         self.canvas_width = 355
         self.canvas_height = 200
 
-        self.Unik = tk.PhotoImage(file="UnikLogo.png")
+        self.Unik = tk.PhotoImage(file=self.resource_path("UnikLogo.png"))
         self.l_unik = tk.Label(image=self.Unik, bg=Background['main'])
 
         self.l_detect = tk.Label(self.gui, text=self.lh_detect(), font=fonts['detection'], fg="grey",
@@ -283,6 +283,14 @@ class ClientPanel(tk.Frame):
         vs = ttk.Separator(parent, orient=tk.VERTICAL)
         return vs
 
+    def resource_path(self, relative_path):
+        try:
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+
+        return os.path.join(base_path, relative_path)
+
     def on_closing(self):
         if messagebox.askokcancel("Exit", "Do you want to exit?\nThis will not affect laser operation."):
             if Globals.disconnect != 1:
@@ -337,6 +345,7 @@ class ClientPanel(tk.Frame):
         if hashlib.sha256(res).hexdigest() == Globals.engauth:
             self.athpage.destroy()
             del(self.athpage)
+            Globals.engineer = 1
             self.new_top()
         else:
             self.athpage.destroy()

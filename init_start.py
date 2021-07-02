@@ -288,7 +288,7 @@ def diagnose():
     setvalue(activate["address"], preset)
     comm_reset()
     #setvalue("03F6",0,"u","1")
-    print(available)
+    #print(available)
     return available
 
 
@@ -341,8 +341,14 @@ def init():
     available = []
     for item in query:
         available.append(item[0])
+
+    if Globals.shiftenabled == 1:
+
+        address = getaddress("gui", "shift_threshold")
+        result = getvalue(address)["value"]
+        Globals.shiftlimit = result
     #comm_reset()
-    print(available)
+    #print(available)
     return available
 
 
@@ -383,4 +389,5 @@ def init_window(text, function):
         available=queues.get()
 
         window.destroy()
+        #available = init()
         return available

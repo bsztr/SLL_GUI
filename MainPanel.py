@@ -33,11 +33,11 @@ class MainPanel(tk.Frame):
         if "PZT0" in Globals.available:
             Globals.regoffset0 = getvalue(getaddress("pzt0_d", "dpotb_amp"), "u", "1")["value"]
             Globals.pzt0type = getvalue(getaddress("pzt0", "id"), "s", "1")["value"]
-            print(Globals.pzt0type)
+            #print(Globals.pzt0type)
         if "PZT1" in Globals.available:
             Globals.regoffset1 = getvalue(getaddress("pzt1_d", "dpotb_amp"), "u", "1")["value"]
             Globals.pzt1type = getvalue(getaddress("pzt1", "id"), "s", "1")["value"]
-            print(Globals.pzt1type)
+            #print(Globals.pzt1type)
 
         global message
 

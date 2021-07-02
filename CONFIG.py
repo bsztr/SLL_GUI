@@ -209,7 +209,8 @@ ld_d={  "curr": [1, "u", "u"],
         "clp_enable": [8,"u","1"],
         "clp_target": [9,"u","u"],
         "clp_repeat": [12,"u","1"],
-        "clp_step": [13,"i","u"]
+        "clp_step": [13,"i","u"],
+        "clp_constant": [11, "f", "1"]
           }
 
 gui = {
@@ -233,7 +234,7 @@ gui = {
     "shift_enable": [17, "u", "1"],
     "shift_step": [18, "i", "1"],
     "shift_serial": [19, "u", "1"],
-    "shift_threshold": [20, "u", "1"],
+    "shift_threshold": [20, "u", "u"],
     "shift_count": [21, "u", "1"],
     "shift_position": [22, "i", "1"]
 }

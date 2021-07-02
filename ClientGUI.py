@@ -5,7 +5,7 @@ from tkinter.messagebox import showinfo
 
 
 #Init
-
+Globals.engineer = 0
 #GUI
 if Globals.available==[]:
     Globals.available=runinit()
