@@ -210,7 +210,10 @@ ld_d={  "curr": [1, "u", "u"],
         "clp_target": [9,"u","u"],
         "clp_repeat": [12,"u","1"],
         "clp_step": [13,"i","u"],
-        "clp_constant": [11, "f", "1"]
+        "clp_constant_I": [11, "f", "1"],
+        "clp_constant_P": [14, "f", "1"],
+        "clp_constant_M": [10, "f", "1"],
+        "clp_ldmax": [15, "u", "1"]
           }
 
 gui = {

@@ -79,7 +79,7 @@ class LDPanel(tk.Frame):
             self.b_on=tk.Button(self, text="Pump on", width=13, command=lambda: self.laser_on(), bg=Colours['green'], fg="snow", font=fonts['main'])
             self.b_off=tk.Button(self, text="Pump off", width=13, command=lambda: self.laser_off(), bg=Colours['red'], fg="snow", font=fonts['main'])
 
-            self.b_clpc = tk.Button(self, text="CLP compensation", width=20, font=fonts['main'],
+            self.b_clpc = tk.Button(self, text="OPM settings", width=20, font=fonts['main'],
                                         bg=Background['submit'],
                                         command=lambda: self.openclp(master, base))
 

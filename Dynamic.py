@@ -4,6 +4,7 @@ from CONFIG import *
 import Globals
 import time
 import math
+import numpy as np
 from init_start import *
 from tkinter.messagebox import askyesnocancel
 from tkinter import messagebox
@@ -523,15 +524,39 @@ class clpdata(tk.Frame):
                                           bg=Background['submit'],
                                           command=lambda: submit(self, "ld_d", "clp_repeat", min=59, max=3600))
 
-            self.l_clp_constant = tk.Label(self, text="CLP C constant", font=fonts['main'], bg=Background['main'])
-            self.t_clp_constant = tk.Text(self, width=6, height=1)
-            self.s_clp_constant = ld_label(self)
-            self.s_clp_constant.update_status(getaddress("ld_d", "clp_constant"), "clp_constant", "driver")
-            self.b_clp_constant = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
-                                            bg=Background['submit'],
-                                            command=lambda: submit(self, "ld_d", "clp_constant"))
+            self.l_clp_constant_M = tk.Label(self, text="CLP M constant (1e+6)", font=fonts['main'], bg=Background['main'])
+            self.t_clp_constant_M = tk.Text(self, width=6, height=1)
+            self.s_clp_constant_M = ld_label(self)
+            self.s_clp_constant_M.update_status(getaddress("ld_d", "clp_constant_M"), "clp_constant_M", "driver")
+            self.b_clp_constant_M = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                             bg=Background['submit'],
+                                             command=lambda: submit(self, "ld_d", "clp_constant_M"))
 
-            self.l_clp_step = tk.Label(self, text="CLP current step (uA)", font=fonts['main'], bg=Background['main'])
+            self.l_clp_constant_I = tk.Label(self, text="CLP I constant", font=fonts['main'], bg=Background['main'])
+            self.t_clp_constant_I = tk.Text(self, width=6, height=1)
+            self.s_clp_constant_I = ld_label(self)
+            self.s_clp_constant_I.update_status(getaddress("ld_d", "clp_constant_I"), "clp_constant_I", "driver")
+            self.b_clp_constant_I = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                            bg=Background['submit'],
+                                            command=lambda: submit(self, "ld_d", "clp_constant_I"))
+
+            self.l_clp_constant_P = tk.Label(self, text="CLP P constant", font=fonts['main'], bg=Background['main'])
+            self.t_clp_constant_P = tk.Text(self, width=6, height=1)
+            self.s_clp_constant_P = ld_label(self)
+            self.s_clp_constant_P.update_status(getaddress("ld_d", "clp_constant_P"), "clp_constant_P", "driver")
+            self.b_clp_constant_P = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                             bg=Background['submit'],
+                                             command=lambda: submit(self, "ld_d", "clp_constant_P"))
+
+            self.l_clp_ldmax = tk.Label(self, text="OPM max accumulated current (100 uA)", font=fonts['main'], bg=Background['main'])
+            self.t_clp_ldmax = tk.Text(self, width=6, height=1)
+            self.s_clp_ldmax = ld_label(self)
+            self.s_clp_ldmax.update_status(getaddress("ld_d", "clp_ldmax"), "clp_ldmax", "driver")
+            self.b_clp_ldmax = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                             bg=Background['submit'],
+                                             command=lambda: submit(self, "ld_d", "clp_ldmax"))
+
+            self.l_clp_step = tk.Label(self, text="OPM accumulated current (uA)", font=fonts['main'], bg=Background['main'])
             self.t_clp_step = tk.Text(self, width=6, height=1)
             self.s_clp_step = ld_label(self)
             self.s_clp_step.update_status(getaddress("ld_d", "clp_step"), "clp_step", "driver")
@@ -627,56 +652,71 @@ class clpdata(tk.Frame):
             self.s_clp_repeat.grid(row=4, column=3, columnspan=1, sticky="nw", pady=self.pady)
             self.b_clp_repeat.grid(row=4, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-            self.l_clp_constant.grid(row=5, column=1, columnspan=1, sticky="nw", pady=self.pady)
-            self.t_clp_constant.grid(row=5, column=2, columnspan=1, sticky="nw", pady=self.pady)
-            self.s_clp_constant.grid(row=5, column=3, columnspan=1, sticky="nw", pady=self.pady)
-            self.b_clp_constant.grid(row=5, column=4, columnspan=1, sticky="nw", pady=self.pady)
+            self.l_clp_constant_M.grid(row=5, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_clp_constant_M.grid(row=5, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_clp_constant_M.grid(row=5, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_clp_constant_M.grid(row=5, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-            self.l_clp_step.grid(row=6, column=1, columnspan=1, sticky="nw", pady=self.pady)
-            self.t_clp_step.grid(row=6, column=2, columnspan=1, sticky="nw", pady=self.pady)
-            self.s_clp_step.grid(row=6, column=3, columnspan=1, sticky="nw", pady=self.pady)
-            self.b_clp_step.grid(row=6, column=4, columnspan=1, sticky="nw", pady=self.pady)
-            self.l_clp_power.grid(row=7, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.l_clp_constant_I.grid(row=6, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_clp_constant_I.grid(row=6, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_clp_constant_I.grid(row=6, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_clp_constant_I.grid(row=6, column=4, columnspan=1, sticky="nw", pady=self.pady)
+
+            self.l_clp_constant_P.grid(row=7, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_clp_constant_P.grid(row=7, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_clp_constant_P.grid(row=7, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_clp_constant_P.grid(row=7, column=4, columnspan=1, sticky="nw", pady=self.pady)
+
+            self.l_clp_ldmax.grid(row=8, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_clp_ldmax.grid(row=8, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_clp_ldmax.grid(row=8, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_clp_ldmax.grid(row=8, column=4, columnspan=1, sticky="nw", pady=self.pady)
+
+            self.l_clp_step.grid(row=9, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_clp_step.grid(row=9, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_clp_step.grid(row=9, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_clp_step.grid(row=9, column=4, columnspan=1, sticky="nw", pady=self.pady)
+            self.l_clp_power.grid(row=10, column=1, columnspan=1, sticky="nw", pady=self.pady)
             # self.t_clp_step.grid(row=5, column=2, columnspan=1, sticky="nw", pady=self.pady)
-            self.s_clp_power.grid(row=7, column=3, columnspan=1, sticky="nw", pady=self.pady)
-            self.b_clp_power.grid(row=7, column=4, columnspan=1, sticky="nw", pady=self.pady)
-            self.cdisc.grid(row=8, column=1, columnspan=4, sticky="nw", pady=self.pady)
+            self.s_clp_power.grid(row=10, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_clp_power.grid(row=10, column=4, columnspan=1, sticky="nw", pady=self.pady)
+            self.cdisc.grid(row=11, column=1, columnspan=4, sticky="nw", pady=self.pady)
 
-            self.title2.grid(row=10, column=1, columnspan=2, sticky="nw", pady=self.pady)
+            self.title2.grid(row=15, column=1, columnspan=2, sticky="nw", pady=self.pady)
 
-            self.l_shifte.grid(row=11, column=1, columnspan=1, sticky="nw", pady=self.pady)
-            self.t_shift_enable.grid(row=11, column=2, columnspan=1, sticky="nw", pady=self.pady)
-            self.s_shift_enable.grid(row=11, column=3, columnspan=1, sticky="nw", pady=self.pady)
-            self.b_shifte.grid(row=11, column=4, columnspan=1, sticky="nw", pady=self.pady)
+            self.l_shifte.grid(row=16, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_shift_enable.grid(row=16, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_shift_enable.grid(row=16, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_shifte.grid(row=16, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-            self.l_shifts.grid(row=12, column=1, columnspan=1, sticky="nw", pady=self.pady)
-            self.t_shift_step.grid(row=12, column=2, columnspan=1, sticky="nw", pady=self.pady)
-            self.s_shift_step.grid(row=12, column=3, columnspan=1, sticky="nw", pady=self.pady)
-            self.b_shifts.grid(row=12, column=4, columnspan=1, sticky="nw", pady=self.pady)
+            self.l_shifts.grid(row=17, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_shift_step.grid(row=17, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_shift_step.grid(row=17, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_shifts.grid(row=17, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-            self.l_shiftser.grid(row=13, column=1, columnspan=1, sticky="nw", pady=self.pady)
-            self.t_shift_serial.grid(row=13, column=2, columnspan=1, sticky="nw", pady=self.pady)
-            self.s_shift_serial.grid(row=13, column=3, columnspan=1, sticky="nw", pady=self.pady)
-            self.b_shiftser.grid(row=13, column=4, columnspan=1, sticky="nw", pady=self.pady)
+            self.l_shiftser.grid(row=18, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_shift_serial.grid(row=18, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_shift_serial.grid(row=18, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_shiftser.grid(row=18, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-            self.l_shiftth.grid(row=14, column=1, columnspan=1, sticky="nw", pady=self.pady)
-            self.t_shift_threshold.grid(row=14, column=2, columnspan=1, sticky="nw", pady=self.pady)
-            self.s_shift_threshold.grid(row=14, column=3, columnspan=1, sticky="nw", pady=self.pady)
-            self.b_shiftth.grid(row=14, column=4, columnspan=1, sticky="nw", pady=self.pady)
+            self.l_shiftth.grid(row=19, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_shift_threshold.grid(row=19, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_shift_threshold.grid(row=19, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_shiftth.grid(row=19, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-            self.l_shiftc.grid(row=15, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.l_shiftc.grid(row=20, column=1, columnspan=1, sticky="nw", pady=self.pady)
             # self.t_shift_count.grid(row=15, column=2, columnspan=1, sticky="nw", pady=self.pady)
-            self.s_shift_count.grid(row=15, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_shift_count.grid(row=20, column=3, columnspan=1, sticky="nw", pady=self.pady)
             # self.b_shiftc.grid(row=15, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-            self.l_shiftpos.grid(row=16, column=1, columnspan=1, sticky="nw", pady=self.pady)
-            self.t_shift_position.grid(row=16, column=2, columnspan=1, sticky="nw", pady=self.pady)
-            self.s_shift_position.grid(row=16, column=3, columnspan=1, sticky="nw", pady=self.pady)
-            self.b_shiftpos.grid(row=16, column=4, columnspan=1, sticky="nw", pady=self.pady)
+            self.l_shiftpos.grid(row=21, column=1, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_shift_position.grid(row=21, column=2, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_shift_position.grid(row=21, column=3, columnspan=1, sticky="nw", pady=self.pady)
+            self.b_shiftpos.grid(row=21, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-            self.b_shift.grid(row=20, column=2, columnspan=2, sticky="nw", pady=self.pady)
-            self.b_connect.grid(row=20, column=3, columnspan=2, sticky="nw", pady=self.pady)
-            self.disc.grid(row=21, column=1, columnspan=4, sticky="nw", pady=self.pady)
+            self.b_shift.grid(row=25, column=2, columnspan=2, sticky="nw", pady=self.pady)
+            self.b_connect.grid(row=25, column=3, columnspan=2, sticky="nw", pady=self.pady)
+            self.disc.grid(row=26, column=1, columnspan=4, sticky="nw", pady=self.pady)
         else:
             self.l_disc1 = tk.Label(self,
                                     text="Please connect the shifter USB cable, and power supply.\nAfter the cables are connected, click the connect button.",
@@ -731,7 +771,7 @@ class clpdata(tk.Frame):
             if instr == 2:
                 self.s_clp_enable.configure(text="Already on")
             else:
-                setvalue(getaddress("ld_d", "clp_enable"), "0x55502AAA", "1", "1")
+                setvalue(getaddress("ld_d", "clp_enable"), "0x55532AAA", "1", "1")
                 self.s_clp_enable.configure(text="Activated")
         elif vall == 0:
             if instr == 0:
