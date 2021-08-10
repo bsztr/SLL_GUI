@@ -21,7 +21,7 @@ class LockArch(tk.Frame):
         self.pady=2
         self.configure(bg=Background['main'])
 
-        self.pzttype = {"PZT1": "digital driver","PZT2":"analogue driver","PZTQ":"quantum driver"}
+        self.pzttype = {"PZT1": "digital driver","PZT2":"analogue driver","PZTA":"analogue driver","PZTQ":"quantum driver"}
         try:
             self.pztselect = self.pzttype[eval("Globals." + base+"type")]
         except KeyError:
