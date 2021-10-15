@@ -10,7 +10,7 @@ import matplotlib.animation as animation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from tkinter.messagebox import askyesnocancel
-import pandas, os, sys, clr, time
+import pandas, os, sys, time
 import numpy as np
 
 #sys.path.append(r"C:\Program Files\Thorlabs\Kinesis")

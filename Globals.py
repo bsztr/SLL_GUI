@@ -63,7 +63,7 @@ global pzt_ov
 global ld_act
 
 fwver = "0"
-guiver = "1.7.3"
+guiver = "1.7.7"
 #Fixed analogue pzt driver bugs.
 
 
@@ -80,6 +80,8 @@ pzt_dp_power = 11
 pzt_ov = 12
 ld_act = 8
 
+serdo = object
+stageon = 0
 runnning_PROC = []
 Colours={
 
@@ -104,6 +106,10 @@ ld_d = [0,0]
 shiftlimit = 4
 shiftpopup = 0
 shiftenabled = 0
+shiftmincurrent = 0
+shiftldrange = 0
+shiftNOW = 0
+opmsetting = 0
 tec0threshold = 0
 tec1threshold = 0
 tec2threshold = 0

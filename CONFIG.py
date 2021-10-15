@@ -187,6 +187,23 @@ lock_dict={
     "EDG_P_DW": 29
 }
 
+opm_mech=["Slow", "Fast", "Slow & PARK", "Fast & PARK", "Off"]
+
+opm_dict={
+    "02": "Slow",
+    "22": "Fast",
+    "12": "Slow & PARK",
+    "32": "Fast & PARK",
+    "00": "Off",
+
+    "Slow": "02",
+    "Fast": "22",
+    "Slow & PARK": "12",
+    "Fast & PARK": "32",
+    "Off":"00",
+
+}
+
 lh={
     "serial": [8,"u","1"],
     "date": [5,"u","1"],
@@ -198,6 +215,7 @@ lh={
 
 ld={
     "act": [Globals.ld_act, "u", "u"],
+    "clp_error": [41, "i", "u"]
 }
 
 
@@ -239,7 +257,10 @@ gui = {
     "shift_serial": [19, "u", "1"],
     "shift_threshold": [20, "u", "u"],
     "shift_count": [21, "u", "1"],
-    "shift_position": [22, "i", "1"]
+    "shift_position": [22, "i", "1"],
+    "shift_mincurrent": [23, "u", "u"],
+    "opm_setting": [24, "u", "u"],
+    "opm_target": [25, "u", "u"]
 }
 
 rang = {

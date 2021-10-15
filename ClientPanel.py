@@ -201,7 +201,7 @@ class ClientPanel(tk.Frame):
         # self.b_ldoff = tk.Button(self.gui, text="LD\noff", bg=Colours['grey'], fg=Colours["darkgrey"],font=fonts['subbutton'], height=1, width=5)
         self.b_loff = tk.Button(self.gui, text="SYSTEM OFF", bg=Colours['red'], fg="white",
                                 command=lambda: self.laser_off(), font=fonts['subbutton'], height=1, width=10)
-        self.b_lock = tk.Button(self.gui, text="RELOCK", fg=Colours["darkgrey"], bg=Colours['grey'], command="",
+        self.b_lock = tk.Button(self.gui, text="Lock Power", fg=Colours["darkgrey"], bg=Colours['grey'], command="",
                                 font=fonts['subbutton'], height=1, width=10)
         self.b_alignment = tk.Button(self.gui, text="EXT ALIGNMENT", fg="black", bg=Colours['lightgrey'],
                                      command=lambda: self.alignment(), font=fonts['main'], height=1, width=7)
@@ -212,20 +212,53 @@ class ClientPanel(tk.Frame):
         self.b_clear = tk.Button(self.gui, text="Clear", bg=Colours['grey'],
                                  command=lambda: self.clear(self.c_message), font=fonts['status'], height=1,
                                  width=5)
+        if Globals.opmsetting != 1:
+            self.l_reg_scale = tk.Label(self.gui, text="Regulation offset", font=fonts['main'],
+                                     bg=Background['main'])
+            self.ld_scale = tk.Scale(self.gui, from_=-20, to=20, tickinterval= False,
+                                     resolution=1, orient=tk.HORIZONTAL,
+                                     bg=Background["main"], font=fonts["main"], command="")
+            self.ld_scale.set(0)
+            self.b_plus_reg = tk.Button(self.gui, text="+", bg=Colours['grey'],
+                                     command=lambda: self.regoffset(1), font=fonts['title'], height=1,
+                                     width=5)
+            self.b_neg_reg = tk.Button(self.gui, text="-", bg=Colours['grey'],
+                                     command=lambda: self.regoffset(0), font=fonts['title'], height=1,
+                                     width=5)
+            self.ld_scale.configure(command=lambda x: self.pzt_regscale())
+        else:
 
-        self.l_reg_scale = tk.Label(self.gui, text="Regulation offset", font=fonts['main'],
-                                 bg=Background['main'])
-        self.reg_scale = tk.Scale(self.gui, from_=-20, to=20, tickinterval= False,
-                                 resolution=1, orient=tk.HORIZONTAL,
-                                 bg=Background["main"], font=fonts["main"], command="")
-        self.reg_scale.set(0)
-        self.b_plus_reg = tk.Button(self.gui, text="+", bg=Colours['grey'],
-                                 command=lambda: self.regoffset(1), font=fonts['title'], height=1,
-                                 width=5)
-        self.b_neg_reg = tk.Button(self.gui, text="-", bg=Colours['grey'],
-                                 command=lambda: self.regoffset(0), font=fonts['title'], height=1,
-                                 width=5)
-        self.reg_scale.configure(command=lambda x: self.pzt_regscale())
+        #####LD Adjustment pan
+
+            self.l_reg_scale = tk.Label(self.gui, text="Output power regulation", font=fonts['main'],
+                                     bg=Background['main'])
+            self.ld_scale = tk.Scale(self.gui, from_=-50, to=50, tickinterval= False,
+                                     resolution=1, orient=tk.HORIZONTAL,
+                                     bg=Background["main"], font=fonts["main"], command="")
+            current_ld = getvalue(getaddress("ld_d", "curr"))["value"]
+            stepy =Globals.shiftldrange/100
+            orig = Globals.shiftmincurrent + Globals.shiftldrange/2
+            opmstep = int(((current_ld -orig)/Globals.shiftldrange)*100)
+
+            if abs(opmstep) > 50:
+                opmstep = 0
+            self.ld_scale.set(opmstep)
+            self.b_plus_reg = tk.Button(self.gui, text="+", bg=Colours['grey'],
+                                     command=lambda: self.ldoffset(1), font=fonts['title'], height=1,
+                                     width=5)
+            self.b_neg_reg = tk.Button(self.gui, text="-", bg=Colours['grey'],
+                                     command=lambda: self.ldoffset(0), font=fonts['title'], height=1,
+                                     width=5)
+            self.ld_scale.configure(command=lambda x: self.ld_regscale())
+
+            if opmstep > 45:
+                self.b_shiftbutton = tk.Button(self.gui, text="Shift", fg="red",bg=Colours['grey'],
+                                           command=lambda: self.startshift(), font=fonts['title'], height=1,
+                                           width=5)
+                self.b_shiftbutton.grid(row=29, column=3, columnspan=2, rowspan=1, sticky="nwse", pady=(0,6), padx=6)
+
+
+
         # Grid - Info pan
         self.l_unik.grid(row=1, column=1, columnspan=4, rowspan=2, sticky="nw", padx=3, pady=(18,0))
         self.l_detect.grid(row=4, column=1, columnspan=4, rowspan=2, sticky="nw")
@@ -252,7 +285,7 @@ class ClientPanel(tk.Frame):
         self.l_reg_scale.grid(row=21, column=1, columnspan=2, rowspan=1, sticky="nws", padx=(3, 3), pady=(2, 2))
         self.b_plus_reg.grid(row=21, column=3, columnspan=1, rowspan=1, sticky="nwse", padx=(3, 3), pady=(2, 2))
         self.b_neg_reg.grid(row=21, column=4, columnspan=1, rowspan=1, sticky="nwse", padx=(3, 3), pady=(2, 2))
-        self.reg_scale.grid(row=22, column=1, columnspan=4, rowspan=1, sticky="nwes", padx=(3, 3), pady=(2, 2))
+        self.ld_scale.grid(row=22, column=1, columnspan=4, rowspan=1, sticky="nwes", padx=(3, 3), pady=(2, 2))
         # self.b_ldoff.grid(row=22, column=4, columnspan=1, rowspan=2, sticky="nwes", padx=(2, 5), pady=(25,12))
         self.b_loff.grid(row=25, column=1, columnspan=2, rowspan=2, sticky="nwse", padx=5, pady=(10, 0))
         self.geths(self.gui).grid(row=24, column=1, rowspan=2, columnspan=4, sticky="we", pady=(0, 8), padx=5)
@@ -751,27 +784,31 @@ class ClientPanel(tk.Frame):
             if readbit(self.actual, 19) == "1":
 
                 if readbit(self.actual, 20) == "1":
-                    self.message_trigger("Pump LD has stabilised, locking will be initiated \n")
-                    if "PZT0" in Globals.available:
-                        if readbit(self.actual, 6) == "1":
-                            resvalue(control['address'], control["pzt0_m"])
-                            self.actual = self.actual - control["pzt0_m"]
-                        if readbit(self.actual, 8) == "0":
-                            addvalue(control['address'], control["pzt0_l"])
-                            self.actual = self.actual + control["pzt0_l"]
+                    if Globals.opmsetting == 1:
+                        self.message_trigger("Pump LD has stabilised, adjust power if necessary. \n")
+                        self.gui.after_cancel(self.pzt_after)
+                        self.b_lock.configure(fg=Colours["solo"], command=lambda: self.opm_on())
+                    else:
+                        self.message_trigger("Pump LD has stabilised, locking will be initiated \n")
+                        if "PZT0" in Globals.available:
+                            if readbit(self.actual, 6) == "1":
+                                resvalue(control['address'], control["pzt0_m"])
+                                self.actual = self.actual - control["pzt0_m"]
+                            if readbit(self.actual, 8) == "0":
+                                addvalue(control['address'], control["pzt0_l"])
+                                self.actual = self.actual + control["pzt0_l"]
 
-                    if "PZT1" in Globals.available:
-                        if readbit(self.actual, 7) == "1":
-                            print("here1")
-                            resvalue(control['address'], control["pzt1_m"])
-                            self.actual = self.actual - control["pzt1_m"]
-                        if readbit(self.actual, 9) == "0":
-                            print("here2")
-                            addvalue(control['address'], control["pzt1_l"])
-                            self.actual = self.actual + control["pzt1_l"]
+                        if "PZT1" in Globals.available:
+                            if readbit(self.actual, 7) == "1":
+                                resvalue(control['address'], control["pzt1_m"])
+                                self.actual = self.actual - control["pzt1_m"]
+                            if readbit(self.actual, 9) == "0":
+                                addvalue(control['address'], control["pzt1_l"])
+                                self.actual = self.actual + control["pzt1_l"]
 
-                    self.gui.after_cancel(self.pzt_after)
-                    self.lock()
+                        self.gui.after_cancel(self.pzt_after)
+
+                        self.lock()
         else:
             return "break"
 
@@ -1056,7 +1093,7 @@ class ClientPanel(tk.Frame):
         else:
             addv = -1
 
-        result = float(self.reg_scale.get()) + addv
+        result = float(self.ld_scale.get()) + addv
 
         if result > 20:
             result = 20
@@ -1065,7 +1102,7 @@ class ClientPanel(tk.Frame):
             result = -20
             self.message_trigger("Regulation offset limit reached at -20. \n")
 
-        self.reg_scale.set(result)
+        self.ld_scale.set(result)
 
         if "PZT0" in Globals.available:
             towrite = Globals.regoffset0 + result
@@ -1083,6 +1120,185 @@ class ClientPanel(tk.Frame):
             elif towrite < 0:
                 towrite = 0
             setvalue(getaddress("pzt1_d", "dpotb_amp"), towrite, "u", "1")
+
+    def ld_regscale(self):
+        if hasattr(self, "ld_scale"):
+            result = float(self.ld_scale.get())
+
+            if result > 50:
+                result = 50
+                self.message_trigger("Power offset limit reached at +50. \n")
+            if result < -50:
+                result = -50
+                self.message_trigger("Power offset limit reached at -50. \n")
+
+            #self.ld_scale.set(result)
+            if result > 45:
+                if not hasattr("self", "b_shiftbutton"):
+                    self.b_shiftbutton = tk.Button(self.gui, text="Shift", fg="red", bg=Colours['grey'],
+                                                   command=lambda: self.startshift(), font=fonts['title'], height=1,
+                                                   width=5)
+                    self.b_shiftbutton.grid(row=29, column=3, columnspan=2, rowspan=1, sticky="nwse", pady=(0, 6),
+                                            padx=6)
+                    self.message_trigger("Crystal can be shifted to new position.\n")
+
+            step = Globals.shiftldrange / 100
+            orig = Globals.shiftldrange / 2 + Globals.shiftmincurrent
+
+            result = orig + step * result
+            #print(result)
+            setvalue(getaddress("ld_d", "curr"), result)
+
+    def opm_on(self):
+        self.b_lock.configure(fg=Colours["solo"], command=lambda: self.opm_off(), text = "Lock off")
+        self.b_plus_reg.configure(command=lambda: self.opm_act())
+        self.b_neg_reg.configure(command=lambda: self.opm_act())
+        self.message_trigger("Laser power is getting locked.\n")
+        self.connect_dev()
+        if self.ard_on == 1:
+            self.opm_iacc = 0
+            self.c = 0
+            self.opm_ratio = getvalue(getaddress("ld_d", "clp_constant_M"), "f", "1")["value"]
+            self.opm_target = self.getpowerlvl()
+            self.currtar = getvalue(getaddress("gui", "opm_target"), "u", "u")["value"]
+            self.opm_run()
+
+
+    def opm_off(self):
+        self.message_trigger("Laser power is unlocked.\n")
+        self.b_lock.configure(fg=Colours["solo"], command=lambda: self.opm_on(), text = "Lock on")
+        self.b_plus_reg.configure(command=lambda: self.ldoffset(1))
+        self.b_neg_reg.configure(command=lambda: self.ldoffset(0))
+        self.gui.after_cancel(self.opmrun)
+        if self.ard_on == 1:
+            self.serard.close()
+            self.ard_on = 0
+            Globals.stageon = 0
+
+    def opm_act(self):
+        self.message_trigger("Power can only be adjusted, if power is unlocked.\n")
+
+
+    def opm_run(self):
+
+        self.opmrun = self.gui.after(500, self.opm_run)
+        Globals.runnning_PROC.append(self.opmrun)
+
+        if self.c % 10 == 0:
+            indtarget = getvalue(getaddress("gui", "opm_target"), "u", "u")["value"]
+            if self.currtar != indtarget:
+                self.opm_target = indtarget
+            self.opm_ratio = getvalue(getaddress("ld_d", "clp_constant_M"), "f", "1")["value"]
+            self.opm_p = getvalue(getaddress("ld_d", "clp_constant_P"), "f", "1")["value"]
+            self.opm_i = getvalue(getaddress("ld_d", "clp_constant_I"), "f", "1")["value"]
+            #self.message_trigger(f"{self.opm_target}, {self.opm_ratio}, {self.opm_p}, {self.opm_i} \n")
+
+        if self.ard_on == 0:
+            self.message_trigger("Device not connected. \n")
+            self.opm_off()
+        else:
+            value = str(self.serard.read_all().decode()).splitlines()[:-1]
+            if len(value) == 1:
+
+                power_reading = (int(value[0])) / self.opm_ratio
+
+                if power_reading > -1 and power_reading < 2222:
+                    err = self.opm_target - power_reading
+                    self.opm_iacc = err + self.opm_iacc
+                    pid_r = self.opm_p * err + self.opm_i * self.opm_iacc
+
+                    curr_ld = getvalue(getaddress("ld_d", "curr"), "u", "u")["value"]
+                    if pid_r > 0.12:
+                        pid_r = 0.12
+                    if pid_r < -0.12:
+                        pid_r = -0.12
+                    pid_output = curr_ld + pid_r
+                    #self.message_trigger(f"UV is read as {power_reading}, output is {pid_output}, pid_r {pid_r} \n")
+
+                    #if pid_output < Globals.shiftmincurrent+Globals.shiftldrange and pid_output > Globals.shiftmincurrent:
+                        #setvalue(getaddress("ld_d", "curr"), pid_output, "u", "u")
+            self.c += 1
+            self.serard.flushOutput()
+
+    def getcurrlvl(self):
+        if self.ard_on ==1:
+            pwr = []
+            for i in range(8):
+                value = str(self.serard.read_all().decode()).splitlines()[:-1]
+                if len(value) == 1:
+                    power_reading = (int(value[0])) / self.opm_ratio
+                    pwr.append(power_reading)
+                    time.sleep(1)
+            target = np.mean(pwr)/self.opm_ratio
+            return target
+        else:
+            return 0
+
+    def connect_dev(self):
+        ports = comports()
+        selected_port = None
+        if Globals.stageon ==0:
+            for port in ports:
+                if "CH340" in port.description:
+                    selected_port = port.device
+
+            if selected_port == None:
+                self.ard_on = 0
+            else:
+
+                serd = serial.Serial(
+                    port=selected_port,
+                    baudrate=9600,
+                    parity=serial.PARITY_NONE,
+                    stopbits=1,
+                    bytesize=8,
+                    timeout=10
+                )
+
+                self.serard = serd
+                self.ard_on = 1
+                self.serard.flush()
+                Globals.serdo = self.serard
+                Globals.stageon = 1
+        else:
+            self.serard = Globals.serdo
+            self.ard_on = 1
+            self.serard.flush()
+
+    def ldoffset(self, x):
+        if x == 1:
+            addv = 1
+        else:
+            addv = -1
+
+        result = float(self.ld_scale.get()) + addv
+
+        if result > 50:
+            result = 50
+            self.message_trigger("Power offset limit reached at +50. \n")
+        if result < -50:
+            result = -50
+            self.message_trigger("Power offset limit reached at -50. \n")
+
+        self.ld_scale.set(result)
+        if result > 45:
+            if not hasattr("self", "b_shiftbutton"):
+                self.b_shiftbutton = tk.Button(self.gui, text="Shift", fg="red", bg=Colours['grey'],
+                                               command=lambda: self.startshift(), font=fonts['title'], height=1,
+                                               width=5)
+                self.b_shiftbutton.grid(row=29, column=3, columnspan=2, rowspan=1, sticky="nwse", pady=(0, 6), padx=6)
+                self.message_trigger("Crystal can be shifted to new position.\n")
+
+
+        step = Globals.shiftldrange / 100
+        orig = Globals.shiftldrange / 2 + Globals.shiftmincurrent
+
+        result = orig + step*result
+
+        setvalue(getaddress("ld_d", "curr"), result, "u", "u")
+
+    def startshift(self):
+        Globals.shiftNOW = 1
 
     def power_indicator(self, id):
         source = getvalue(indicator["read"])['value']

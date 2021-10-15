@@ -239,7 +239,7 @@ class graph(tk.Toplevel):
         if self.second != "":
             self.z.append(args[2])
 
-            return self.ax.plot(self.x, self.y, color='darkviolet', label=self.base.upper() + " Actual current (A)"), self.ax.plot(
+            return print("graph is on now!!"), self.ax.plot(self.x, self.y, color='darkviolet', label=self.base.upper() + " Actual current (A)"), self.ax.plot(
                self.x, self.z, 'b--', label="Requested current")
 
         else:

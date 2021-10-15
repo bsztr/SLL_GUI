@@ -7,6 +7,8 @@ import queue
 from tkinter import ttk
 from Convert import sci, desci
 from datetime import datetime
+import ctypes
+from tkinter.messagebox import askyesnocancel
 import re
 
 def runinit():
@@ -223,6 +225,7 @@ def getmodules():
                 }
                 ld = {
                     "act": [Globals.ld_act, "u", "u"],
+                    "clp_error": [41, "i", "u"]
                 }
 
 
@@ -300,6 +303,7 @@ def init():
     #setvalue(activate['address'], 81)
     query = getmodules()
     setvalue("03F6",0,"u","1")
+    Globals.shiftenabled = getvalue(getaddress("gui", "shift_enable"))["value"]
     getnames_init()
     #Check if subscription is valid:
     #setvalue(getaddress("gui", "ban"), 0, "u", "1")
@@ -331,22 +335,40 @@ def init():
                 setvalue(getaddress("gui", "ban"), 1, "u", "1")
                 setvalue(getaddress("ld_d", "curr"), 0, "u", "u")
                 return []
+    full_active = getvalue(activate['address'])["value"]
+    while query[-1][-1] == "failed":
+        # argu = askyesnocancel(, f"{query[-1][0]} failed, do you want to go in recovery mode?")
 
-    # while query[-1][-1] == "failed":
-    #     remove = query[-1][-3].lower()
-    #     setvalue(activate['address'], full_active - activate[remove])
-    #     full_active = full_active - activate[remove]
-    #     query = getmodules()
+        argu = ctypes.windll.user32.MessageBoxW(0, f"{query[-1][0]} failed, do you want to go in recovery mode?", "Module failed", 4)
+        if argu == 6 and Globals.engineer == 1:
+            remove = query[-1][-3].lower()
+            setvalue(activate['address'], full_active - activate[remove])
+            full_active = full_active - activate[remove]
+            query = getmodules()
+        else:
+            break
 
     available = []
     for item in query:
         available.append(item[0])
 
-    if Globals.shiftenabled == 1:
+
+    if Globals.shiftenabled > 0:
 
         address = getaddress("gui", "shift_threshold")
         result = getvalue(address)["value"]
         Globals.shiftlimit = result
+        address = getaddress("gui", "shift_mincurrent")
+        result = getvalue(address)["value"]
+        if result > 3e+6:
+            result = 3e+6
+        Globals.shiftmincurrent = result
+        Globals.shiftldrange = Globals.shiftlimit - Globals.shiftmincurrent
+        if Globals.shiftldrange < 0:
+            Globals.shiftldrange = 0
+
+        Globals.opmsetting = getvalue(getaddress("gui", "opm_setting"), "u", "u")["value"]
+        print(Globals.opmsetting)
     #comm_reset()
     #print(available)
     return available
