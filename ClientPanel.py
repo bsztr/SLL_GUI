@@ -235,7 +235,7 @@ class ClientPanel(tk.Frame):
             self.ld_scale = tk.Scale(self.gui, from_=-50, to=50, tickinterval= False,
                                      resolution=1, orient=tk.HORIZONTAL,
                                      bg=Background["main"], font=fonts["main"], command="")
-            current_ld = getvalue(getaddress("ld_d", "curr"))["value"]
+            current_ld = getvalue(getaddress("ld_d", "curr"), "u", "u")["value"]
             stepy =Globals.shiftldrange/100
             orig = Globals.shiftmincurrent + Globals.shiftldrange/2
             opmstep = int(((current_ld -orig)/Globals.shiftldrange)*100)
@@ -744,7 +744,7 @@ class ClientPanel(tk.Frame):
                         addvalue(control['address'], 1)
                     Globals.ramp_enabled = 0
                     Globals.laser_turnhigh = 0
-                    setvalue(getaddress("ld_d", "curr"), Globals.Names['high'], "u", "u")
+                    #setvalue(getaddress("ld_d", "curr"), Globals.Names['high'], "u", "u")
                     self.message_trigger("Pump LD is turning on. \n")
                     # if readbit(self.actual, 1) != "1":
                     #     addvalue(control["address"], control["pzt"])
@@ -1147,123 +1147,7 @@ class ClientPanel(tk.Frame):
 
             result = orig + step * result
             #print(result)
-            setvalue(getaddress("ld_d", "curr"), result)
-
-    def opm_on(self):
-        self.b_lock.configure(fg=Colours["solo"], command=lambda: self.opm_off(), text = "Lock off")
-        self.b_plus_reg.configure(command=lambda: self.opm_act())
-        self.b_neg_reg.configure(command=lambda: self.opm_act())
-        self.message_trigger("Laser power is getting locked.\n")
-        self.connect_dev()
-        if self.ard_on == 1:
-            self.opm_iacc = 0
-            self.c = 0
-            self.opm_ratio = getvalue(getaddress("ld_d", "clp_constant_M"), "f", "1")["value"]
-            self.opm_target = self.getpowerlvl()
-            self.currtar = getvalue(getaddress("gui", "opm_target"), "u", "u")["value"]
-            self.opm_run()
-
-
-    def opm_off(self):
-        self.message_trigger("Laser power is unlocked.\n")
-        self.b_lock.configure(fg=Colours["solo"], command=lambda: self.opm_on(), text = "Lock on")
-        self.b_plus_reg.configure(command=lambda: self.ldoffset(1))
-        self.b_neg_reg.configure(command=lambda: self.ldoffset(0))
-        self.gui.after_cancel(self.opmrun)
-        if self.ard_on == 1:
-            self.serard.close()
-            self.ard_on = 0
-            Globals.stageon = 0
-
-    def opm_act(self):
-        self.message_trigger("Power can only be adjusted, if power is unlocked.\n")
-
-
-    def opm_run(self):
-
-        self.opmrun = self.gui.after(500, self.opm_run)
-        Globals.runnning_PROC.append(self.opmrun)
-
-        if self.c % 10 == 0:
-            indtarget = getvalue(getaddress("gui", "opm_target"), "u", "u")["value"]
-            if self.currtar != indtarget:
-                self.opm_target = indtarget
-            self.opm_ratio = getvalue(getaddress("ld_d", "clp_constant_M"), "f", "1")["value"]
-            self.opm_p = getvalue(getaddress("ld_d", "clp_constant_P"), "f", "1")["value"]
-            self.opm_i = getvalue(getaddress("ld_d", "clp_constant_I"), "f", "1")["value"]
-            #self.message_trigger(f"{self.opm_target}, {self.opm_ratio}, {self.opm_p}, {self.opm_i} \n")
-
-        if self.ard_on == 0:
-            self.message_trigger("Device not connected. \n")
-            self.opm_off()
-        else:
-            value = str(self.serard.read_all().decode()).splitlines()[:-1]
-            if len(value) == 1:
-
-                power_reading = (int(value[0])) / self.opm_ratio
-
-                if power_reading > -1 and power_reading < 2222:
-                    err = self.opm_target - power_reading
-                    self.opm_iacc = err + self.opm_iacc
-                    pid_r = self.opm_p * err + self.opm_i * self.opm_iacc
-
-                    curr_ld = getvalue(getaddress("ld_d", "curr"), "u", "u")["value"]
-                    if pid_r > 0.12:
-                        pid_r = 0.12
-                    if pid_r < -0.12:
-                        pid_r = -0.12
-                    pid_output = curr_ld + pid_r
-                    #self.message_trigger(f"UV is read as {power_reading}, output is {pid_output}, pid_r {pid_r} \n")
-
-                    #if pid_output < Globals.shiftmincurrent+Globals.shiftldrange and pid_output > Globals.shiftmincurrent:
-                        #setvalue(getaddress("ld_d", "curr"), pid_output, "u", "u")
-            self.c += 1
-            self.serard.flushOutput()
-
-    def getcurrlvl(self):
-        if self.ard_on ==1:
-            pwr = []
-            for i in range(8):
-                value = str(self.serard.read_all().decode()).splitlines()[:-1]
-                if len(value) == 1:
-                    power_reading = (int(value[0])) / self.opm_ratio
-                    pwr.append(power_reading)
-                    time.sleep(1)
-            target = np.mean(pwr)/self.opm_ratio
-            return target
-        else:
-            return 0
-
-    def connect_dev(self):
-        ports = comports()
-        selected_port = None
-        if Globals.stageon ==0:
-            for port in ports:
-                if "CH340" in port.description:
-                    selected_port = port.device
-
-            if selected_port == None:
-                self.ard_on = 0
-            else:
-
-                serd = serial.Serial(
-                    port=selected_port,
-                    baudrate=9600,
-                    parity=serial.PARITY_NONE,
-                    stopbits=1,
-                    bytesize=8,
-                    timeout=10
-                )
-
-                self.serard = serd
-                self.ard_on = 1
-                self.serard.flush()
-                Globals.serdo = self.serard
-                Globals.stageon = 1
-        else:
-            self.serard = Globals.serdo
-            self.ard_on = 1
-            self.serard.flush()
+            setvalue(getaddress("ld_d", "curr"), result, "u", "u")
 
     def ldoffset(self, x):
         if x == 1:
@@ -1295,7 +1179,145 @@ class ClientPanel(tk.Frame):
 
         result = orig + step*result
 
-        setvalue(getaddress("ld_d", "curr"), result, "u", "u")
+       # setvalue(getaddress("ld_d", "curr"), result)
+
+
+    def opm_on(self):
+        self.b_lock.configure(fg=Colours["solo"], command=lambda: self.opm_off(), text = "Lock off")
+        self.b_plus_reg.configure(command=lambda: self.opm_act())
+        self.b_neg_reg.configure(command=lambda: self.opm_act())
+        self.message_trigger("Laser power is getting locked.\n")
+        self.connect_dev()
+        if self.ard_on == 1:
+            self.l_clp_curr_actual.stop_clp()
+            self.opm_iacc = 0
+            self.c = 0
+            self.opm_ratio = getvalue(getaddress("ld_d", "clp_constant_M"), "f", "u")["value"]
+            self.opm_target = self.getpowerlvl()
+            #print(self.opm_target)
+            self.currtar = np.round(self.opm_target,3)
+
+            setvalue(getaddress("gui", "opm_target"), self.currtar,"f", "u")
+            self.opm_run()
+
+
+    def opm_off(self):
+        self.message_trigger("Laser power is unlocked.\n")
+        self.b_lock.configure(fg=Colours["solo"], command=lambda: self.opm_on(), text = "Lock on")
+        self.b_plus_reg.configure(command=lambda: self.ldoffset(1))
+        self.b_neg_reg.configure(command=lambda: self.ldoffset(0))
+        self.gui.after_cancel(self.opmrun)
+        if self.ard_on == 1:
+            self.serard.close()
+            self.ard_on = 0
+            Globals.stageon = 0
+
+    def opm_act(self):
+        self.message_trigger("Power can only be adjusted, if power is unlocked.\n")
+
+
+    def opm_run(self):
+        if Globals.laser_off != 1:
+            self.opmrun = self.gui.after(500, self.opm_run)
+            Globals.runnning_PROC.append(self.opmrun)
+
+            if self.c % 10 == 0:
+                indtarget = getvalue(getaddress("gui", "opm_target"), "f", "u")["value"]
+                if self.currtar != indtarget:
+                    self.opm_target = indtarget
+                self.opm_ratio = getvalue(getaddress("ld_d", "clp_constant_M"), "f", "u")["value"]
+                self.opm_p = getvalue(getaddress("ld_d", "clp_constant_P"), "f", "u")["value"]
+                self.opm_i = getvalue(getaddress("ld_d", "clp_constant_I"), "f", "u")["value"]
+
+
+            if self.ard_on == 0:
+                self.message_trigger("Device not connected. \n")
+                self.opm_off()
+            else:
+                value = str(self.serard.read_all().decode()).splitlines()[:-1]
+                if len(value) == 1:
+
+                    power_reading = (int(value[0]))
+                    #print(power_reading)
+                    if power_reading > -1 and power_reading < 1023:
+                        power_reading =power_reading / self.opm_ratio
+                        self.l_clp_curr_actual.configure(text = str(round(power_reading,3)))
+                        err = self.opm_target - power_reading
+                        self.opm_iacc = err + self.opm_iacc
+                        pid_r = self.opm_p * err + self.opm_i * self.opm_iacc
+
+                        curr_ld = getvalue(getaddress("ld", "curr"), "u", "u")["value"]
+                        if self.c % 250:
+                            setvalue(getaddress("ld_d", "curr"), curr_ld, "u", "u")
+                        if pid_r > 0.12:
+                            pid_r = 0.12
+                        if pid_r < -0.12:
+                            pid_r = -0.12
+                        pid_output = curr_ld + pid_r
+                        #self.message_trigger(f"UV is read as {power_reading}, output is {pid_output}, pid_r {pid_r} \n")
+                        #print(Globals.shiftmincurrent, Globals.shiftmincurrent+Globals.shiftldrange, pid_output)
+                        if pid_output < Globals.shiftmincurrent+Globals.shiftldrange and pid_output > Globals.shiftmincurrent:
+                            setvalue(getaddress("ld", "curr"), pid_output, "u", "u")
+                        # if self.c % 5 == 0:
+                        #     self.message_trigger(
+                        #         f"{self.opm_target}, {self.opm_p}, {power_reading}, {pid_output}, {pid_r}\n")
+                self.c += 1
+                self.serard.flushOutput()
+
+
+    def getpowerlvl(self):
+        if self.ard_on ==1:
+            pwr = []
+            for i in range(5):
+                value = str(self.serard.read_all().decode()).splitlines()[:-1]
+
+                if len(value) == 1:
+                    power_reading = (int(value[0]))
+                    pwr.append(power_reading)
+                time.sleep(1)
+
+            try:
+                target = np.mean(pwr)/self.opm_ratio
+            except:
+                self.opm_off()
+                self.message_trigger("Regulation failed.\n")
+            return target
+        else:
+            return 0
+
+    def connect_dev(self):
+        ports = comports()
+        selected_port = None
+        if Globals.stageon ==0:
+            for port in ports:
+                print(port.description)
+                if "CH340" in port.description or "Arduino" in port.description:
+                    selected_port = port.device
+
+            if selected_port == None:
+                self.ard_on = 0
+                self.message_trigger("No regulator found.")
+            else:
+
+                serd = serial.Serial(
+                    port=selected_port,
+                    baudrate=19200,
+                    parity=serial.PARITY_NONE,
+                    stopbits=1,
+                    bytesize=8,
+                    timeout=10
+                )
+
+                self.serard = serd
+                self.ard_on = 1
+                self.serard.flush()
+                Globals.serdo = self.serard
+                Globals.stageon = 1
+        else:
+            self.serard = Globals.serdo
+            self.ard_on = 1
+            self.serard.flush()
+
 
     def startshift(self):
         Globals.shiftNOW = 1

@@ -926,7 +926,7 @@ class clpdata(tk.Frame):
                 self.s_shift_count.configure(text=str(newc))
             if user == 0:
                 current_ld = getvalue(getaddress("ld", "act"), "u", "u")["value"]
-                new_current = current_ld - 0.1
+                new_current = Globals.shiftmincurrent
                 setvalue(getaddress("ld_d", "curr"), new_current, "u", "u")
                 Globals.shiftpopup = 0
                 if getbit(control['address'], 1) == "1":
@@ -937,8 +937,13 @@ class clpdata(tk.Frame):
                     resvalue(control['address'], 1024)
 
                 messagebox.showinfo("Laser restart",
-                                    "Please wait until motor stops, then disconnect shifter cables.\nRestart GUI.")
-
+                                    "Please wait until motor stops, then close GUI.\nRestart software.")
+                if getbit(control['address'], 1) == "1":
+                    resvalue(control['address'], 2)
+                if getbit(control['address'], 0) == "1":
+                    resvalue(control['address'], 1)
+                if getbit(control['address'], 10) == "1":
+                    resvalue(control['address'], 1024)
                 self.destroy()
 
         else:
@@ -979,7 +984,7 @@ class clpdata(tk.Frame):
 
         if Globals.stageon == 0:
             for port in ports:
-                if "CH340" in port.description:
+                if "CH340" in port.description or "Arduino" in port.description:
                     selected_port = port.device
 
             if selected_port == None:
@@ -1014,25 +1019,52 @@ class clpdata(tk.Frame):
         self.shifter_connect = 0
         self.disc.configure(text="Driver disconnected")
 
+    def getpowerlvl(self):
+        self.opm_ratio = getvalue(getaddress("ld_d", "clp_constant_M"), "f", "u")["value"]
+        if Globals.stageon == 0:
+            self.piezoserial()
+        if Globals.stageon ==1:
+            pwr = []
+            for i in range(5):
+                value = str(self.serstage.read_all().decode()).splitlines()[:-1]
+                print(value)
+                if len(value) == 1:
+                    power_reading = (int(value[0]))
+                    pwr.append(power_reading)
+                time.sleep(1)
+
+            try:
+                target = np.mean(pwr)/self.opm_ratio
+            except:
+                self.opm_off()
+                self.message_trigger("Regulation failed.\n")
+            return target
+        else:
+            return -1
+
     def getclplevel(self):
         dset = 10  #
         power = []
         power2 = []
         clp_pzt0 = ""
         clp_pzt1 = ""
-        for i in range(dset):
+        val = self.getpowerlvl()
+        if val == -1:
+            for i in range(dset):
+                if "PZT0" in Globals.available:
+                    val = getvalue(getaddress("pzt0", "clp_power"))["value"]
+                    power.append(val)
+                if "PZT1" in Globals.available:
+                    val = getvalue(getaddress("pzt1", "clp_power"))["value"]
+                    power2.append(val)
             if "PZT0" in Globals.available:
-                val = getvalue(getaddress("pzt0", "clp_power"))["value"]
-                power.append(val)
+                clp_pzt0 = (np.round(np.mean(power)/1000000, 3) * 1)
             if "PZT1" in Globals.available:
-                val = getvalue(getaddress("pzt1", "clp_power"))["value"]
-                power2.append(val)
-        if "PZT0" in Globals.available:
-            clp_pzt0 = (np.round(np.mean(power)/1000000, 3) * 1)
-        if "PZT1" in Globals.available:
-            clp_pzt1 = (np.round(np.mean(power2)/1000000, 3) * 1)
+                clp_pzt1 = (np.round(np.mean(power2)/1000000, 3) * 1)
 
-        self.s_clp_power.configure(text=f"{str(clp_pzt0)},{str(clp_pzt1)} V")
+            self.s_clp_power.configure(text=f"{str(clp_pzt0)},{str(clp_pzt1)} V")
+        else:
+            self.s_clp_power.configure(text=f"{np.round(val, 3)}, from EXT")
 
 
 # class BenchtopPiezoWrapper():

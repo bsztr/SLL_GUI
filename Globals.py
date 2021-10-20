@@ -63,7 +63,7 @@ global pzt_ov
 global ld_act
 
 fwver = "0"
-guiver = "1.7.7"
+guiver = "1.7.8"
 #Fixed analogue pzt driver bugs.
 
 

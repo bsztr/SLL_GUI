@@ -356,10 +356,10 @@ def init():
     if Globals.shiftenabled > 0:
 
         address = getaddress("gui", "shift_threshold")
-        result = getvalue(address)["value"]
+        result = getvalue(address, "u", "u")["value"]
         Globals.shiftlimit = result
         address = getaddress("gui", "shift_mincurrent")
-        result = getvalue(address)["value"]
+        result = getvalue(address, "u", "u")["value"]
         if result > 3e+6:
             result = 3e+6
         Globals.shiftmincurrent = result

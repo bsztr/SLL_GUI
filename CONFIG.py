@@ -215,6 +215,7 @@ lh={
 
 ld={
     "act": [Globals.ld_act, "u", "u"],
+    "curr": [26, "u", "u"],
     "clp_error": [41, "i", "u"]
 }
 
@@ -228,9 +229,9 @@ ld_d={  "curr": [1, "u", "u"],
         "clp_target": [9,"u","u"],
         "clp_repeat": [12,"u","1"],
         "clp_step": [13,"i","u"],
-        "clp_constant_I": [11, "f", "1"],
-        "clp_constant_P": [14, "f", "1"],
-        "clp_constant_M": [10, "f", "1"],
+        "clp_constant_I": [11, "f", "u"],
+        "clp_constant_P": [14, "f", "u"],
+        "clp_constant_M": [10, "f", "u"],
         "clp_ldmax": [15, "u", "1"]
           }
 
@@ -260,7 +261,7 @@ gui = {
     "shift_position": [22, "i", "1"],
     "shift_mincurrent": [23, "u", "u"],
     "opm_setting": [24, "u", "u"],
-    "opm_target": [25, "u", "u"]
+    "opm_target": [25, "f", "u"]
 }
 
 rang = {
