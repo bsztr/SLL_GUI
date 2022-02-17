@@ -232,15 +232,15 @@ class ClientPanel(tk.Frame):
 
             self.l_reg_scale = tk.Label(self.gui, text="Output power regulation", font=fonts['main'],
                                      bg=Background['main'])
-            self.ld_scale = tk.Scale(self.gui, from_=-50, to=50, tickinterval= False,
+            self.ld_scale = tk.Scale(self.gui, from_=0, to=100, tickinterval= False,
                                      resolution=1, orient=tk.HORIZONTAL,
                                      bg=Background["main"], font=fonts["main"], command="")
             current_ld = getvalue(getaddress("ld_d", "curr"), "u", "u")["value"]
             stepy =Globals.shiftldrange/100
-            orig = Globals.shiftmincurrent + Globals.shiftldrange/2
+            orig = Globals.shiftmincurrent #+ Globals.shiftldrange/2
             opmstep = int(((current_ld -orig)/Globals.shiftldrange)*100)
 
-            if abs(opmstep) > 50:
+            if abs(opmstep) > 100 or abs(opmstep) < 0:
                 opmstep = 0
             self.ld_scale.set(opmstep)
             self.b_plus_reg = tk.Button(self.gui, text="+", bg=Colours['grey'],
@@ -251,7 +251,7 @@ class ClientPanel(tk.Frame):
                                      width=5)
             self.ld_scale.configure(command=lambda x: self.ld_regscale())
 
-            if opmstep > 45:
+            if opmstep > 95:
                 self.b_shiftbutton = tk.Button(self.gui, text="Shift", fg="red",bg=Colours['grey'],
                                            command=lambda: self.startshift(), font=fonts['title'], height=1,
                                            width=5)
@@ -716,6 +716,7 @@ class ClientPanel(tk.Frame):
             self.tec_on()
 
     def tec_on(self):
+
         if Globals.laser_off == 0:
             if Globals.tec_stab == 1:
                 self.ld_on()
@@ -734,7 +735,7 @@ class ClientPanel(tk.Frame):
         if Globals.laser_off == 0 or Globals.laser_turnhigh == 1:
 
             if Globals.tec_stab == 1:
-                self.actual = Globals.status_bit
+                self.actual = getvalue(control["address"])["value"]
                 self.ld_after = self.gui.after(1000, self.ld_on)
                 self.b_ldon.configure(text="PUMP OFF", bg=Colours["red"], fg=Colours["white"],
                                       command=lambda: self.ld_off())
@@ -756,6 +757,8 @@ class ClientPanel(tk.Frame):
             return "break"
 
     def ld_off(self):
+        if Globals.opmrunning == 1:
+            self.opm_off()
         if hasattr(self, 'ld_after'):
             self.gui.after_cancel(self.ld_after)
         if hasattr(self, 'pzt_after'):
@@ -1013,40 +1016,47 @@ class ClientPanel(tk.Frame):
             self.message_trigger("Pump is not switched on.\n")
 
     def alignment(self):
-        self.alignment_bit = getvalue(control["address"])["value"]
-        if readbit(self.alignment_bit, 0) == "1":
-            if hasattr(self, "ld_scale"):
-                self.ld_scale.configure(command="")
-                self.ld_scale.set(Globals.Names["low"])
-                self.ld_scale.configure(command=lambda x: self.ld_powerscale())
-            setvalue(getaddress("ld_d", "curr"), Globals.Names['low'], "u", "u")
-            self.ramp_enabled()
-            self.message_trigger("Power level set to external alignment. \n")
-        else:
-            self.message_trigger("Pump LD needs to stabilise first. \n")
-
-    def highp(self):
-        if getbit(control['address'], 10) == "1":
-            if getbit(control['address'], 0) == "1":
-                if Globals.ramp_enabled == 1:
-
-                    if hasattr(self, "ld_scale"):
-                        self.ld_scale.configure(command="")
-                        self.ld_scale.set(Globals.Names["high"])
-                        self.ld_scale.configure(command=lambda x: self.ld_powerscale())
-
-                    self.message_trigger(
-                        "Power level set to full power, make sure to comply with safety regulations. \n")
-                    Globals.ramp_enabled = 0
-                    Globals.laser_turnhigh = 1
-                    self.ld_on()
-
-                else:
-                    self.message_trigger("Pump LD is already set to full power \n")
+        if Globals.opmsetting != 1:
+            self.alignment_bit = getvalue(control["address"])["value"]
+            if readbit(self.alignment_bit, 0) == "1":
+                if hasattr(self, "ld_scale"):
+                    self.ld_scale.configure(command="")
+                    self.ld_scale.set(Globals.Names["low"])
+                    self.ld_scale.configure(command=lambda x: self.ld_powerscale())
+                setvalue(getaddress("ld_d", "curr"), Globals.Names['low'], "u", "u")
+                self.ramp_enabled()
+                self.message_trigger("Power level set to external alignment. \n")
             else:
                 self.message_trigger("Pump LD needs to stabilise first. \n")
         else:
-            self.message_trigger("TECs need to stabilise first. \n")
+            self.message_trigger("Power adjustment available through slider. \n")
+
+
+    def highp(self):
+        if Globals.opmsetting != 1:
+            if getbit(control['address'], 10) == "1":
+                if getbit(control['address'], 0) == "1":
+                    if Globals.ramp_enabled == 1:
+
+                        if hasattr(self, "ld_scale"):
+                            self.ld_scale.configure(command="")
+                            self.ld_scale.set(Globals.Names["high"])
+                            self.ld_scale.configure(command=lambda x: self.ld_powerscale())
+
+                        self.message_trigger(
+                            "Power level set to full power, make sure to comply with safety regulations. \n")
+                        Globals.ramp_enabled = 0
+                        Globals.laser_turnhigh = 1
+                        self.ld_on()
+
+                    else:
+                        self.message_trigger("Pump LD is already set to full power \n")
+                else:
+                    self.message_trigger("Pump LD needs to stabilise first. \n")
+            else:
+                self.message_trigger("TECs need to stabilise first. \n")
+        else:
+            self.message_trigger("Power adjustment available through slider. \n")
 
     def ld_powerscale(self):
         if hasattr(self, "ld_scale"):
@@ -1125,16 +1135,16 @@ class ClientPanel(tk.Frame):
         if hasattr(self, "ld_scale"):
             result = float(self.ld_scale.get())
 
-            if result > 50:
-                result = 50
-                self.message_trigger("Power offset limit reached at +50. \n")
-            if result < -50:
-                result = -50
-                self.message_trigger("Power offset limit reached at -50. \n")
+            if result > 100:
+                result = 100
+                self.message_trigger("Power offset limit reached at +100. \n")
+            if result < 0:
+                result = 0
+                self.message_trigger("Power offset limit reached at 0. \n")
 
             #self.ld_scale.set(result)
-            if result > 45:
-                if not hasattr("self", "b_shiftbutton"):
+            if result > 95:
+                if not hasattr(self, "b_shiftbutton"):
                     self.b_shiftbutton = tk.Button(self.gui, text="Shift", fg="red", bg=Colours['grey'],
                                                    command=lambda: self.startshift(), font=fonts['title'], height=1,
                                                    width=5)
@@ -1143,7 +1153,7 @@ class ClientPanel(tk.Frame):
                     self.message_trigger("Crystal can be shifted to new position.\n")
 
             step = Globals.shiftldrange / 100
-            orig = Globals.shiftldrange / 2 + Globals.shiftmincurrent
+            orig = Globals.shiftmincurrent
 
             result = orig + step * result
             #print(result)
@@ -1157,16 +1167,16 @@ class ClientPanel(tk.Frame):
 
         result = float(self.ld_scale.get()) + addv
 
-        if result > 50:
-            result = 50
-            self.message_trigger("Power offset limit reached at +50. \n")
-        if result < -50:
-            result = -50
-            self.message_trigger("Power offset limit reached at -50. \n")
+        if result > 100:
+            result = 100
+            self.message_trigger("Power offset limit reached at +100. \n")
+        if result < 0:
+            result = 0
+            self.message_trigger("Power offset limit reached at 0. \n")
 
         self.ld_scale.set(result)
-        if result > 45:
-            if not hasattr("self", "b_shiftbutton"):
+        if result > 95:
+            if not hasattr(self, "b_shiftbutton"):
                 self.b_shiftbutton = tk.Button(self.gui, text="Shift", fg="red", bg=Colours['grey'],
                                                command=lambda: self.startshift(), font=fonts['title'], height=1,
                                                width=5)
@@ -1175,7 +1185,7 @@ class ClientPanel(tk.Frame):
 
 
         step = Globals.shiftldrange / 100
-        orig = Globals.shiftldrange / 2 + Globals.shiftmincurrent
+        orig = Globals.shiftmincurrent
 
         result = orig + step*result
 
@@ -1188,7 +1198,11 @@ class ClientPanel(tk.Frame):
         self.b_neg_reg.configure(command=lambda: self.opm_act())
         self.message_trigger("Laser power is getting locked.\n")
         self.connect_dev()
+        Globals.opmrunning = 1
         if self.ard_on == 1:
+            self.serard.write(f"002\n".encode("UTF-8"))
+            time.sleep(2)
+            self.serard.write(f"002\n".encode("UTF-8"))
             self.l_clp_curr_actual.stop_clp()
             self.opm_iacc = 0
             self.c = 0
@@ -1207,7 +1221,11 @@ class ClientPanel(tk.Frame):
         self.b_plus_reg.configure(command=lambda: self.ldoffset(1))
         self.b_neg_reg.configure(command=lambda: self.ldoffset(0))
         self.gui.after_cancel(self.opmrun)
+        Globals.opmrunning = 0
         if self.ard_on == 1:
+            self.serard.write(f"003\n".encode("UTF-8"))
+            time.sleep(2)
+            self.serard.write(f"003\n".encode("UTF-8"))
             self.serard.close()
             self.ard_on = 0
             Globals.stageon = 0
@@ -1226,8 +1244,8 @@ class ClientPanel(tk.Frame):
                 if self.currtar != indtarget:
                     self.opm_target = indtarget
                 self.opm_ratio = getvalue(getaddress("ld_d", "clp_constant_M"), "f", "u")["value"]
-                self.opm_p = getvalue(getaddress("ld_d", "clp_constant_P"), "f", "u")["value"]
-                self.opm_i = getvalue(getaddress("ld_d", "clp_constant_I"), "f", "u")["value"]
+                self.opm_p = getvalue(getaddress("ld_d", "clp_constant_P"), "f", "u")["value"]/1000000
+                self.opm_i = getvalue(getaddress("ld_d", "clp_constant_I"), "f", "u")["value"]/1000000
 
 
             if self.ard_on == 0:
@@ -1238,7 +1256,7 @@ class ClientPanel(tk.Frame):
                 if len(value) == 1:
 
                     power_reading = (int(value[0]))
-                    #print(power_reading)
+                    print(power_reading)
                     if power_reading > -1 and power_reading < 1023:
                         power_reading =power_reading / self.opm_ratio
                         self.l_clp_curr_actual.configure(text = str(round(power_reading,3)))
@@ -1270,7 +1288,7 @@ class ClientPanel(tk.Frame):
             pwr = []
             for i in range(5):
                 value = str(self.serard.read_all().decode()).splitlines()[:-1]
-
+                print("value", value)
                 if len(value) == 1:
                     power_reading = (int(value[0]))
                     pwr.append(power_reading)

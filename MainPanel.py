@@ -217,8 +217,10 @@ class MainPanel(tk.Frame):
         current_ld = getvalue(getaddress("ld_d", "curr"))["value"]
         stepy =Globals.shiftldrange/100
         orig = Globals.shiftmincurrent + Globals.shiftldrange/2
-        opmstep = int(((current_ld -orig)/Globals.shiftldrange)*100)
-
+        try:
+            opmstep = int(((current_ld -orig)/Globals.shiftldrange)*100)
+        except:
+            opmstep = 0
         if abs(opmstep) > 50:
             opmstep = 0
         self.ld_scale.set(opmstep)
@@ -365,7 +367,7 @@ class MainPanel(tk.Frame):
         message=""
 
     def getmessage(self):
-        print(Globals.runnning_PROC)
+        #print(Globals.runnning_PROC)
         if Globals.laser_off == 0:
             if Globals.incident_message != Globals.recorded_message:
                 self.message_trigger(Globals.incident_message + "\n")
