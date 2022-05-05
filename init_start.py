@@ -247,7 +247,7 @@ def getnames_init():
         Names['low'] = 2
         setvalue(getaddress("gui", "low"),Names["low"], "u", "u")
     Names['high'] = getvalue(getaddress("gui", "high"), "u", "u")["value"]
-    if Names['high'] > 6:
+    if Names['high'] > 7:
         Names['high'] = getvalue(getaddress("ld_d", "curr"), "u", "u")["value"]
         setvalue(getaddress("gui", "high"), Names["high"], "u", "u")
     Names['modell'] = getvalue(getaddress("gui", "modell"), "s", "1")["value"]
@@ -262,11 +262,21 @@ def getnames_init():
     Names['ldr'] = getvalue(getaddress("gui", "ldr"), "s", "1")["value"]
     Names['wavelength'] = getvalue(getaddress("lh", "wavelength"), "u", "1")["value"]
 
+
     for item in Names:
         if Names[item] == "Empty":
             Names[item] = DefaultNames[item]
 
     Globals.Names = Names
+    # RPMC Fix for dpot setting
+    # setvalue(getaddress("pzt0_d","dpota_cr"),11,"u","1")
+    # setvalue(getaddress("pzt0_d", "dpota_amp"), 11, "u", "1")
+    # setvalue(getaddress("pzt0_d", "dpotb_cr"), 10, "u", "1")
+    # setvalue(getaddress("pzt0_d", "dpotb_amp"), 6, "u", "1")
+    # setvalue(getaddress("pzt0_d", "clp_ci"), 1, "f", "1")
+    # setvalue(getaddress("pzt0_d", "clp_cr"), 250, "u", "1")
+    # setvalue(getaddress("pzt0_d", "clp_amp"), 251, "u", "1")
+    ######
 
     # f = open("dict/Names.json", "w+")
     # f.write(json.dumps(Names))

@@ -201,8 +201,13 @@ class ClientPanel(tk.Frame):
         # self.b_ldoff = tk.Button(self.gui, text="LD\noff", bg=Colours['grey'], fg=Colours["darkgrey"],font=fonts['subbutton'], height=1, width=5)
         self.b_loff = tk.Button(self.gui, text="SYSTEM OFF", bg=Colours['red'], fg="white",
                                 command=lambda: self.laser_off(), font=fonts['subbutton'], height=1, width=10)
-        self.b_lock = tk.Button(self.gui, text="Lock Power", fg=Colours["darkgrey"], bg=Colours['grey'], command="",
-                                font=fonts['subbutton'], height=1, width=10)
+        if Globals.opmsetting == 1:
+            self.b_lock = tk.Button(self.gui, text="Lock Power", fg=Colours["darkgrey"], bg=Colours['grey'], command="",
+                                    font=fonts['subbutton'], height=1, width=10)
+        else:
+            self.b_lock = tk.Button(self.gui, text="RELOCK", fg=Colours["darkgrey"], bg=Colours['grey'], command="",
+                                    font=fonts['subbutton'], height=1, width=10)
+
         self.b_alignment = tk.Button(self.gui, text="EXT ALIGNMENT", fg="black", bg=Colours['lightgrey'],
                                      command=lambda: self.alignment(), font=fonts['main'], height=1, width=7)
         self.b_highp = tk.Button(self.gui, text="FULL POWER", fg="black", bg=Colours['lightgrey'],
@@ -745,7 +750,7 @@ class ClientPanel(tk.Frame):
                         addvalue(control['address'], 1)
                     Globals.ramp_enabled = 0
                     Globals.laser_turnhigh = 0
-                    #setvalue(getaddress("ld_d", "curr"), Globals.Names['high'], "u", "u")
+                    setvalue(getaddress("ld_d", "curr"), Globals.Names['high'], "u", "u")
                     self.message_trigger("Pump LD is turning on. \n")
                     # if readbit(self.actual, 1) != "1":
                     #     addvalue(control["address"], control["pzt"])
@@ -1038,7 +1043,7 @@ class ClientPanel(tk.Frame):
                 if getbit(control['address'], 0) == "1":
                     if Globals.ramp_enabled == 1:
 
-                        if hasattr(self, "ld_scale"):
+                        if hasattr(self, "ld_scale") and Globals.opmsetting == 1:
                             self.ld_scale.configure(command="")
                             self.ld_scale.set(Globals.Names["high"])
                             self.ld_scale.configure(command=lambda x: self.ld_powerscale())

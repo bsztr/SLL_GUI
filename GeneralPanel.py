@@ -390,11 +390,12 @@ class GeneralPanel(tk.Frame):
         currdir = r"C:/"
         fname = tk.filedialog.askopenfilename(initialdir=currdir, title="Select file",
                                            filetypes=[('All files','*.*'), ('Bin file','*.bin')])
+        print(fname[-3:])
         if fname != "":
-            if fname[:-3] =="bin":
+            if fname[-3:] =="bin":
 
                 parent.disconnect()
-                smmain('-p', "COM3", '-w', '-v', '-e', fname)
+                smmain('-p', Globals.COMport, '-w', '-v', '-e', fname)
                 tk.messagebox.showinfo("Update done",f"The firmware has updated, please reboot system,\nthen click green cross on the main console to reconnect.")
                 stop_COMM()
             else:
