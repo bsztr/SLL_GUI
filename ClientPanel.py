@@ -204,9 +204,7 @@ class ClientPanel(tk.Frame):
         if Globals.opmsetting == 1:
             self.b_lock = tk.Button(self.gui, text="Lock Power", fg=Colours["darkgrey"], bg=Colours['grey'], command="",
                                     font=fonts['subbutton'], height=1, width=10)
-        else:
-            self.b_lock = tk.Button(self.gui, text="RELOCK", fg=Colours["darkgrey"], bg=Colours['grey'], command="",
-                                    font=fonts['subbutton'], height=1, width=10)
+
 
         self.b_alignment = tk.Button(self.gui, text="EXT ALIGNMENT", fg="black", bg=Colours['lightgrey'],
                                      command=lambda: self.alignment(), font=fonts['main'], height=1, width=7)
@@ -218,6 +216,8 @@ class ClientPanel(tk.Frame):
                                  command=lambda: self.clear(self.c_message), font=fonts['status'], height=1,
                                  width=5)
         if Globals.opmsetting != 1:
+            self.b_lock = tk.Button(self.gui, text="RELOCK", fg=Colours["darkgrey"], bg=Colours['grey'], command="",
+                                    font=fonts['subbutton'], height=1, width=10)
             self.l_reg_scale = tk.Label(self.gui, text="Regulation offset", font=fonts['main'],
                                      bg=Background['main'])
             self.ld_scale = tk.Scale(self.gui, from_=-20, to=20, tickinterval= False,
@@ -1024,7 +1024,7 @@ class ClientPanel(tk.Frame):
         if Globals.opmsetting != 1:
             self.alignment_bit = getvalue(control["address"])["value"]
             if readbit(self.alignment_bit, 0) == "1":
-                if hasattr(self, "ld_scale"):
+                if hasattr(self, "ld_scale") and Globals.opmsetting != 1:
                     self.ld_scale.configure(command="")
                     self.ld_scale.set(Globals.Names["low"])
                     self.ld_scale.configure(command=lambda x: self.ld_powerscale())
