@@ -379,7 +379,7 @@ def init():
             Globals.shiftldrange = 0
 
         Globals.opmsetting = getvalue(getaddress("gui", "opm_setting"), "u", "u")["value"]
-        print(Globals.opmsetting)
+        #print("opm set to", Globals.opmsetting)
     #comm_reset()
     #print(available)
     return available
