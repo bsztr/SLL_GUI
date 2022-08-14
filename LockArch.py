@@ -978,7 +978,7 @@ class advdata(tk.Frame):
         self.b_tec2_pid = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
                                      bg=Background['submit'],
                                      command=lambda: submit(self, "gui", "tec2_pid"))
-        self.l_lock_timer = tk.Label(self, text="TEC2 PID DISABLE (==0)", font=fonts['main'], bg=Background['main'])
+        self.l_lock_timer = tk.Label(self, text="Lock warm-up", font=fonts['main'], bg=Background['main'])
         self.t_lock_timer = tk.Text(self, width=6, height=1)
         self.s_lock_timer = gui_label(self)
         self.s_lock_timer.update_status(getaddress("gui", "lock_timer"), "lock_timer")
