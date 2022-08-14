@@ -126,7 +126,7 @@ def kelvin(inte):
     return result
 
 def dekelvin(kelvin):
-    result= int(round((kelvin+273.15)*10e+5,10))
+    result= int(round((float(kelvin)+273.15)*10e+5,10))
     return result
 
 def micro(inte):

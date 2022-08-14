@@ -76,6 +76,14 @@ class LDPanel(tk.Frame):
                                   bg=Background['submit'],
                                   command=lambda: submit(self, self.base + "_d", "delay"))
 
+            self.l_Kp = tk.Label(self, text="LD PID compensation value", font=fonts['main'], bg=Background['main'])
+            self.t_Kp = tk.Text(self, width=6, height=1)
+            self.s_Kp = ld_label(self)
+            self.s_Kp.update_status(getaddress(self.base, "Kp"), "Kp", "slot")
+            self.b_Kp = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                  bg=Background['submit'],
+                                  command=lambda: submit(self, self.base, "Kp"))
+
             self.b_on=tk.Button(self, text="Pump on", width=13, command=lambda: self.laser_on(), bg=Colours['green'], fg="snow", font=fonts['main'])
             self.b_off=tk.Button(self, text="Pump off", width=13, command=lambda: self.laser_off(), bg=Colours['red'], fg="snow", font=fonts['main'])
 
@@ -102,20 +110,25 @@ class LDPanel(tk.Frame):
             self.s_delay.grid(row=5, column=3, columnspan=1, sticky="nwse", pady=2)
             self.b_delay.grid(row=5, column=4, columnspan=1, sticky="nw", pady=2)
 
-            self.l_cl.grid(row=6, column=1, columnspan=1, sticky="nw", pady=2)
-            self.t_cl.grid(row=6, column=2, columnspan=1, sticky="nw", pady=2)
-            self.s_cl.grid(row=6, column=3, columnspan=1, sticky="esnw", pady=2)
-            self.b_cl.grid(row=6, column=4, columnspan=1, sticky="nw", pady=2)
+            self.l_Kp.grid(row=6, column=1, columnspan=1, sticky="nw", pady=2)
+            self.t_Kp.grid(row=6, column=2, columnspan=1, sticky="nw", pady=2)
+            self.s_Kp.grid(row=6, column=3, columnspan=1, sticky="nwse", pady=2)
+            self.b_Kp.grid(row=6, column=4, columnspan=1, sticky="nw", pady=2)
 
-            self.l_dc.grid(row=7, column=1, columnspan=1, sticky="nw", pady=2)
-            self.t_dc.grid(row=7, column=2, columnspan=1, sticky="nw", pady=2)
-            self.s_dc.grid(row=7, column=3, columnspan=1, sticky="nwse", pady=2)
-            self.b_dc.grid(row=7, column=4, columnspan=1, sticky="nw", pady=2)
+            self.l_cl.grid(row=7, column=1, columnspan=1, sticky="nw", pady=2)
+            self.t_cl.grid(row=7, column=2, columnspan=1, sticky="nw", pady=2)
+            self.s_cl.grid(row=7, column=3, columnspan=1, sticky="esnw", pady=2)
+            self.b_cl.grid(row=7, column=4, columnspan=1, sticky="nw", pady=2)
 
-            self.b_on.grid(row=8, column=1, columnspan=1, sticky="nw", pady=(5, 0), padx=2)
-            self.b_off.grid(row=8, column=2, columnspan=1, sticky="nw", pady=(5, 0), padx=2)
-            self.l_ld_disclaimer.grid(row=9, column=1, columnspan=4, sticky="nw", pady=2)
-            self.b_clpc.grid(row=10, column=1, columnspan=4, sticky="nw", pady=2)
+            self.l_dc.grid(row=8, column=1, columnspan=1, sticky="nw", pady=2)
+            self.t_dc.grid(row=8, column=2, columnspan=1, sticky="nw", pady=2)
+            self.s_dc.grid(row=8, column=3, columnspan=1, sticky="nwse", pady=2)
+            self.b_dc.grid(row=8, column=4, columnspan=1, sticky="nw", pady=2)
+
+            self.b_on.grid(row=9, column=1, columnspan=1, sticky="nw", pady=(5, 0), padx=2)
+            self.b_off.grid(row=9, column=2, columnspan=1, sticky="nw", pady=(5, 0), padx=2)
+            self.l_ld_disclaimer.grid(row=10, column=1, columnspan=4, sticky="nw", pady=2)
+            self.b_clpc.grid(row=11, column=1, columnspan=4, sticky="nw", pady=2)
 
     def laser_on(self):
             self.bit=getvalue(control['address'])['value']

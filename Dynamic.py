@@ -106,7 +106,7 @@ class temp_label(tk.Label):
         if self.threshold != "":
             value =  float(self.threshold)
 
-            if result > value - 0.35 and result<value + 0.35:
+            if result > value - 0.45 and result<value + 0.45:
                 return Colours['green']
             else:
                 return Colours['red']
@@ -456,11 +456,11 @@ class Logo(tk.Label):
         try:
             type = rang[Names["modell"]]
         except KeyError:
-            type = "Solo"
+            type = "NX"
         fontuse = fonts['submodel']
-        if type != "Solo":
+        if type != "NX":
             fontuse = fonts['model']
-        logo=str(type) + " " + str(Names["wavelength"])
+        logo=str(Names["wavelength"])+ " " + str(type)
         self.configure(text=logo, fg=Colours['solo'], font=fontuse, bg=Background['main'])
         self.logo_after = self.after(1500, lambda: self.update_logo())
 

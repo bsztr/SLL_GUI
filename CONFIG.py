@@ -163,28 +163,20 @@ pzt_d = {
     "minm":[29, "u", "u"],
     "maxm":[28, "u", "u"],
     "minsl":[12, "u", "u"],
-    "maxsl":[13, "u", "u"],
+    "lockmode":[13, "u", "1"],
     "maxwp":[35, "i", "u"],
     "minwp":[34, "i", "u"],
     "clpt":[36, "u", "1"]
 }
 
 
-lock_mech=["LEV", "MIH", "EDGE_UP", "EDG_P_UP", "EDGE_DW", "EDG_P_DW"]
+lock_mech=["DIFFERENTIAL", "DIVISION"]
 
 lock_dict={
-    5: "EDGE_UP",
-    1: "LEV",
-    3: "MIH",
-    13: "EDG_P_UP",
-    21: "EDGE_DW",
-    29: "EDG_P_DW",
-    "EDGE_UP": 5,
-    "LEV": 1,
-    "MIH": 3,
-    "EDG_P_UP": 13,
-    "EDGE_DW":21,
-    "EDG_P_DW": 29
+    0: "DIFFERENTIAL",
+    1: "DIVISION",
+    "DIFFERENTIAL": 0,
+    "DIVISION": 1,
 }
 
 opm_mech=["Slow", "Fast", "Slow & PARK", "Fast & PARK", "Off"]
@@ -216,7 +208,8 @@ lh={
 ld={
     "act": [Globals.ld_act, "u", "u"],
     "curr": [26, "u", "u"],
-    "clp_error": [41, "i", "u"]
+    "clp_error": [41, "i", "u"],
+    "Kp": [267, "f", "1"]
 }
 
 
@@ -261,17 +254,27 @@ gui = {
     "shift_position": [22, "i", "1"],
     "shift_mincurrent": [23, "u", "u"],
     "opm_setting": [24, "u", "u"],
-    "opm_target": [25, "f", "u"]
+    "opm_target": [25, "f", "u"],
+    "lock_tune": [88,"u","1"],
+    "tec_tune": [89,"u","1"],
+    "dphd_thres": [90,"u","u"],
+    "lock_timer": [91,"u","1"],
+    "pid_timer": [92,"u","1"],
+    "tec3_pid": [93,"u","1"],
+    "tec2_pid": [94,"u","1"],
+    "tec1_pid": [95, "u", "1"],
+    "tec0_pid": [96, "u", "1"],
 }
 
 rang = {
 
-    "S": "Solo",
-    "D": "Duetto",
-    "Q": "Quartetto",
-    "s": "Solo",
-    "d": "Duetto",
-    "q": "Quartetto"
+
+    "Q": "QT",
+    "q": "QT",
+    "n": "NX",
+    "N": "NX",
+    "m": "NX mini",
+    "M": "NX mini"
 }
 
 indicator = {

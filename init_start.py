@@ -226,7 +226,8 @@ def getmodules():
                 ld = {
                     "act": [Globals.ld_act, "u", "u"],
                     "curr": [26, "u", "u"],
-                    "clp_error": [41, "i", "u"]
+                    "clp_error": [41, "i", "u"],
+                    "Kp": [267, "f", "1"]
                 }
 
 

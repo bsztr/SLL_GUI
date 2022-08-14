@@ -232,7 +232,7 @@ class LockArch(tk.Frame):
         self.l_lockm = tk.Label(master, text="Lock mechanism", font=fonts['main'], bg=Background['main'])
         self.lock_option=tk.StringVar(master)
         self.t_lockm=tk.OptionMenu(master, self.lock_option, *lock_mech)
-        self.t_lockm.config(font=fonts['main'], bg=Background['main'], height=1, width=8)
+        self.t_lockm.config(font=fonts['main'], bg=Background['main'], height=1, width=9)
         self.s_lockm = lockm_label(self.master)
         self.s_lockm.read_lockm(base+"_d", self.lock_option)
         self.b_lockm = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
@@ -481,20 +481,20 @@ class LockArch(tk.Frame):
     def write_lockm(self):
         b = self.base+"_d"
         status = self.s_lockm
-        address=getaddress(b,"lockm")
+        address=getaddress(b,"lockmode")
         val=self.lock_option.get()
 
         #print(val)
         if val != "":
-            arg1=eval(base[b][1])["lockm"][1]
-            arg2=eval(base[b][1])["lockm"][2]
-            curr = getbit(address, 5)
-            if curr == "1":
-                addit = 32
-            else:
-                addit = 0
+            arg1=eval(base[b][1])["lockmode"][1]
+            arg2=eval(base[b][1])["lockmode"][2]
+            # curr = getbit(address, 5)
+            # if curr == "1":
+            #     addit = 32
+            # else:
+            #     addit = 0
 
-            val=lock_dict.get(val, 2) + addit
+            val=lock_dict.get(val, 2)#+addit
             setvalue(address, val, arg1, arg2)
             status.read_lockm(b, self.lock_option)
         else:
@@ -541,16 +541,16 @@ class lockm_label(tk.Label):
 
     def read_lockm(self, b, s):
 
-        address=getaddress(b,"lockm")
-        arg1=eval(base[b][1])["lockm"][1]
-        arg2=eval(base[b][1])["lockm"][2]
+        address=getaddress(b,"lockmode")
+        arg1=eval(base[b][1])["lockmode"][1]
+        arg2=eval(base[b][1])["lockmode"][2]
         self.lock=int(getvalue(address, arg1, arg2)['value'])
-        curr = readbit(self.lock, 5)
-        if curr == "1":
-            addit = 32
-        else:
-            addit = 0
-        self.lock = self.lock - addit
+        # curr = readbit(self.lock, 5)
+        # if curr == "1":
+        #     addit = 32
+        # else:
+        #     addit = 0
+        # self.lock = self.lock - addit
         mech=lock_dict.get(self.lock)
         try:
             value = lock_mech.index(mech)
@@ -882,21 +882,21 @@ class advdata(tk.Frame):
                                   bg=Background['submit'],
                                   command=lambda: submit(self, b + "_d", "maxm"))
 
-        self.l_minsl = tk.Label(self, text="Minimum slope", font=fonts['main'], bg=Background['main'])
-        self.t_minsl = tk.Text(self, width=6, height=1)
-        self.s_minsl = pzt_label(self)
-        self.s_minsl.update_status(getaddress(b + "_d", "minsl"), "minsl", "driver")
-        self.b_minsl = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
-                                  bg=Background['submit'],
-                                  command=lambda: submit(self, b + "_d", "minsl"))
-
-        self.l_maxsl = tk.Label(self, text="Maximum slope", font=fonts['main'], bg=Background['main'])
-        self.t_maxsl = tk.Text(self, width=6, height=1)
-        self.s_maxsl = pzt_label(self)
-        self.s_maxsl.update_status(getaddress(b + "_d", "maxsl"), "maxsl", "driver")
-        self.b_maxsl = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
-                                  bg=Background['submit'],
-                                  command=lambda: submit(self, b + "_d", "maxsl"))
+        # self.l_minsl = tk.Label(self, text="Minimum slope", font=fonts['main'], bg=Background['main'])
+        # self.t_minsl = tk.Text(self, width=6, height=1)
+        # self.s_minsl = pzt_label(self)
+        # self.s_minsl.update_status(getaddress(b + "_d", "minsl"), "minsl", "driver")
+        # self.b_minsl = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+        #                           bg=Background['submit'],
+        #                           command=lambda: submit(self, b + "_d", "minsl"))
+        #
+        # self.l_maxsl = tk.Label(self, text="Maximum slope", font=fonts['main'], bg=Background['main'])
+        # self.t_maxsl = tk.Text(self, width=6, height=1)
+        # self.s_maxsl = pzt_label(self)
+        # self.s_maxsl.update_status(getaddress(b + "_d", "maxsl"), "maxsl", "driver")
+        # self.b_maxsl = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+        #                           bg=Background['submit'],
+        #                           command=lambda: submit(self, b + "_d", "maxsl"))
 
         self.l_minwp = tk.Label(self, text="Minimum WP offset", font=fonts['main'], bg=Background['main'])
         self.t_minwp = tk.Text(self, width=6, height=1)
@@ -921,6 +921,70 @@ class advdata(tk.Frame):
         self.b_clpt = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
                                   bg=Background['submit'],
                                   command=lambda: submit(self, b + "_d", "clpt"))
+        
+        self.l_lock_tune = tk.Label(self, text="Lock tuning (1-on)", font=fonts['main'], bg=Background['main'])
+        self.t_lock_tune = tk.Text(self, width=6, height=1)
+        self.s_lock_tune = gui_label(self)
+        self.s_lock_tune.update_status(getaddress("gui", "lock_tune"), "lock_tune")
+        self.b_lock_tune = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                  bg=Background['submit'],
+                                  command=lambda: submit(self, "gui", "lock_tune"))
+        
+        self.l_tec_tune = tk.Label(self, text="TEC select (1 or 2)", font=fonts['main'], bg=Background['main'])
+        self.t_tec_tune = tk.Text(self, width=6, height=1)
+        self.s_tec_tune = gui_label(self)
+        self.s_tec_tune.update_status(getaddress("gui", "tec_tune"), "tec_tune")
+        self.b_tec_tune = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                  bg=Background['submit'],
+                                  command=lambda: submit(self, "gui", "tec_tune"))
+        
+        self.l_dphd_thres = tk.Label(self, text="DPhD threshold (V)", font=fonts['main'], bg=Background['main'])
+        self.t_dphd_thres = tk.Text(self, width=6, height=1)
+        self.s_dphd_thres = gui_label(self)
+        self.s_dphd_thres.update_status(getaddress("gui", "dphd_thres"), "dphd_thres")
+        self.b_dphd_thres = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                  bg=Background['submit'],
+                                  command=lambda: submit(self, "gui", "dphd_thres"))
+        
+        self.l_pid_timer = tk.Label(self, text="PID stabilisation", font=fonts['main'], bg=Background['main'])
+        self.t_pid_timer = tk.Text(self, width=6, height=1)
+        self.s_pid_timer = gui_label(self)
+        self.s_pid_timer.update_status(getaddress("gui", "pid_timer"), "pid_timer")
+        self.b_pid_timer = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                  bg=Background['submit'],
+                                  command=lambda: submit(self, "gui", "pid_timer"))
+
+
+        self.l_tec0_pid = tk.Label(self, text="TEC0 PID DISABLE (==0)", font=fonts['main'], bg=Background['main'])
+        self.t_tec0_pid = tk.Text(self, width=6, height=1)
+        self.s_tec0_pid = gui_label(self)
+        self.s_tec0_pid.update_status(getaddress("gui", "tec0_pid"), "tec0_pid")
+        self.b_tec0_pid = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                     bg=Background['submit'],
+                                     command=lambda: submit(self, "gui", "tec0_pid"))
+
+        self.l_tec1_pid = tk.Label(self, text="TEC1 PID DISABLE (==0)", font=fonts['main'], bg=Background['main'])
+        self.t_tec1_pid = tk.Text(self, width=6, height=1)
+        self.s_tec1_pid = gui_label(self)
+        self.s_tec1_pid.update_status(getaddress("gui", "tec1_pid"), "tec1_pid")
+        self.b_tec1_pid = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                     bg=Background['submit'],
+                                     command=lambda: submit(self, "gui", "tec1_pid"))
+
+        self.l_tec2_pid = tk.Label(self, text="TEC2 PID DISABLE (==0)", font=fonts['main'], bg=Background['main'])
+        self.t_tec2_pid = tk.Text(self, width=6, height=1)
+        self.s_tec2_pid = gui_label(self)
+        self.s_tec2_pid.update_status(getaddress("gui", "tec2_pid"), "tec2_pid")
+        self.b_tec2_pid = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                     bg=Background['submit'],
+                                     command=lambda: submit(self, "gui", "tec2_pid"))
+        self.l_lock_timer = tk.Label(self, text="TEC2 PID DISABLE (==0)", font=fonts['main'], bg=Background['main'])
+        self.t_lock_timer = tk.Text(self, width=6, height=1)
+        self.s_lock_timer = gui_label(self)
+        self.s_lock_timer.update_status(getaddress("gui", "lock_timer"), "lock_timer")
+        self.b_lock_timer = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                     bg=Background['submit'],
+                                     command=lambda: submit(self, "gui", "lock_timer"))
 
         self.b_wpq = tk.Button(self, text="Acquire potential lock points", bg=Background['submit'], width=35, font=fonts['main'],
                                 command=lambda: self.wpaq(self, b))
@@ -937,15 +1001,15 @@ class advdata(tk.Frame):
         self.s_maxm.grid(row=3, column=3, columnspan=1, sticky="nw", pady=self.pady)
         self.b_maxm.grid(row=3, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-        self.l_minsl.grid(row=4, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_minsl.grid(row=4, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_minsl.grid(row=4, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_minsl.grid(row=4, column=4, columnspan=1, sticky="nw", pady=self.pady)
-
-        self.l_maxsl.grid(row=5, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_maxsl.grid(row=5, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_maxsl.grid(row=5, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_maxsl.grid(row=5, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        # self.l_minsl.grid(row=4, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        # self.t_minsl.grid(row=4, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        # self.s_minsl.grid(row=4, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        # self.b_minsl.grid(row=4, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        #
+        # self.l_maxsl.grid(row=5, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        # self.t_maxsl.grid(row=5, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        # self.s_maxsl.grid(row=5, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        # self.b_maxsl.grid(row=5, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
         self.l_minwp.grid(row=6, column=1, columnspan=1, sticky="nw", pady=self.pady)
         self.t_minwp.grid(row=6, column=2, columnspan=1, sticky="nw", pady=self.pady)
@@ -962,7 +1026,47 @@ class advdata(tk.Frame):
         self.s_clpt.grid(row=8, column=3, columnspan=1, sticky="nw", pady=self.pady)
         self.b_clpt.grid(row=8, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-        self.b_wpq.grid(row=9, column=1, columnspan=6, sticky="nw", pady=self.pady)
+        self.l_lock_tune.grid(row=9, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_lock_tune.grid(row=9, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_lock_tune.grid(row=9, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_lock_tune.grid(row=9, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        
+        self.l_tec_tune.grid(row=10, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_tec_tune.grid(row=10, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_tec_tune.grid(row=10, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_tec_tune.grid(row=10, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        
+        self.l_dphd_thres.grid(row=11, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_dphd_thres.grid(row=11, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_dphd_thres.grid(row=11, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_dphd_thres.grid(row=11, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        
+        self.l_pid_timer.grid(row=12, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_pid_timer.grid(row=12, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_pid_timer.grid(row=12, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_pid_timer.grid(row=12, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        
+        self.l_tec0_pid.grid(row=13, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_tec0_pid.grid(row=13, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_tec0_pid.grid(row=13, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_tec0_pid.grid(row=13, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        
+        self.l_tec1_pid.grid(row=14, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_tec1_pid.grid(row=14, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_tec1_pid.grid(row=14, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_tec1_pid.grid(row=14, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        
+        self.l_tec2_pid.grid(row=15, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_tec2_pid.grid(row=15, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_tec2_pid.grid(row=15, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_tec2_pid.grid(row=15, column=4, columnspan=1, sticky="nw", pady=self.pady)
+
+        self.l_lock_timer.grid(row=16, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_lock_timer.grid(row=16, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_lock_timer.grid(row=16, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_lock_timer.grid(row=16, column=4, columnspan=1, sticky="nw", pady=self.pady)
+
+        self.b_wpq.grid(row=18, column=1, columnspan=6, sticky="nw", pady=self.pady)
 
     def wpaq(self, master, b):
 

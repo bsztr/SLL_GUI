@@ -208,35 +208,85 @@ class MainPanel(tk.Frame):
         self.b_more=tk.Button(self.gui, text="More", bg=Colours['grey'], command= self.new_top, font=fonts['subbutton'], height=1, width=14)
         self.b_clear = tk.Button(self.gui, text="Clear", bg=Colours['grey'], command=lambda: self.clear(self.c_message), font=fonts['status'], height=1, width=5)
 
-        #REG pan with +/-
-        self.l_reg_scale = tk.Label(self.gui, text="Output power regulation", font=fonts['main'],
-                                 bg=Background['main'])
-        self.ld_scale = tk.Scale(self.gui, from_=-50, to=50, tickinterval= False,
-                                 resolution=1, orient=tk.HORIZONTAL,
-                                 bg=Background["main"], font=fonts["main"], command="")
-        current_ld = getvalue(getaddress("ld_d", "curr"))["value"]
-        stepy =Globals.shiftldrange/100
-        orig = Globals.shiftmincurrent + Globals.shiftldrange/2
-        try:
-            opmstep = int(((current_ld -orig)/Globals.shiftldrange)*100)
-        except:
-            opmstep = 0
-        if abs(opmstep) > 50:
-            opmstep = 0
-        self.ld_scale.set(opmstep)
-        self.b_plus_reg = tk.Button(self.gui, text="+", bg=Colours['grey'],
-                                 command=lambda: self.ldoffset(1), font=fonts['title'], height=1,
-                                 width=5)
-        self.b_neg_reg = tk.Button(self.gui, text="-", bg=Colours['grey'],
-                                 command=lambda: self.ldoffset(0), font=fonts['title'], height=1,
-                                 width=5)
-        self.ld_scale.configure(command=lambda x: self.ld_regscale())
+        # #REG pan with +/-
+        # self.l_reg_scale = tk.Label(self.gui, text="Output power regulation", font=fonts['main'],
+        #                          bg=Background['main'])
+        # self.ld_scale = tk.Scale(self.gui, from_=-50, to=50, tickinterval= False,
+        #                          resolution=1, orient=tk.HORIZONTAL,
+        #                          bg=Background["main"], font=fonts["main"], command="")
+        # current_ld = getvalue(getaddress("ld_d", "curr"))["value"]
+        # stepy =Globals.shiftldrange/100
+        # orig = Globals.shiftmincurrent + Globals.shiftldrange/2
+        # try:
+        #     opmstep = int(((current_ld -orig)/Globals.shiftldrange)*100)
+        # except:
+        #     opmstep = 0
+        # if abs(opmstep) > 50:
+        #     opmstep = 0
+        # self.ld_scale.set(opmstep)
+        # self.b_plus_reg = tk.Button(self.gui, text="+", bg=Colours['grey'],
+        #                          command=lambda: self.ldoffset(1), font=fonts['title'], height=1,
+        #                          width=5)
+        # self.b_neg_reg = tk.Button(self.gui, text="-", bg=Colours['grey'],
+        #                          command=lambda: self.ldoffset(0), font=fonts['title'], height=1,
+        #                          width=5)
+        # self.ld_scale.configure(command=lambda x: self.ld_regscale())
+        #
+        # if opmstep > 45:
+        #     self.b_shiftbutton = tk.Button(self.gui, text="Shift", fg="red",bg=Colours['grey'],
+        #                                command=lambda: self.startshift(), font=fonts['title'], height=1,
+        #                                width=5)
+        #     self.b_shiftbutton.grid(row=29, column=3, columnspan=2, rowspan=1, sticky="nwse", pady=(0,6), padx=6)
 
-        if opmstep > 45:
-            self.b_shiftbutton = tk.Button(self.gui, text="Shift", fg="red",bg=Colours['grey'],
-                                       command=lambda: self.startshift(), font=fonts['title'], height=1,
+        if Globals.opmsetting != 1:
+            self.b_lock = tk.Button(self.gui, text="RELOCK", fg=Colours["darkgrey"], bg=Colours['grey'], command="",
+                                    font=fonts['subbutton'], height=1, width=10)
+            self.l_reg_scale = tk.Label(self.gui, text="Regulation offset", font=fonts['main'],
+                                        bg=Background['main'])
+            self.reg_scale = tk.Scale(self.gui, from_=-20, to=20, tickinterval=False,
+                                      resolution=1, orient=tk.HORIZONTAL,
+                                      bg=Background["main"], font=fonts["main"], command="")
+            self.reg_scale.set(0)
+            self.b_plus_reg = tk.Button(self.gui, text="+", bg=Colours['grey'],
+                                        command=lambda: self.regoffset(1), font=fonts['title'], height=1,
+                                        width=5)
+            self.b_neg_reg = tk.Button(self.gui, text="-", bg=Colours['grey'],
+                                       command=lambda: self.regoffset(0), font=fonts['title'], height=1,
                                        width=5)
-            self.b_shiftbutton.grid(row=29, column=3, columnspan=2, rowspan=1, sticky="nwse", pady=(0,6), padx=6)
+            self.reg_scale.configure(command=lambda x: self.pzt_regscale())
+            self.reg_scale.grid(row=22, column=1, columnspan=4, rowspan=1, sticky="nwes", padx=(3, 3), pady=(2, 2))
+
+        else:
+
+            #####LD Adjustment pan
+
+            self.l_reg_scale = tk.Label(self.gui, text="Output power regulation", font=fonts['main'],
+                                        bg=Background['main'])
+            self.ld_scale = tk.Scale(self.gui, from_=0, to=100, tickinterval=False,
+                                     resolution=1, orient=tk.HORIZONTAL,
+                                     bg=Background["main"], font=fonts["main"], command="")
+            current_ld = getvalue(getaddress("ld_d", "curr"), "u", "u")["value"]
+            stepy = Globals.shiftldrange / 100
+            orig = Globals.shiftmincurrent  # + Globals.shiftldrange/2
+            opmstep = int(((current_ld - orig) / Globals.shiftldrange) * 100)
+
+            if abs(opmstep) > 100 or abs(opmstep) < 0:
+                opmstep = 0
+            self.ld_scale.set(opmstep)
+            self.b_plus_reg = tk.Button(self.gui, text="+", bg=Colours['grey'],
+                                        command=lambda: self.ldoffset(1), font=fonts['title'], height=1,
+                                        width=5)
+            self.b_neg_reg = tk.Button(self.gui, text="-", bg=Colours['grey'],
+                                       command=lambda: self.ldoffset(0), font=fonts['title'], height=1,
+                                       width=5)
+            self.ld_scale.configure(command=lambda x: self.ld_regscale())
+            self.ld_scale.grid(row=22, column=1, columnspan=4, rowspan=1, sticky="nwes", padx=(3, 3), pady=(2, 2))
+
+            if opmstep > 95:
+                self.b_shiftbutton = tk.Button(self.gui, text="Shift", fg="red", bg=Colours['grey'],
+                                               command=lambda: self.startshift(), font=fonts['title'], height=1,
+                                               width=5)
+                self.b_shiftbutton.grid(row=29, column=3, columnspan=2, rowspan=1, sticky="nwse", pady=(0, 6), padx=6)
 
         #Grid - Info pan
         self.l_unik.grid(row=1, column=1, columnspan=4, rowspan=2, sticky="nw", padx=3, pady=(18,0))
@@ -263,7 +313,7 @@ class MainPanel(tk.Frame):
         self.l_reg_scale.grid(row=21, column=1, columnspan=2, rowspan=1, sticky="nws", padx=(3, 3), pady=(2, 2))
         self.b_plus_reg.grid(row=21, column=3, columnspan=1, rowspan=1, sticky="nwse", padx=(3, 3), pady=(2, 2))
         self.b_neg_reg.grid(row=21, column=4, columnspan=1, rowspan=1, sticky="nwse", padx=(3, 3), pady=(2, 2))
-        self.ld_scale.grid(row=22, column=1, columnspan=4, rowspan=1, sticky="nwes", padx=(3, 3), pady=(2, 2))
+        #self.ld_scale.grid(row=22, column=1, columnspan=4, rowspan=1, sticky="nwes", padx=(3, 3), pady=(2, 2))
         self.b_lon.grid(row=23, column=1, columnspan=4, rowspan=1, sticky="nwes", padx=5, pady=(2,2))
         self.b_loff.grid(row=25, column=1, columnspan=2, rowspan=2, sticky="nwse", padx=5, pady=(10,0))
         self.geths(self.gui).grid(row=24, column=1, rowspan=2, columnspan=4, sticky="we", pady=(0,8), padx=5)
