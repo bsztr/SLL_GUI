@@ -191,7 +191,10 @@ def getmodules():
         elif "control system" in line:
             Globals.fwver = line.split()[-1]
             referencedate = fwdate = datetime.strptime("09122019", "%d%m%Y")
-            fwdate = datetime.strptime(Globals.fwver[1:], "%d%m%Y")
+            try:
+                fwdate = datetime.strptime(Globals.fwver[1:], "%d%m%Y")
+            except:
+                fwdate = datetime.strptime("09102022", "%d%m%Y")
             if fwdate > referencedate:
                 Globals.newfw = 1
                 Globals.tec_current = 896

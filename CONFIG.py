@@ -170,13 +170,15 @@ pzt_d = {
 }
 
 
-lock_mech=["DIFFERENTIAL", "DIVISION"]
+lock_mech=["DIFFERENTIAL", "DIVISION", "MICHELSON"]
 
 lock_dict={
     0: "DIFFERENTIAL",
     1: "DIVISION",
+    2: "MICHELSON",
     "DIFFERENTIAL": 0,
     "DIVISION": 1,
+    "MICHELSON": 2
 }
 
 opm_mech=["Slow", "Fast", "Slow & PARK", "Fast & PARK", "Off"]
