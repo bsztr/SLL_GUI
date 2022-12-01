@@ -185,9 +185,12 @@ def getmodules():
     result=result.replace("\\r", "\n")
     result=result.splitlines()
     modules=[]
+    Globals.errorno = []
     for line in result:
         if "ok" in line or "failed" in line:
             modules.append(line.split())
+        elif "ERR" in line:
+            Globals.errorno =[int(s) for s in re.findall(r"-?\d+", line)]
         elif "control system" in line:
             Globals.fwver = line.split()[-1]
             referencedate = fwdate = datetime.strptime("09122019", "%d%m%Y")
@@ -251,7 +254,7 @@ def getnames_init():
         Names['low'] = 2
         setvalue(getaddress("gui", "low"),Names["low"], "u", "u")
     Names['high'] = getvalue(getaddress("gui", "high"), "u", "u")["value"]
-    if Names['high'] > 7:
+    if Names['high'] > 10:
         Names['high'] = getvalue(getaddress("ld_d", "curr"), "u", "u")["value"]
         setvalue(getaddress("gui", "high"), Names["high"], "u", "u")
     Names['modell'] = getvalue(getaddress("gui", "modell"), "s", "1")["value"]
@@ -352,16 +355,23 @@ def init():
                 return []
     full_active = getvalue(activate['address'])["value"]
     while query[-1][-1] == "failed":
-        # argu = askyesnocancel(, f"{query[-1][0]} failed, do you want to go in recovery mode?")
-
-        argu = ctypes.windll.user32.MessageBoxW(0, f"{query[-1][0]} failed, do you want to go in recovery mode?", "Module failed", 4)
-        if argu == 6 and Globals.engineer == 1:
-            remove = query[-1][-3].lower()
-            setvalue(activate['address'], full_active - activate[remove])
-            full_active = full_active - activate[remove]
+        if str(Globals.errorno[0]) == "-51" and Globals.pztreset == 0:
+            setvalue(getaddress("pzt0_d", "minm"),5,"u","u")
+            setvalue(getaddress("pzt0_d", "maxm"),80,"u","u")
+            setvalue(getaddress("pzt1_d", "minm"),5,"u","u")
+            setvalue(getaddress("pzt1_d", "maxm"),80,"u","u")
+            Globals.pztreset = 1
             query = getmodules()
+
         else:
-            break
+            argu = ctypes.windll.user32.MessageBoxW(0, f"{query[-1][0]} failed, do you want to go in recovery mode?", "Module failed", 4)
+            if argu == 6 and Globals.engineer == 1:
+                remove = query[-1][-3].lower()
+                setvalue(activate['address'], full_active - activate[remove])
+                full_active = full_active - activate[remove]
+                query = getmodules()
+            else:
+                break
 
     available = []
     for item in query:

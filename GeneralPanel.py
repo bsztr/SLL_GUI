@@ -11,6 +11,7 @@ from stm32loader.main import main as smmain
 import os, pandas
 from tkinter.messagebox import showinfo
 import numpy as np
+from Logging import Logger_wrap
 
 class GeneralPanel(tk.Frame):
     def __init__(self, master, parent):
@@ -162,6 +163,12 @@ class GeneralPanel(tk.Frame):
         self.b_write = tk.Button(self, width=8, height=1, text="WRITE", font=fonts['submit'], bg=Background['submit'],
                                  command=lambda: self.write(self.t_write_address,self.t_write_value, self.s_write))
 
+        self.l_log = tk.Label(self, text="Log laser (s)", font=fonts['main'], bg=Background['main'])
+        self.s_log = tk.Label(self, text="", font=fonts['main'], bg=Background['main'], fg=Colours['darkgrey'])
+        self.t_log= tk.Text(self, font=fonts['main'], width=10, height=1)
+        self.b_log = tk.Button(self, width=8, height=1, text="LOG", font=fonts['submit'], bg=Background['submit'],
+                                 command=lambda: self.log(self.t_log,self.s_log, self.b_log))
+
         self.l_conv = tk.Label(self, text="Data format", font=fonts['main'], bg=Background['main'])
         self.conv_option = tk.StringVar(self)
         self.dtype = {
@@ -287,17 +294,21 @@ class GeneralPanel(tk.Frame):
         self.s_conv.grid(row=10, column=13, columnspan=1, sticky="nw", pady=5, padx=2)
         self.l_conv2.grid(row=10, column=14, columnspan=1, sticky="nw", pady=5, padx=2)
         self.s_conv2.grid(row=10, column=15, columnspan=2, sticky="nw", pady=5, padx=2)
+        self.l_log.grid(row=11, column=12, columnspan=1, sticky="nw", pady=5, padx=2)
+        self.t_log.grid(row=11, column=13, columnspan=1, sticky="nw", pady=5, padx=2)
+        self.s_log.grid(row=11, column=15, columnspan=1, sticky="nw", pady=5, padx=2)
+        self.b_log.grid(row=11, column=16, columnspan=1, sticky="nw", pady=5, padx=2)
 
 
-        self.l_how.grid(row=11, column=12, columnspan=4, sticky="nw", pady=5, padx=2)
-        self.l_how2.grid(row=12, column=12, columnspan=4, sticky="nw", padx=2)
-        self.l_disclaimer.grid(row=13, column=12, columnspan=4, sticky="nw", pady=5, padx=2)
+        self.l_how.grid(row=12, column=12, columnspan=4, sticky="nw", pady=5, padx=2)
+        self.l_how2.grid(row=13, column=12, columnspan=4, sticky="nw", padx=2)
+        self.l_disclaimer.grid(row=14, column=12, columnspan=4, sticky="nw", pady=5, padx=2)
 
-        self.l_reg.grid(row=14, column=12, columnspan=1, sticky="nw", pady=5, padx=2)
-        self.s_reg.grid(row=14, column=15, columnspan=1, sticky="nw", pady=5, padx=2)
-        self.t_reg_start.grid(row=14, column=13, columnspan=1, sticky="nw", pady=5, padx=2)
-        self.t_reg_stop.grid(row=14, column=14, columnspan=1, sticky="nw", pady=5, padx=2)
-        self.b_reg.grid(row=14, column=16, columnspan=1, sticky="nw", pady=5, padx=2)
+        self.l_reg.grid(row=15, column=12, columnspan=1, sticky="nw", pady=5, padx=2)
+        self.s_reg.grid(row=15, column=15, columnspan=1, sticky="nw", pady=5, padx=2)
+        self.t_reg_start.grid(row=15, column=13, columnspan=1, sticky="nw", pady=5, padx=2)
+        self.t_reg_stop.grid(row=15, column=14, columnspan=1, sticky="nw", pady=5, padx=2)
+        self.b_reg.grid(row=15, column=16, columnspan=1, sticky="nw", pady=5, padx=2)
 
     def reset(self, status):
         result=comm_reset()
@@ -328,6 +339,35 @@ class GeneralPanel(tk.Frame):
             result=getvalue(target, arg1, arg2)['value']
             status.configure(text=result)
 
+    def log(self, time, status, button):
+        Globals.logoff = 0
+        try:
+            time = int(1000 * float(time.get("1.0", 'end-1c'))-1000)
+            if time < 2000:
+                time = 2000
+        except:
+            time = 2000
+
+
+        status.configure(text = "Running")
+        button.configure(text = "STOP", bg=Colours['red'], fg=Colours["white"],
+                         command=lambda: self.log_off(self.s_log, self.b_log))
+        wl = getvalue(getaddress("lh", "wavelength"),"u","1")["value"]
+        self.log_run(time, wl)
+
+    def log_run(self, time, wl):
+        if not Globals.logoff == 1:
+            Logger_wrap(Globals.available, wl)
+
+        self.timer_log = self.after(time, lambda: self.log_run(time, wl))
+        Globals.runnning_PROC.append(self.timer_log)
+
+    def log_off(self, status, button):
+        Globals.logoff = 1
+        button.configure(width=8, height=1, text="LOG", font=fonts['submit'], bg=Background['submit'], fg=Colours["black"],
+                                 command=lambda: self.log(self.t_log,self.s_log, self.b_log))
+        status.configure(text="Saved")
+        self.after_cancel(self.timer_log)
     def diagnose(self):
         result = diagnose()
         result = ', '.join(result)

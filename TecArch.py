@@ -78,8 +78,23 @@ class TECArch(tk.Frame):
         self.b_warm = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
                                     command=lambda: submit(self, base+"_d", "warm"))
 
-        self.temp_ramp=iterate(master, "Scan temperature", base+"_d", "set", 13, y, False)
-        self.temp_plot=pidplot(master, "PID plot", base, "temperature", 18,y)
+        self.l_mint = tk.Label(master, text="Min temp", font=fonts['main'], bg=Background['main'])
+        self.t_mint = tk.Text(master, width=6, height=1)
+        self.s_mint = temp_label(self.master)
+        self.s_mint.update_status(getaddress(base + "_d", "mint"), "mint", "driver")
+        self.b_mint = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+                             command=lambda: submit(self, base + "_d", "mint"))
+
+        self.l_maxt = tk.Label(master, text="Max temp", font=fonts['main'], bg=Background['main'])
+        self.t_maxt = tk.Text(master, width=6, height=1)
+        self.s_maxt = temp_label(self.master)
+        self.s_maxt.update_status(getaddress(base + "_d", "maxt"), "maxt", "driver")
+        self.b_maxt = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+                             command=lambda: submit(self, base + "_d", "maxt"))
+
+
+        self.temp_plot=pidplot(master, "PID plot", base, "temperature", 15,y)
+        self.temp_ramp=iterate(master, "Scan temperature", base+"_d", "set", 22, y, False)
 
         self.l_title.grid(row=3, column=y, columnspan=4, sticky="nw", pady=self.pdy)
         self.l_set.grid(row=4, column=y, sticky="nw", pady=self.pdy)
@@ -112,10 +127,18 @@ class TECArch(tk.Frame):
             self.t_maxc.grid(row=11, column=y+1, sticky="nw", pady=self.pdy)
             self.s_maxc.grid(row=11, column=y+2, sticky="nwse", pady=self.pdy, padx=self.pdx)
             self.b_maxc.grid(row=11, column=y+3, sticky="nw", pady=self.pdy)
-        self.l_warm.grid(row=12, column=y, sticky="nw", pady=self.pdy)
-        self.t_warm.grid(row=12, column=y + 1, sticky="nw", pady=self.pdy)
-        self.s_warm.grid(row=12, column=y + 2, sticky="nwse", pady=self.pdy, padx=self.pdx)
-        self.b_warm.grid(row=12, column=y + 3, sticky="nw", pady=self.pdy)
+        self.l_mint.grid(row=12, column=y, sticky="nw", pady=self.pdy)
+        self.t_mint.grid(row=12, column=y + 1, sticky="nw", pady=self.pdy)
+        self.s_mint.grid(row=12, column=y + 2, sticky="nwse", pady=self.pdy, padx=self.pdx)
+        self.b_mint.grid(row=12, column=y + 3, sticky="nw", pady=self.pdy)
+        self.l_maxt.grid(row=13, column=y, sticky="nw", pady=self.pdy)
+        self.t_maxt.grid(row=13, column=y + 1, sticky="nw", pady=self.pdy)
+        self.s_maxt.grid(row=13, column=y + 2, sticky="nwse", pady=self.pdy, padx=self.pdx)
+        self.b_maxt.grid(row=13, column=y + 3, sticky="nw", pady=self.pdy)
+        self.l_warm.grid(row=14, column=y, sticky="nw", pady=self.pdy)
+        self.t_warm.grid(row=14, column=y + 1, sticky="nw", pady=self.pdy)
+        self.s_warm.grid(row=14, column=y + 2, sticky="nwse", pady=self.pdy, padx=self.pdx)
+        self.b_warm.grid(row=14, column=y + 3, sticky="nw", pady=self.pdy)
         self.getvs(master).grid(row=2, column=y+4, sticky="ns", rowspan=11, padx=2*self.pdx)
 
     def geths(self, parent):

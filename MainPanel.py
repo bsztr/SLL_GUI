@@ -46,15 +46,15 @@ class MainPanel(tk.Frame):
         Names = Globals.Names
         self.gui = tk.Tk()
         #self.gui.geometry("395x590")
-        self.gui.title("UniKLasers GUI v" + Globals.guiver)
+        self.gui.title("Skylark GUI v" + Globals.guiver)
         self.gui.configure(bg=Background['main'])
         self.button=18
         self.canvas_width=355
         self.canvas_height=200
 
-        self.Unik = tk.PhotoImage(file=self.resource_path("UnikLogo.png"))
-        #self.Unik = self.Unik.zoom(25)
-        #self.Unik = self.Unik.subsample(8)
+        self.Unik = tk.PhotoImage(file=self.resource_path("Skyrlogo.png"))
+        self.Unik = self.Unik.zoom(2)
+        self.Unik = self.Unik.subsample(15)
         self.l_unik = tk.Label(image=self.Unik, bg=Background['main'])
 
         self.l_detect=tk.Label(self.gui, text=self.lh_detect(), font=fonts['detection'], fg="grey", bg=Background['main'])

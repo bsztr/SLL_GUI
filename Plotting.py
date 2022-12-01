@@ -79,7 +79,7 @@ class pidplot(tk.Label):
         self.b_button.grid(row=row+5, column=column+3, sticky="nw", pady=self.pdy, padx=self.pdx)
 
         self.geths(master).grid(row=row, column=column, columnspan= 5, sticky="we", pady=self.pdy, padx=self.pdx)
-        self.geths(master).grid(row=row+6, column=column, columnspan=5, sticky="we", pady=self.pdy, padx=self.pdx)
+        #self.geths(master).grid(row=row+6, column=column, columnspan=5, sticky="we", pady=self.pdy, padx=self.pdx)
         self.getvs(master).grid(row=row, column=column+4, rowspan=6, sticky="sn", pady=self.pdy, padx=self.pdx)
 
 

@@ -61,9 +61,13 @@ global pzt_clppower
 global pzt_dp_power
 global pzt_ov
 global ld_act
+global logoff
+global logfile
+global errorno
+global pztreset
 
 fwver = "0"
-guiver = "2.3"
+guiver = "2.6"
 #Fixed analogue pzt driver bugs.
 
 
@@ -88,6 +92,10 @@ Colours={
 
     "lightgrey": "#b2bec3"
 }
+logoff = 0
+logfile = ""
+errorno = ""
+pztreset = 0
 
 tec0_set=25
 tec1_set=25

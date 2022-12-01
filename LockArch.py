@@ -920,7 +920,7 @@ class advdata(tk.Frame):
                                   bg=Background['submit'],
                                   command=lambda: submit(self, b + "_d", "clpt"))
         
-        self.l_lock_tune = tk.Label(self, text="Lock tuning (1-on)", font=fonts['main'], bg=Background['main'])
+        self.l_lock_tune = tk.Label(self, text="Tuning (PEAK/AVG/LOCK)", font=fonts['main'], bg=Background['main'])
         self.t_lock_tune = tk.Text(self, width=6, height=1)
         self.s_lock_tune = gui_label(self)
         self.s_lock_tune.update_status(getaddress("gui", "lock_tune"), "lock_tune")
@@ -928,13 +928,29 @@ class advdata(tk.Frame):
                                   bg=Background['submit'],
                                   command=lambda: submit(self, "gui", "lock_tune"))
         
-        self.l_tec_tune = tk.Label(self, text="TEC select (1 or 2)", font=fonts['main'], bg=Background['main'])
+        self.l_tec_tune = tk.Label(self, text="Ref TEC select (1 or 2)", font=fonts['main'], bg=Background['main'])
         self.t_tec_tune = tk.Text(self, width=6, height=1)
         self.s_tec_tune = gui_label(self)
         self.s_tec_tune.update_status(getaddress("gui", "tec_tune"), "tec_tune")
         self.b_tec_tune = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
                                   bg=Background['submit'],
                                   command=lambda: submit(self, "gui", "tec_tune"))
+        
+        self.l_tec_tune_ic = tk.Label(self, text="IC TEC select (1 or 2)", font=fonts['main'], bg=Background['main'])
+        self.t_tec_tune_ic = tk.Text(self, width=6, height=1)
+        self.s_tec_tune_ic = gui_label(self)
+        self.s_tec_tune_ic.update_status(getaddress("gui", "tec_tune_ic"), "tec_tune_ic")
+        self.b_tec_tune_ic = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                  bg=Background['submit'],
+                                  command=lambda: submit(self, "gui", "tec_tune_ic"))
+        
+        self.l_tec_tune_ramp = tk.Label(self, text="Ramp TEC select (3)", font=fonts['main'], bg=Background['main'])
+        self.t_tec_tune_ramp = tk.Text(self, width=6, height=1)
+        self.s_tec_tune_ramp = gui_label(self)
+        self.s_tec_tune_ramp.update_status(getaddress("gui", "tec_tune_ramp"), "tec_tune_ramp")
+        self.b_tec_tune_ramp = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                  bg=Background['submit'],
+                                  command=lambda: submit(self, "gui", "tec_tune_ramp"))
         
         self.l_dphd_thres = tk.Label(self, text="DPhD threshold (V)", font=fonts['main'], bg=Background['main'])
         self.t_dphd_thres = tk.Text(self, width=6, height=1)
@@ -1033,38 +1049,48 @@ class advdata(tk.Frame):
         self.t_tec_tune.grid(row=10, column=2, columnspan=1, sticky="nw", pady=self.pady)
         self.s_tec_tune.grid(row=10, column=3, columnspan=1, sticky="nw", pady=self.pady)
         self.b_tec_tune.grid(row=10, column=4, columnspan=1, sticky="nw", pady=self.pady)
-        
-        self.l_dphd_thres.grid(row=11, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_dphd_thres.grid(row=11, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_dphd_thres.grid(row=11, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_dphd_thres.grid(row=11, column=4, columnspan=1, sticky="nw", pady=self.pady)
-        
-        self.l_pid_timer.grid(row=12, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_pid_timer.grid(row=12, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_pid_timer.grid(row=12, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_pid_timer.grid(row=12, column=4, columnspan=1, sticky="nw", pady=self.pady)
-        
-        self.l_tec0_pid.grid(row=13, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_tec0_pid.grid(row=13, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_tec0_pid.grid(row=13, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_tec0_pid.grid(row=13, column=4, columnspan=1, sticky="nw", pady=self.pady)
-        
-        self.l_tec1_pid.grid(row=14, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_tec1_pid.grid(row=14, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_tec1_pid.grid(row=14, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_tec1_pid.grid(row=14, column=4, columnspan=1, sticky="nw", pady=self.pady)
-        
-        self.l_tec2_pid.grid(row=15, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_tec2_pid.grid(row=15, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_tec2_pid.grid(row=15, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_tec2_pid.grid(row=15, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-        self.l_lock_timer.grid(row=16, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_lock_timer.grid(row=16, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_lock_timer.grid(row=16, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_lock_timer.grid(row=16, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_tec_tune_ramp.grid(row=11, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_tec_tune_ramp.grid(row=11, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_tec_tune_ramp.grid(row=11, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_tec_tune_ramp.grid(row=11, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-        self.b_wpq.grid(row=18, column=1, columnspan=6, sticky="nw", pady=self.pady)
+        self.l_tec_tune_ic.grid(row=12, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_tec_tune_ic.grid(row=12, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_tec_tune_ic.grid(row=12, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_tec_tune_ic.grid(row=12, column=4, columnspan=1, sticky="nw", pady=self.pady)
+
+        self.l_dphd_thres.grid(row=13, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_dphd_thres.grid(row=13, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_dphd_thres.grid(row=13, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_dphd_thres.grid(row=13, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        
+        self.l_pid_timer.grid(row=14, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_pid_timer.grid(row=14, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_pid_timer.grid(row=14, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_pid_timer.grid(row=14, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        
+        self.l_tec0_pid.grid(row=15, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_tec0_pid.grid(row=15, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_tec0_pid.grid(row=15, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_tec0_pid.grid(row=15, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        
+        self.l_tec1_pid.grid(row=16, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_tec1_pid.grid(row=16, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_tec1_pid.grid(row=16, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_tec1_pid.grid(row=16, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        
+        self.l_tec2_pid.grid(row=17, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_tec2_pid.grid(row=17, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_tec2_pid.grid(row=17, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_tec2_pid.grid(row=17, column=4, columnspan=1, sticky="nw", pady=self.pady)
+
+        self.l_lock_timer.grid(row=18, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_lock_timer.grid(row=18, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_lock_timer.grid(row=18, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_lock_timer.grid(row=18, column=4, columnspan=1, sticky="nw", pady=self.pady)
+
+        self.b_wpq.grid(row=19, column=1, columnspan=6, sticky="nw", pady=self.pady)
 
     def wpaq(self, master, b):
 
