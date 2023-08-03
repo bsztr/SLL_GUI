@@ -50,125 +50,196 @@ import Globals
 
 
 base = {
-    "tec0": ["DFFF", "tec"],
-    "tec1": ["DBFF", "tec"],
-    "tec2": ["D7FF", "tec"],
-    "tec3": ["D3FF", "tec"],
-    "tec0_d": ["FFF5", "tec_d"],
-    "tec1_d":["FFE1","tec_d"],
-    "tec2_d":["FFCD","tec_d"],
-    "tec3_d":["FFB9","tec_d"],
-    "pzt0":["EFFF","pzt"],
-    "pzt1":["EBFF","pzt"],
-    "pzt0_d":["FF91","pzt_d"],
-    "pzt1_d":["FF66","pzt_d"],
-    "lh":["FFFF","lh"],
-    "ld_d": ["FFA5","ld_d"],
-    "ld": ["BFFF","ld"],
-    "cb":["03FF","cb"],
-    "gui": ["FD00", "gui"]
+    "tec0": ["1000", "tec"],
+    "tec1": ["1100", "tec"],
+    "tec2": ["1200", "tec"],
+    "tec3": ["1300", "tec"],
+    "tec4": ["1400", "tec"],
+    "tec5": ["1500", "tec"],
+    "tec0_d": ["1000", "tec_d"],
+    "tec1_d":["1100","tec_d"],
+    "tec2_d":["1200","tec_d"],
+    "tec3_d":["1300","tec_d"],
+    "tec4_d": ["1400", "tec_d"],
+    "tec5_d": ["1500", "tec_d"],
+    "pzt0":["2000","pzt"],
+    "pzt1":["2100","pzt"],
+    "pzt0_d":["2000","pzt_d"],
+    "pzt1_d":["2100","pzt_d"],
+    "lh":["4000","lh"],
+    "ld_d": ["3000","ld_d"],
+    "ld": ["3000","ld"],
+    "cb":["1000","cb"],
+    "gui": ["4000", "gui"],
+    "dphd": ["5000", "dphd"]
+}
+
+status = {
+    "address": "0002",
+    "STATUS_OK": 0,
+    "TEC_WARMING_UP": 1,
+    "TEC_READY": 2,
+    "LD_OK": 3,
+    "LD_WARMING_UP": 4,
+    "LD_STABLE": 5,
+    "PZT_0_PARK": 6,
+    "PZT_0_RAMP": 7,
+    "PZT_0_Locking": 9,
+    "PZT_0_Tuning": 8,
+    "PZT_0_Locked": 10,
+    "PZT_1_PARK": 11,
+    "PZT_1_RAMP": 12,
+    "PZT_1_Locking": 14,
+    "PZT_1_Tuning": 13,
+    "PZT_1_Locked": 15,
+    "ERROR": 18
 }
 
 control={
-    "address":"03FA",
-    "full": 8,
-    "ext": 4,
-    "ld": 1,
-    "pzt": 2,
-    "tec": 1024,
-    "pzt0_l": 256,
-    "pzt0_m": 64,
-    "pzt1_l": 512,
-    "pzt1_m": 128
+    "address":"0000",
+    "full": 0,
+    "ext": 0,
+    "tec0": 0,
+    "tec1": 1,
+    "tec2": 2,
+    "tec3": 3,
+    "tec4": 4,
+    "tec5": 5,
+    "pzt0": 6,
+    "pzt1": 7,
+    "ld": 8,
+    "pzt0_park": 9,
+    "pzt0_ramp": 10,
+    "pzt0_tune": 11,
+    "pzt0_lock": 12,
+    "pzt1_park":13,
+    "pzt1_ramp": 14,
+    "pzt1_tune": 15,
+    "pzt1_lock": 16,
+    "reset_errors": 19
+}
+
+dphd = {
+    "dpot0": [0,"u","1"],
+    "dpot1": [1,"u","1"],
+    "dpot2": [2,"u","1"],
+    "dpot3": [3,"u","1"],
+    "dpot4": [4,"u","1"],
+    "dpot5": [5,"u","1"]
 }
 
 activate={
-    "address": "FFFE",
+    "address": "0001",
     "CB": 0,
     "LH": 0,
     "tec0": 1,
     "tec1": 2,
     "tec2":4,
     "tec3":8,
-    "pzt0":16,
-    "pzt1":32,
-    "ldr":64,
-    "dpot": "FFFD",
-    "dpot0": 63,
-    "dpot1": 4032
+    "tec4":16,
+    "tec5": 32,
+    "pzt0":64,
+    "pzt1":128,
+    "ldr":256,
+}
+
+mod_check = {
+
+    "tec0": 0,
+    "tec1": 1,
+    "tec2":2,
+    "tec3":3,
+    "tec4":4,
+    "tec5": 5,
+    "pzt0":6,
+    "pzt1":7,
+    "ldr":8,
+
 }
 
 
-
 tec = {
-    "current": [Globals.tec_current, "u", "u"],
-    "req current": [Globals.tec_reqcurrent, "i", "u"],
-    "set": [Globals.tec_set, "u", "k"],
-    "act": [Globals.tec_act, "u", "k"]
+    "fw": [2305, "u", "1"],
+    "current": [80, "f", "1"],
+    "req current": [80, "f", "1"],
+    "set": [2, "f", "1"],
+    "act": [82, "f", "1"]
 }
 
 
 
 tec_d= {
-    "maxc": [1, "u", "u"],
-    "maxv": [0, "u", "u"],
-    "warm":[18,"u","1"],
-    "set": [11, "u", "k"],
-    "p": [2, "f", "1"],
-    "i": [3, "f", "1"],
-    "d": [4, "f", "1"],
-    "maxt": [16, "u", "k"],
-    "mint": [15, "u", "k"]
+    "maxc": [0, "u", "1"],
+    "maxv": [1, "u", "1"],
+    "warm":[7,"u","1"],
+    "set": [2, "f", "1"],
+    "p": [4, "f", "1"],
+    "i": [5, "f", "1"],
+    "d": [6, "f", "1"],
+    "maxt": [10, "f", "1"],
+    "mint": [9, "f", "1"]
 
 }
 
 
 pzt = {
-    "parkv": [Globals.pzt_parkv, "u", "u"],
-    "clp_power": [Globals.pzt_clppower, "u", "u"],
-    "dp_power": [Globals.pzt_dp_power, "i", "u"],
-    "ov": [Globals.pzt_ov, "u", "u"],
-    "id": [1, "s", "1"],
-    "dphd": [770, "u", "1"],
-    "clp": [773, "u", "1"],
-    "v0": [776, "u", "1"],
-    "nrd": [768, "u", "1"],
-    "nrc": [771, "u", "1"],
-    "nrv": [774, "u", "1"],
-    "wploc": [512, "u", "u"]
+    "fw": [2305, "u", "1"],
+    "parkv": [83, "u", "1"],
+    "clp_power": [84, "f", "1"],
+    "dp_power": [80, "u", "1"],
+    "ov": [9, "u", "m"],
+    "id": [1, "u", "1"],
+    "dphd": [1, "u", "1"],
+    "clp": [1, "u", "1"],
+    "v0": [1, "u", "1"],
+    "nrd": [1, "u", "1"],
+    "nrc": [1, "u", "1"],
+    "nrv": [1, "u", "1"],
+    "wploc": [1, "u", "1"],
+    "dpot0": [80, "u", "1"],
+    "dpot1": [81, "u", "1"],
+    "dpot2": [84, "f", "1"],
+    "tune_enable": [13, "u", "1"],
+    "tune_module": [14, "u", "1"],
+    "display_signal": [15, "u", "1"],
+    "clp_cal": [16, "f", "1"],
+    "tune_threshold": [17, "u", "1"],
+    "tune_normal_step": [18, "f", "1"],
+    "tune_large_step": [19, "f", "1"],
+    "tune_delay": [20, "u", "1"]
 }
 
 
 
 
 pzt_d = {
-    "self": [0, "u", "1"],
-    "cmin": [23, "u", "u"],
-    "cmax": [22, "u", "u"],
-    "p": [24, "f", "1"],
-    "i": [25, "f", "1"],
-    "d": [26, "f", "1"],
-    "adelay": [39, "u", "1"],
-    "offset": [27, "i", "u"],
-    "rate": [41,"u","u"],
-    "park": [21, "u", "u"],
-    "dpota_cr": [8, "u", "1"],
-    "dpota_amp": [11, "u", "1"],
-    "dpotb_cr": [15, "u", "1"],
-    "dpotb_amp": [18, "u", "1"],
+    "self": [1, "u", "1"],
+    "cmin": [1, "u", "u"],
+    "cmax": [1, "u", "u"],
+    "p": [2, "f", "1"],
+    "i": [3, "f", "1"],
+    "d": [4, "f", "1"],
+    "adelay": [10, "u", "1"],
+    "offset": [1, "u", "1"],
+    "rate": [5,"f","1"],
+    "park": [9, "u", "1"],
+    "dpota_cr": [1, "u", "1"],
+    "dpota_amp": [1, "u", "1"],
+    "dpotb_cr": [1, "u", "1"],
+    "dpotb_amp": [1, "u", "1"],
     "clp_cr": [1, "u", "1"],
-    "clp_amp": [4, "u", "1"],
-    "clp_ci":[0, "f", "1"],
-    "lockm": [42, "u", "1"],
-    "min":[29, "u", "u"],
-    "max":[28, "u", "u"],
-    "minm":[29, "u", "u"],
-    "maxm":[28, "u", "u"],
-    "minsl":[12, "u", "u"],
-    "lockmode":[13, "u", "1"],
-    "maxwp":[35, "i", "u"],
-    "minwp":[34, "i", "u"],
-    "clpt":[36, "u", "1"]
+    "clp_amp": [1, "u", "1"],
+    "clp_ci":[1, "u", "1"],
+    "lockm": [1, "u", "1"],
+    "min":[84, "u", "1"],
+    "max":[85, "u", "1"],
+    "minm":[11, "u", "m"],
+    "maxm":[12, "u", "m"],
+    "minsl":[1, "u", "1"],
+    "lockmode":[8, "u", "1"],
+    "maxwp":[1, "u", "1"],
+    "minwp":[1, "u", "1"],
+    "clpt":[1, "u", "1"]
 }
 
 
@@ -202,75 +273,87 @@ opm_dict={
 
 
 lh={
-    "serial": [8,"u","1"],
-    "date": [5,"u","1"],
-    "power": [9,"u","1"],
-    "wavelength": [6,"u","1"],
-    "model": [7,"u","1"]
+    "serial": [0,"u","1"],
+    "date": [1,"u","1"],
+    "power": [2,"u","1"],
+    "wavelength": [3,"u","1"],
+    "model": [4,"u","1"]
 }
 
 
 ld={
-    "act": [Globals.ld_act, "u", "u"],
-    "curr": [26, "u", "u"],
-    "clp_error": [41, "i", "u"],
-    "Kp": [267, "f", "1"]
+    "fw": [2305, "u", "u"],
+    "act": [82, "u", "u"],
+    "curr": [80, "u", "u"],
+    "clp_error": [1, "u", "1"],
+    "Kp": [1, "u", "1"]
 }
 
 
-ld_d={  "curr": [1, "u", "u"],
-        "dc": [0, "u", "u"],
-        "cl": [4, "u", "u"],
-        "cerror": [5, "u", "u"],
-        "delay": [7,"u","1"],
-        "clp_enable": [8,"u","1"],
-        "clp_target": [9,"u","u"],
-        "clp_repeat": [12,"u","1"],
-        "clp_step": [13,"i","u"],
-        "clp_constant_I": [11, "f", "u"],
-        "clp_constant_P": [14, "f", "u"],
-        "clp_constant_M": [10, "f", "u"],
-        "clp_ldmax": [15, "u", "1"]
+ld_d={  "curr": [0, "u", "u"],
+        "dc": [1, "u", "1"],
+        "cl": [2, "u", "u"],
+        "cerror": [1, "u", "1"],
+        "delay": [4,"u","1"],
+        "clp_enable": [1,"u","1"],
+        "clp_target": [1,"u","1"],
+        "clp_repeat": [1,"u","1"],
+        "clp_step": [1,"u","1"],
+        "clp_constant_I": [1, "u", "1"],
+        "clp_constant_P": [1, "u", "1"],
+        "clp_constant_M": [1, "u", "1"],
+        "clp_ldmax": [1, "u", "1"]
           }
 
 gui = {
 
-    "low":[0, "u", "u"],
-    "high":[1, "u", "u"],
-    "modell":[2, "s", "1"],
-    "tec0":[3, "s", "1"],
-    "tec1":[4, "s", "1"],
-    "tec2":[5, "s", "1"],
-    "tec3":[6, "s", "1"],
-    "pzt0":[7, "s", "1"],
-    "pzt1":[8, "s", "1"],
-    "cb":[9, "s", "1"],
-    "lh":[10, "s", "1"],
-    "ldr":[11, "s", "1"],
-    "trial":[12, "u", "1"],
-    "start":[13, "t", "1"],
-    "dur":[14, "t", "1"],
-    "ban": [15, "u", "1"],
-    "shift_enable": [17, "u", "1"],
-    "shift_step": [18, "i", "1"],
-    "shift_serial": [19, "u", "1"],
-    "shift_threshold": [20, "u", "u"],
-    "shift_count": [21, "u", "1"],
-    "shift_position": [22, "i", "1"],
-    "shift_mincurrent": [23, "u", "u"],
-    "opm_setting": [24, "u", "u"],
-    "opm_target": [25, "f", "u"],
-    "lock_tune": [88,"u","1"],
-    "tec_tune": [89,"u","1"],
-    "dphd_thres": [90,"u","u"],
-    "lock_timer": [91,"u","1"],
-    "pid_timer": [92,"u","1"],
-    "tec3_pid": [93,"u","1"],
-    "tec2_pid": [94,"u","1"],
-    "tec1_pid": [95, "u", "1"],
-    "tec0_pid": [96, "u", "1"],
-    "tec_tune_ic":[66,"u","1"],
-    "tec_tune_ramp":[65,"u","1"]
+    "low":[256, "u", "u"],
+    "high":[257, "u", "u"],
+    "modell":[258, "s", "1"],
+    "tec0":[259, "u", "1"],
+    "tec1":[260, "u", "1"],
+    "tec2":[261, "u", "1"],
+    "tec3":[262, "u", "1"],
+    "tec4": [263, "u", "1"],
+    "tec5": [264, "u", "1"],
+    "pzt0":[265, "u", "1"],
+    "pzt1":[266, "u", "1"],
+    "pzt2": [267, "u", "1"],
+    "pzt3": [268, "u", "1"],
+    "ldr": [269, "u", "1"],
+    "dpot0": [270, "u", "1"],
+    "dpot1": [271, "u", "1"],
+    "dpot2": [20482, "u", "1"],
+    "dpot3": [20483, "u", "1"],
+    "dpot4": [20484, "u", "1"],
+    "dpot5": [20485, "u", "1"],
+    "cb":[1, "u", "1"],
+    "lh":[1, "u", "1"],
+
+    "trial":[1, "u", "1"],
+    "start":[1, "u", "1"],
+    "dur":[1, "u", "1"],
+    "ban": [1, "u", "1"],
+    "shift_enable": [1, "u", "1"],
+    "shift_step": [1, "u", "1"],
+    "shift_serial": [1, "u", "1"],
+    "shift_threshold": [1, "u", "1"],
+    "shift_count": [1, "u", "1"],
+    "shift_position": [1, "u", "1"],
+    "shift_mincurrent": [1, "u", "1"],
+    "opm_setting": [1, "u", "1"],
+    "opm_target": [1, "u", "1"],
+    "lock_tune": [1,"u","1"],
+    "tec_tune": [1,"u","1"],
+    "dphd_thres": [1,"u","1"],
+    "lock_timer": [1,"u","1"],
+    "pid_timer": [1,"u","1"],
+    "tec3_pid": [1,"u","1"],
+    "tec2_pid": [1,"u","1"],
+    "tec1_pid": [1, "u", "1"],
+    "tec0_pid": [1, "u", "1"],
+    "tec_tune_ic":[1,"u","1"],
+    "tec_tune_ramp":[1,"u","1"]
 }
 
 rang = {
@@ -285,22 +368,33 @@ rang = {
 }
 
 indicator = {
-    "write": "03FA",
-    "read": "03FA",
+    "write": "0000",
+    "read": "0002",
     "tec": {
-        "grey": 10,
-        "amber": 16,
-        "green": 17
+        "grey": 0,
+        "amber": 1,
+        "green": 2
     },
     "ld": {
         "grey": 0,
-        "amber": 18,
-        "green": 19
+        "amber": 4,
+        "green": 5
     },
-    "pzt": {
-        "grey": 1,
-        "amber": 20,
-        "green": 21
+    "pzt0": {
+        "grey": 0,
+        "amber": 6,
+        "blue": 7,
+        "lightgreen": 8,
+        "orange": 9,
+        "green": 10
+    },
+    "pzt1": {
+        "grey": 0,
+        "amber": 11,
+        "blue": 12,
+        "lightgreen": 13,
+        "orange": 14,
+        "green": 15
     },
     "power": {
         "off": "",
@@ -328,25 +422,25 @@ cb={
 
 fonts={
 
-    "main": ("Jost Light", 10),
-    "button": ("Proxima Nova Rg", 16),
-    "mainbutton": ("Jost Regular", 20),
-    "subbutton": ("Jost Regular", 12),
-    "title": ("Jost Regular", 10),
-    "detection": ("Proxima Nova Th", 11),
-    "status": ("Jost Regular", 8),
-    "indicator": ("Jost Regular", 8),
+    "main": ("Calibri Light", 10),
+    "button": ("Calibri", 16),
+    "mainbutton": ("Calibri", 20),
+    "subbutton": ("Calibri", 12),
+    "title": ("Calibri Bold", 10),
+    "detection": ("Calibri Light", 11),
+    "status": ("Calibri", 8),
+    "indicator": ("Calibri", 8),
     "calibration": ("Proxima Nova Alt Lt", 7),
-    "submit": ("Proxima Nova Rg", 6),
-    "messages": ("Jost Light", 8),
-    "model": ("Jost Regular", 20),
-    "submodel": ("Jost Regular", 25),
+    "submit": ("Calibri", 6),
+    "messages": ("Arial", 8),
+    "model": ("Calibri", 20),
+    "submodel": ("Calibri", 25),
     "actual": ("Jost Light", 9),
     "info":  ("Jost Light", 16, "italic"),
     "temperature": ("Jost Regular", 9),
     "temperature_b": ("Jost Regular", 10),
     "pzt_status": ("Jost Regular", 8),
-    "copyright": ("Jost Light", 10)
+    "copyright": ("Calibri Light", 10)
 }
 
 DefaultNames={
@@ -357,8 +451,12 @@ DefaultNames={
     "tec1": "TEC1",
     "tec2": "TEC2",
     "tec3": "TEC3",
+    "tec4": "TEC4",
+    "tec5": "TEC5",
     "pzt0": "PZT0",
     "pzt1": "PZT1",
+    "pzt2": "PZT2",
+    "pzt3": "PZT3",
     "ldr": "LD",
     "cb": "CB",
     "lh": "LH",
@@ -379,12 +477,13 @@ Colours={
     #"red": "#d63032221",
     "red": "#D11C24",
     "amber": "#fdcb6e",
-    #"green": "#00b894",
+    "lightgreen": "#1dd1a1",
     "green": "#00874F",
     "orange": "#f39c12",
     "grey": "ghost white",
     "lightgrey": "#b2bec3",
     "darkgrey": "#636e72",
+    "blue": '#2e86de',
     "solo": "#262626",
     "white": "#ecf0f1",
     "darkred": "#b33939",

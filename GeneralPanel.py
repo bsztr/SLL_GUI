@@ -6,7 +6,7 @@ from init_start import *
 import math
 from init_start import getmodules
 import Globals
-from COMM import stop_COMM
+from COMM import stop_COMM, save_regs
 from stm32loader.main import main as smmain
 import os, pandas
 from tkinter.messagebox import showinfo
@@ -26,12 +26,12 @@ class GeneralPanel(tk.Frame):
         # Advanced definition
         self.l_device = tk.Label(self, text="Device summary", font=fonts['title'], bg=Background['main'])
 
-        self.l_model = tk.Label(self, text="Model ID:", font=fonts['main'], bg=Background['main'])
-        self.t_model = tk.Text(self, font=fonts['main'], width=10, height=1)
-        self.s_model = lh_label(self)
-        self.s_model.update_status(getaddress(self.base, "model"), "model")
-        self.b_model = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
-                                  command=lambda: submit(self, self.base, "model"))
+        # self.l_model = tk.Label(self, text="Model ID:", font=fonts['main'], bg=Background['main'])
+        # self.t_model = tk.Text(self, font=fonts['main'], width=10, height=1)
+        # self.s_model = lh_label(self)
+        # self.s_model.update_status(getaddress(self.base, "model"), "model")
+        # self.b_model = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+        #                           command=lambda: submit(self, self.base, "model"))
 
         self.l_modell = tk.Label(self, text="Model name:", font=fonts['main'], bg=Background['main'])
         self.t_modell = tk.Text(self, font=fonts['main'], width=10, height=1)
@@ -82,40 +82,54 @@ class GeneralPanel(tk.Frame):
         self.b_low = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
                                 command=lambda: submit_gui(self, "gui", "low", "f"))
 
-        self.l_trial = tk.Label(self, text="Trial On(1), Off(0):", font=fonts['main'], bg=Background['main'])
-        self.t_trial = tk.Text(self, font=fonts['main'], width=10, height=1)
-        self.s_trial = gui_label(self)
-        self.s_trial.update_status(getaddress("gui", "trial"), "trial")
-        self.b_trial = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
-                                command=lambda: submit_gui(self, "gui", "trial", "f"))
+        self.l_dpot0 = tk.Label(self, text="DPOT0 default:", font=fonts['main'], bg=Background['main'])
+        self.t_dpot0 = tk.Text(self, font=fonts['main'], width=10, height=1)
+        self.s_dpot0 = gui_label(self)
+        self.s_dpot0.update_status(getaddress("gui", "dpot0"), "dpot0")
+        self.b_dpot0 = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+                                  command=lambda: submit_r(self, "gui", "dpot0", 0, 255))
 
-        self.l_start = tk.Label(self, text="Starting date:", font=fonts['main'], bg=Background['main'])
-        self.t_start = tk.Text(self, font=fonts['main'], width=10, height=1)
-        self.s_start = gui_label(self)
-        self.s_start.update_status(getaddress("gui", "start"), "start")
-        self.b_start = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
-                                command=lambda: submit_gui(self, "gui", "start"))
+        self.l_dpot1 = tk.Label(self, text="DPOT1 default:", font=fonts['main'], bg=Background['main'])
+        self.t_dpot1 = tk.Text(self, font=fonts['main'], width=10, height=1)
+        self.s_dpot1 = gui_label(self)
+        self.s_dpot1.update_status(getaddress("gui", "dpot1"), "dpot1")
+        self.b_dpot1 = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+                                 command=lambda: submit_r(self, "gui", "dpot1", 0, 255))
 
-        self.l_dur = tk.Label(self, text="End date:", font=fonts['main'], bg=Background['main'])
-        self.t_dur = tk.Text(self, font=fonts['main'], width=10, height=1)
-        self.s_dur = gui_label(self)
-        self.s_dur.update_status(getaddress("gui", "dur"), "dur")
-        self.b_dur = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
-                                command=lambda: submit_gui(self, "gui", "dur"))
-
-        self.l_ban = tk.Label(self, text="Subscription reset (0 to res):", font=fonts['main'], bg=Background['main'])
-        self.t_ban = tk.Text(self, font=fonts['main'], width=10, height=1)
-        self.s_ban = gui_label(self)
-        self.s_ban.update_status(getaddress("gui", "ban"), "ban")
-        self.b_ban = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
-                                command=lambda: submit_gui(self, "gui", "ban"))
+        # self.l_trial = tk.Label(self, text="Trial On(1), Off(0):", font=fonts['main'], bg=Background['main'])
+        # self.t_trial = tk.Text(self, font=fonts['main'], width=10, height=1)
+        # self.s_trial = gui_label(self)
+        # self.s_trial.update_status(getaddress("gui", "trial"), "trial")
+        # self.b_trial = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+        #                         command=lambda: submit_gui(self, "gui", "trial", "f"))
+        #
+        # self.l_start = tk.Label(self, text="Starting date:", font=fonts['main'], bg=Background['main'])
+        # self.t_start = tk.Text(self, font=fonts['main'], width=10, height=1)
+        # self.s_start = gui_label(self)
+        # self.s_start.update_status(getaddress("gui", "start"), "start")
+        # self.b_start = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+        #                         command=lambda: submit_gui(self, "gui", "start"))
+        #
+        # self.l_dur = tk.Label(self, text="End date:", font=fonts['main'], bg=Background['main'])
+        # self.t_dur = tk.Text(self, font=fonts['main'], width=10, height=1)
+        # self.s_dur = gui_label(self)
+        # self.s_dur.update_status(getaddress("gui", "dur"), "dur")
+        # self.b_dur = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+        #                         command=lambda: submit_gui(self, "gui", "dur"))
+        #
+        # self.l_ban = tk.Label(self, text="Subscription reset (0 to res):", font=fonts['main'], bg=Background['main'])
+        # self.t_ban = tk.Text(self, font=fonts['main'], width=10, height=1)
+        # self.s_ban = gui_label(self)
+        # self.s_ban.update_status(getaddress("gui", "ban"), "ban")
+        # self.b_ban = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+        #                         command=lambda: submit_gui(self, "gui", "ban"))
 
         self.l_activate_title=tk.Label(self, text="Activate modules", font=fonts['title'], bg=Background['main'])
         self.row=3
         self.column=5
         i=0
         Globals.modules=Globals.available
-        for item in ["CB", "LH", "TEC0", "TEC1", "TEC2", "TEC3", "PZT0", "PZT1", "LDR"]:
+        for item in ["TEC0", "TEC1", "TEC2", "TEC3", "TEC4", "TEC5", "PZT0", "PZT1", "PZT2", "PZT3", "LDR"]:
             avail_pan = activate(self)
             avail_pan(self, item,self.row+i,self.column)
             i+=1
@@ -123,8 +137,8 @@ class GeneralPanel(tk.Frame):
         self.l_diagnose = tk.Label(self, text="", font=fonts['status'], bg=Background['main'], fg=Colours['darkgrey'])
         self.b_diagnose = tk.Button(self, width=8, height=1, text="DIAGNOSE", font=fonts['submit'], bg=Background['submit'],
                                       command= self.diagnose)
-        self.l_diagnose.grid(row=12, column=5, columnspan=6, sticky="nwse", pady=5)
-        self.b_diagnose.grid(row=12, column=11, columnspan=1, pady=5)
+        self.l_diagnose.grid(row=14, column=5, columnspan=6, sticky="nwse", pady=5)
+        self.b_diagnose.grid(row=14, column=11, columnspan=1, pady=5)
 
 
         self.l_advanced = tk.Label(self, text="Advanced options*", font=fonts['title'], bg=Background['main'])
@@ -144,10 +158,10 @@ class GeneralPanel(tk.Frame):
         self.b_fpup = tk.Button(self, width=8, height=1, text="UPDATE", font=fonts['submit'], bg=Background['submit'],
                                       command=lambda: self.fpup(parent))
 
-        self.l_debug = tk.Label(self, text="Silent mode", font=fonts['main'], bg=Background['main'])
+        self.l_debug = tk.Label(self, text="Save all", font=fonts['main'], bg=Background['main'])
         self.s_debug = tk.Label(self, text="", font=fonts['main'], bg=Background['main'], fg=Colours['darkgrey'])
-        self.b_debug = tk.Button(self, width=8, height=1, text="START", font=fonts['submit'], bg=Background['submit'],
-                                 command=lambda: self.debug(self.s_debug, self.b_debug, parent))
+        self.b_debug = tk.Button(self, width=8, height=1, text="SAVE", font=fonts['submit'], bg=Background['submit'],
+                                 command=lambda: self.save_regs_gen(self.s_debug))
 
 
         self.l_read = tk.Label(self, text="Read register", font=fonts['main'], bg=Background['main'])
@@ -209,54 +223,62 @@ class GeneralPanel(tk.Frame):
         self.l_logo.grid(row=0, column=15, columnspan=4, rowspan=1, sticky="e", pady=10)
         self.geths(self).grid(row=1, column=1, columnspan=19, sticky="we", pady=10)
         self.l_device.grid(row=2, column=1, columnspan=4, sticky="nw", pady=5)
-        self.l_model.grid(row=3, column=1, columnspan=1, sticky="nw", pady=5)
-        self.t_model.grid(row=3, column=2, columnspan=1, sticky="ne", pady=5)
-        self.s_model.grid(row=3, column=3, columnspan=1, sticky="ne", pady=5)
-        self.b_model.grid(row=3, column=4, columnspan=1, sticky="nw", pady=5)
-        self.l_modell.grid(row=4, column=1, columnspan=1, sticky="nw", pady=5)
-        self.t_modell.grid(row=4, column=2, columnspan=1, sticky="ne", pady=5)
-        self.s_modell.grid(row=4, column=3, columnspan=1, sticky="ne", pady=5)
-        self.b_modell.grid(row=4, column=4, columnspan=1, sticky="nw", pady=5)
-        self.l_date.grid(row=5, column=1, columnspan=1, sticky="nw", pady=5)
-        self.t_date.grid(row=5, column=2, columnspan=1, sticky="ne", pady=5)
-        self.s_date.grid(row=5, column=3, columnspan=1, sticky="ne", pady=5)
-        self.b_date.grid(row=5, column=4, columnspan=1, sticky="nw", pady=5)
-        self.l_serial.grid(row=6, column=1, columnspan=1, sticky="nw", pady=5)
-        self.t_serial.grid(row=6, column=2, columnspan=1, sticky="ne", pady=5)
-        self.s_serial.grid(row=6, column=3, columnspan=1, sticky="ne", pady=5)
-        self.b_serial.grid(row=6, column=4, columnspan=1, sticky="nw", pady=5)
-        self.l_power.grid(row=7, column=1, columnspan=1, sticky="nw", pady=5)
-        self.t_power.grid(row=7, column=2, columnspan=1, sticky="ne", pady=5)
-        self.s_power.grid(row=7, column=3, columnspan=1, sticky="ne", pady=5)
-        self.b_power.grid(row=7, column=4, columnspan=1, sticky="nw", pady=5)
-        self.l_wavelength.grid(row=8, column=1, columnspan=1, sticky="nw", pady=5)
-        self.t_wavelength.grid(row=8, column=2, columnspan=1, sticky="ne", pady=5)
-        self.s_wavelength.grid(row=8, column=3, columnspan=1, sticky="ne", pady=5)
-        self.b_wavelength.grid(row=8, column=4, columnspan=1, sticky="nw", pady=5)
-        self.l_high.grid(row=9, column=1, columnspan=1, sticky="nw", pady=5)
-        self.t_high.grid(row=9, column=2, columnspan=1, sticky="ne", pady=5)
-        self.s_high.grid(row=9, column=3, columnspan=1, sticky="ne", pady=5)
-        self.b_high.grid(row=9, column=4, columnspan=1, sticky="nw", pady=5)
-        self.l_low.grid(row=10, column=1, columnspan=1, sticky="nw", pady=5)
-        self.t_low.grid(row=10, column=2, columnspan=1, sticky="ne", pady=5)
-        self.s_low.grid(row=10, column=3, columnspan=1, sticky="ne", pady=5)
-        self.b_low.grid(row=10, column=4, columnspan=1, sticky="nw", pady=5)
-        self.l_trial.grid(row=11, column=1, columnspan=1, sticky="nw", pady=5)
-        self.t_trial.grid(row=11, column=2, columnspan=1, sticky="ne", pady=5)
-        self.s_trial.grid(row=11, column=3, columnspan=1, sticky="ne", pady=5)
-        self.b_trial.grid(row=11, column=4, columnspan=1, sticky="nw", pady=5)
-        self.l_start.grid(row=12, column=1, columnspan=1, sticky="nw", pady=5)
-        self.t_start.grid(row=12, column=2, columnspan=1, sticky="ne", pady=5)
-        self.s_start.grid(row=12, column=3, columnspan=1, sticky="ne", pady=5)
-        self.b_start.grid(row=12, column=4, columnspan=1, sticky="nw", pady=5)
-        self.l_dur.grid(row=13, column=1, columnspan=1, sticky="nw", pady=5)
-        self.t_dur.grid(row=13, column=2, columnspan=1, sticky="ne", pady=5)
-        self.s_dur.grid(row=13, column=3, columnspan=1, sticky="ne", pady=5)
-        self.b_dur.grid(row=13, column=4, columnspan=1, sticky="nw", pady=5)
-        self.l_ban.grid(row=14, column=1, columnspan=1, sticky="nw", pady=5)
-        self.t_ban.grid(row=14, column=2, columnspan=1, sticky="ne", pady=5)
-        self.s_ban.grid(row=14, column=3, columnspan=1, sticky="ne", pady=5)
-        self.b_ban.grid(row=14, column=4, columnspan=1, sticky="nw", pady=5)
+        # self.l_model.grid(row=3, column=1, columnspan=1, sticky="nw", pady=5)
+        # self.t_model.grid(row=3, column=2, columnspan=1, sticky="ne", pady=5)
+        # self.s_model.grid(row=3, column=3, columnspan=1, sticky="ne", pady=5)
+        # self.b_model.grid(row=3, column=4, columnspan=1, sticky="nw", pady=5)
+        self.l_modell.grid(row=3, column=1, columnspan=1, sticky="nw", pady=5)
+        self.t_modell.grid(row=3, column=2, columnspan=1, sticky="ne", pady=5)
+        self.s_modell.grid(row=3, column=3, columnspan=1, sticky="ne", pady=5)
+        self.b_modell.grid(row=3, column=4, columnspan=1, sticky="nw", pady=5)
+        self.l_date.grid(row=4, column=1, columnspan=1, sticky="nw", pady=5)
+        self.t_date.grid(row=4, column=2, columnspan=1, sticky="ne", pady=5)
+        self.s_date.grid(row=4, column=3, columnspan=1, sticky="ne", pady=5)
+        self.b_date.grid(row=4, column=4, columnspan=1, sticky="nw", pady=5)
+        self.l_serial.grid(row=5, column=1, columnspan=1, sticky="nw", pady=5)
+        self.t_serial.grid(row=5, column=2, columnspan=1, sticky="ne", pady=5)
+        self.s_serial.grid(row=5, column=3, columnspan=1, sticky="ne", pady=5)
+        self.b_serial.grid(row=5, column=4, columnspan=1, sticky="nw", pady=5)
+        self.l_power.grid(row=6, column=1, columnspan=1, sticky="nw", pady=5)
+        self.t_power.grid(row=6, column=2, columnspan=1, sticky="ne", pady=5)
+        self.s_power.grid(row=6, column=3, columnspan=1, sticky="ne", pady=5)
+        self.b_power.grid(row=6, column=4, columnspan=1, sticky="nw", pady=5)
+        self.l_wavelength.grid(row=7, column=1, columnspan=1, sticky="nw", pady=5)
+        self.t_wavelength.grid(row=7, column=2, columnspan=1, sticky="ne", pady=5)
+        self.s_wavelength.grid(row=7, column=3, columnspan=1, sticky="ne", pady=5)
+        self.b_wavelength.grid(row=7, column=4, columnspan=1, sticky="nw", pady=5)
+        self.l_high.grid(row=8, column=1, columnspan=1, sticky="nw", pady=5)
+        self.t_high.grid(row=8, column=2, columnspan=1, sticky="ne", pady=5)
+        self.s_high.grid(row=8, column=3, columnspan=1, sticky="ne", pady=5)
+        self.b_high.grid(row=8, column=4, columnspan=1, sticky="nw", pady=5)
+        self.l_low.grid(row=9, column=1, columnspan=1, sticky="nw", pady=5)
+        self.t_low.grid(row=9, column=2, columnspan=1, sticky="ne", pady=5)
+        self.s_low.grid(row=9, column=3, columnspan=1, sticky="ne", pady=5)
+        self.b_low.grid(row=9, column=4, columnspan=1, sticky="nw", pady=5)
+        self.l_dpot0.grid(row=10, column=1, columnspan=1, sticky="nw", pady=5)
+        self.t_dpot0.grid(row=10, column=2, columnspan=1, sticky="ne", pady=5)
+        self.s_dpot0.grid(row=10, column=3, columnspan=1, sticky="ne", pady=5)
+        self.b_dpot0.grid(row=10, column=4, columnspan=1, sticky="nw", pady=5)
+        self.l_dpot1.grid(row=11, column=1, columnspan=1, sticky="nw", pady=5)
+        self.t_dpot1.grid(row=11, column=2, columnspan=1, sticky="ne", pady=5)
+        self.s_dpot1.grid(row=11, column=3, columnspan=1, sticky="ne", pady=5)
+        self.b_dpot1.grid(row=11, column=4, columnspan=1, sticky="nw", pady=5)
+        # self.l_trial.grid(row=11, column=1, columnspan=1, sticky="nw", pady=5)
+        # self.t_trial.grid(row=11, column=2, columnspan=1, sticky="ne", pady=5)
+        # self.s_trial.grid(row=11, column=3, columnspan=1, sticky="ne", pady=5)
+        # self.b_trial.grid(row=11, column=4, columnspan=1, sticky="nw", pady=5)
+        # self.l_start.grid(row=12, column=1, columnspan=1, sticky="nw", pady=5)
+        # self.t_start.grid(row=12, column=2, columnspan=1, sticky="ne", pady=5)
+        # self.s_start.grid(row=12, column=3, columnspan=1, sticky="ne", pady=5)
+        # self.b_start.grid(row=12, column=4, columnspan=1, sticky="nw", pady=5)
+        # self.l_dur.grid(row=13, column=1, columnspan=1, sticky="nw", pady=5)
+        # self.t_dur.grid(row=13, column=2, columnspan=1, sticky="ne", pady=5)
+        # self.s_dur.grid(row=13, column=3, columnspan=1, sticky="ne", pady=5)
+        # self.b_dur.grid(row=13, column=4, columnspan=1, sticky="nw", pady=5)
+        # self.l_ban.grid(row=14, column=1, columnspan=1, sticky="nw", pady=5)
+        # self.t_ban.grid(row=14, column=2, columnspan=1, sticky="ne", pady=5)
+        # self.s_ban.grid(row=14, column=3, columnspan=1, sticky="ne", pady=5)
+        # self.b_ban.grid(row=14, column=4, columnspan=1, sticky="nw", pady=5)
 
         self.l_activate_title.grid(row=2, column=5, columnspan=4, sticky="nw", pady=5, padx=(10,0))
 
@@ -311,9 +333,9 @@ class GeneralPanel(tk.Frame):
         self.b_reg.grid(row=15, column=16, columnspan=1, sticky="nw", pady=5, padx=2)
 
     def reset(self, status):
-        result=comm_reset()
-        status.configure(text=result)
-        Globals.errorreset = 1
+        setvalue(control["address"], 2**control["reset_errors"], "u", "1")
+        status.configure(text="Reset complete")
+        Globals.error_disp = 0
 
     def debug(self, status, button, parent):
         print("GET STOPPED")
@@ -338,6 +360,11 @@ class GeneralPanel(tk.Frame):
         else:
             result=getvalue(target, arg1, arg2)['value']
             status.configure(text=result)
+
+    def save_regs_gen(self, stat):
+        stat.configure(text="")
+        save_regs()
+        stat.configure(text = "Saved.")
 
     def log(self, time, status, button):
         Globals.logoff = 0
@@ -460,8 +487,12 @@ class activate(tk.Frame):
         self.l_status = tk.Label(master, text=self.check(module), font=fonts['main'], bg=Background['main'])
 
         self.t_name = tk.Text(master, font=fonts['main'], width=10, height=1)
-        self.s_name = tk.Label(master, text=Names[module.lower()], font=fonts['main'], bg=Background['main'],
-                               fg=Colours['darkgrey'])
+        try:
+            self.s_name = tk.Label(master, text=Names[module.lower()], font=fonts['main'], bg=Background['main'],
+                                   fg=Colours['darkgrey'])
+        except:
+            self.s_name = tk.Label(master, text="TEST_ENV", font=fonts['main'], bg=Background['main'],
+                                   fg=Colours['darkgrey'])
         self.b_name = tk.Button(master, width=8, height=1, text="RENAME", font=fonts['submit'], bg=Background['submit'],
                                 command= self.rename)
 
@@ -490,13 +521,13 @@ class activate(tk.Frame):
             else:
                 val=getvalue(CONFIG.activate['address'])['value']
                 setvalue(CONFIG.activate['address'], val+baseval)
-                comm_init()
+                #comm_init()
                 Globals.available.append(base)
                 status.configure(text="on")
                 Globals.incident_message = base.upper() + " has been activated. \n"
                 Globals.refresh = 1
                 exec("Globals." + base.lower() + "r" + "= 1")
-                print(eval("Globals." + base.lower() + "r"))
+                #print(eval("Globals." + base.lower() + "r"))
         return "break"
 
 
@@ -511,7 +542,7 @@ class activate(tk.Frame):
             else:
                 val = getvalue(CONFIG.activate['address'])['value']
                 setvalue(CONFIG.activate['address'], val - baseval)
-                comm_init()
+                #comm_init()
                 Globals.available.remove(base)
                 status.configure(text="off")
                 Globals.incident_message = base.upper() + " has been deactivated. \n"

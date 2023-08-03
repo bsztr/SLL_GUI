@@ -13,7 +13,7 @@ os.environ['TCL_LIBRARY'] = r'C:\Users\Ben\AppData\Local\Programs\Python\Python3
 os.environ['TK_LIBRARY'] = r'C:\Users\Ben\AppData\Local\Programs\Python\Python37\tcl\tk8.6'
 
 setup(
-    name = "Skylark GUI Client",
+    name = "Skylark Client",
     description='Graphical user interface for Skylark',
     version=__version__,
     options = {"build_exe": {
@@ -24,8 +24,7 @@ setup(
 }},
 executables = [Executable("ClientGUI.py",base="Win32GUI", shortcutName="Skylark Client",
             shortcutDir="DesktopFolder", icon="skyico.ico")],
-data_files = [('C:\\Windows\\Fonts', ['font/Proxima Nova Alt Light.otf']), ('C:\\Windows\\Fonts', ['font/Proxima Nova Alt Thin.otf']), ('C:\\Windows\\Fonts', ['font/Proxima Nova Black.otf']),
-              ('C:\\Windows\\Fonts', ['font/Proxima Nova Thin.otf']), ('C:\\Windows\\Fonts', ['font/ProximaNova-Regular.otf'])]
+data_files = []
 )
 
 ##python Client_Complier.py bdist_msi

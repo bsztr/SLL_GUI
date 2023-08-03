@@ -28,14 +28,14 @@ class TECArch(tk.Frame):
         self.t_act = temp_label(self.master)
         self.t_act.readin_temp(base)
 
-        self.l_c = tk.Label(master, text="TEC Current (A)", font=fonts['main'], bg=Background['main'])
+        self.l_c = tk.Label(master, text="TEC Voltage (DAC)", font=fonts['main'], bg=Background['main'])
         self.t_c = tk.Text(master, width=6, height=1)
         #self.t_c.update_status(getaddress(base, "current"), "current", "slot")
         self.b_c = tk.Button(master, width=3, height=1, text="Plot", font=fonts['submit'],
                                   bg=Background['plot'], fg="white",
                                   command=lambda: self.plot(base, "current (A)", "current", self.t_c, "req current"))
 
-        if base != "tec3":
+        if base != "tec7":
             self.l_p = tk.Label(master, text="P Gain", font=fonts['main'], bg=Background['main'])
             self.t_p = tk.Text(master, width=6, height=1)
             self.s_p = temp_label(self.master)
@@ -57,19 +57,19 @@ class TECArch(tk.Frame):
             self.b_d = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
                                         command=lambda: submit(self, base+"_d", "d"))
 
-            self.l_maxv = tk.Label(master, text="Max voltage (V)", font=fonts['main'], bg=Background['main'])
+            self.l_maxv = tk.Label(master, text="Max voltage (DAC)", font=fonts['main'], bg=Background['main'])
             self.t_maxv = tk.Text(master, width=6, height=1)
             self.s_maxv=temp_label(self.master)
             self.s_maxv.update_status(getaddress(base+"_d", "maxv"), "maxv", "driver")
             self.b_maxv = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
                                         command=lambda: submit(self, base+"_d", "maxv"))
 
-            self.l_maxc = tk.Label(master, text="Max current (A)", font=fonts['main'], bg=Background['main'])
-            self.t_maxc = tk.Text(master, width=6, height=1)
-            self.s_maxc=temp_label(self.master)
-            self.s_maxc.update_status(getaddress(base+"_d", "maxc"), "maxc", "driver")
-            self.b_maxc = tk.Button(master, width=3, height=1, text="OK",font=fonts['submit'], bg=Background['submit'],
-                                        command=lambda: submit(self, base+"_d", "maxc"))
+            # self.l_maxc = tk.Label(master, text="Max current (A)", font=fonts['main'], bg=Background['main'])
+            # self.t_maxc = tk.Text(master, width=6, height=1)
+            # self.s_maxc=temp_label(self.master)
+            # self.s_maxc.update_status(getaddress(base+"_d", "maxc"), "maxc", "driver")
+            # self.b_maxc = tk.Button(master, width=3, height=1, text="OK",font=fonts['submit'], bg=Background['submit'],
+            #                             command=lambda: submit(self, base+"_d", "maxc"))
 
         self.l_warm = tk.Label(master, text="Warm up (s)", font=fonts['main'], bg=Background['main'])
         self.t_warm = tk.Text(master, width=6, height=1)
@@ -103,7 +103,7 @@ class TECArch(tk.Frame):
         self.b_set.grid(row=4, column=y+3, sticky="nw", pady=self.pdy)
         self.l_act.grid(row=5, column=y, sticky="nw", pady=self.pdy)
         self.t_act.grid(row=5, column=y+1, sticky="nwse", pady=self.pdy, columnspan=3)
-        if base != "tec3":
+        if base != "tec7":
             self.l_p.grid(row=6, column=y, sticky="nw", pady=self.pdy)
             self.t_p.grid(row=6, column=y+1, sticky="nw", pady=self.pdy)
             self.s_p.grid(row=6, column=y+2, sticky="nwse", pady=self.pdy, padx=self.pdx)
@@ -123,10 +123,10 @@ class TECArch(tk.Frame):
             self.t_maxv.grid(row=10, column=y+1, sticky="nw", pady=self.pdy)
             self.s_maxv.grid(row=10, column=y+2, sticky="nwse", pady=self.pdy, padx=self.pdx)
             self.b_maxv.grid(row=10, column=y+3, sticky="nw", pady=self.pdy)
-            self.l_maxc.grid(row=11, column=y, sticky="nw", pady=self.pdy)
-            self.t_maxc.grid(row=11, column=y+1, sticky="nw", pady=self.pdy)
-            self.s_maxc.grid(row=11, column=y+2, sticky="nwse", pady=self.pdy, padx=self.pdx)
-            self.b_maxc.grid(row=11, column=y+3, sticky="nw", pady=self.pdy)
+            # self.l_maxc.grid(row=11, column=y, sticky="nw", pady=self.pdy)
+            # self.t_maxc.grid(row=11, column=y+1, sticky="nw", pady=self.pdy)
+            # self.s_maxc.grid(row=11, column=y+2, sticky="nwse", pady=self.pdy, padx=self.pdx)
+            # self.b_maxc.grid(row=11, column=y+3, sticky="nw", pady=self.pdy)
         self.l_mint.grid(row=12, column=y, sticky="nw", pady=self.pdy)
         self.t_mint.grid(row=12, column=y + 1, sticky="nw", pady=self.pdy)
         self.s_mint.grid(row=12, column=y + 2, sticky="nwse", pady=self.pdy, padx=self.pdx)
@@ -262,8 +262,8 @@ class graph(tk.Toplevel):
         if self.second != "":
             self.z.append(args[2])
 
-            return print("graph is on now!!"), self.ax.plot(self.x, self.y, color='darkviolet', label=self.base.upper() + " Actual current (A)"), self.ax.plot(
-               self.x, self.z, 'b--', label="Requested current")
+            return self.ax.plot(self.x, self.y, color='darkviolet', label=self.base.upper() + " Actual current (A)")#, self.ax.plot(
+               #self.x, self.z, 'b--', label="Requested current")
 
         else:
             return self.ax.plot(self.x, self.y, color='darkviolet', label=self.base.upper() + " Actual current (A)")
@@ -288,9 +288,9 @@ class PlotMagic(object):
 
     def __call__(self, address, interval, second):
         self.x = self.x + interval / 1000
-        self.y = getvalue(address, "u", "u")['value']
+        self.y = getvalue(address, "f", "1")['value']
         if second != "":
-             self.z = getvalue(second, "i", "u")['value']
+             self.z = getvalue(second, "f", "1")['value']
              if self.z < 0:
                  self.y = -self.y
              return self.x, self.y, self.z

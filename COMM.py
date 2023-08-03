@@ -13,41 +13,42 @@ available_ports=list(comports())
 COMM_port = ""
 
 for p in available_ports:
-    if "Silicon Labs CP210x USB to UART Bridge" in p.description:
+    if "USB Serial Port" in p.description:
         COMM_port = p.device
 
 if COMM_port == "":
     raise EnvironmentError("Device not connected.")
-Globals.COMport = COMM_port
-Globals.ser = serial.Serial(
+COMport = COMM_port
+ser = serial.Serial(
     #port=COMM_port,
     port=COMM_port,
-    baudrate=57600,
+    baudrate=115200,
     parity=serial.PARITY_NONE,
     stopbits=1,
     bytesize=8,
     timeout=8
 )
 
+Globals.ser = ser
+
 def init_COMM():
     available_ports = list(comports())
     COMM_port = ""
 
     for p in available_ports:
-        if "Silicon Labs CP210x USB to UART Bridge" in p.description:
+        if "USB Serial Port" in p.description:
             COMM_port = p.device
 
     if COMM_port == "":
         raise EnvironmentError("Device not connected.")
 
     Globals.ser = serial.Serial(
-        # port=COMM_port,
         port=COMM_port,
-        baudrate=57600,
+        baudrate=115200,
         parity=serial.PARITY_NONE,
         stopbits=1,
         bytesize=8,
-        timeout=8
+        timeout=5
     )
 
 def stop_COMM():
@@ -59,9 +60,10 @@ def getvalue(address, type="u", conv="1"):
         address=address[2:]
     arg="0x"+str(address.lower())
     #print("GET$"+arg)
-    ser.write(("GET$"+arg+chr(13)).encode())
+    ser.write((chr(13)+"GET$"+arg+chr(13)).encode())
     result = dict()
-    reply = str(ser.read(29))
+    reply = str(ser.read(31))
+    #print(reply)
     hex = re.findall(r'0x[0-9A-F]+', reply, re.I)
     if "OK" in reply:
         result['success']=1
@@ -98,11 +100,12 @@ def getvalue(address, type="u", conv="1"):
     dconv ={
         'k': kelvin,
         'u': micro,
-        '1': hex2hex
+        '1': hex2hex,
+        'm': mili
         }
 
     result['value'] = dconv[conv](result['value'])
-
+    #print(result)
     return result
 
 def getbit(address, bit):
@@ -119,7 +122,8 @@ def setvalue(address, val, type="u", conv="1"):
     dconv = {
         'k': dekelvin,
         'u': demicro,
-        '1': hex2hex
+        '1': hex2hex,
+        'm': demili
         }
 
     val=dconv[conv](val)
@@ -146,31 +150,37 @@ def setvalue(address, val, type="u", conv="1"):
     ser.write(("SET$"+arg+"$"+str(val)+chr(13)).encode())
     #print("SET$"+arg+"$"+str(val)+chr(13))
     result = dict()
-    reply = str(ser.read(7))
+    reply = str(ser.read(8))
+    #print(reply)
     check=getvalue(address, type, conv)
     if check["success"]==1:
-        result['success']=1
-        result['value']=check['value']
+            result['success']=1
+            result['value']=check['value']
     else:
-        #Globals.incident_error=check["error"]
-        #Globals.error=1
-        result['value']="0"
-        result['success']=0
+            #Globals.incident_error=check["error"]
+            #Globals.error=1
+            result['value']="0"
+            result['success']=0
     return result
 
 def resvalue(address, value, arg1="u", arg2="1"):
+    #print(value, "REM")
     target=getvalue(address, arg1, arg2)['value']-value
+    #print(target)
     setvalue(address, target, arg1, arg2)
 
 def addvalue(address, value, arg1="u", arg2="1"):
+    #print(value, "ADD")
     target=getvalue(address, arg1, arg2)['value']+value
+    #print(target)
     setvalue(address, target, arg1, arg2)
 
 def comm_reset():
     ser = Globals.ser
     ser.reset_output_buffer()
     ser.write(("RST" + chr(13)).encode())
-    result=str(ser.read(800).decode())
+    # result=str(ser.read(800).decode())
+    result = "OK"
     if"OK" in result:
         return "Reset complete"
     else:
@@ -179,33 +189,39 @@ def comm_reset():
 def comm_init():
     ser = Globals.ser
     ser.reset_output_buffer()
-    ser.write(("RST" + chr(13)).encode())
-    reply = str(ser.read(800))
+    #ser.write(("RST" + chr(13)).encode())
+    #reply = str(ser.read(800))
+    reply = "OK"
     return reply
 
 def comm_start():
     ser = Globals.ser
     ser.reset_output_buffer()
-    val=8
-    address="03fa"
-    val=ctypes.c_uint32(val).value
-    val="0x%08x" %val
-    arg="0x"+str(address.lower())
-    ser.write(("SET$"+arg+"$"+val+chr(13)).encode())
-    reply = str(ser.read(800))
+    reply = "OK"
+    # val=8
+    # address="03fa"
+    # val=ctypes.c_uint32(val).value
+    # val="0x%08x" %val
+    # arg="0x"+str(address.lower())
+    # ser.write(("SET$"+arg+"$"+val+chr(13)).encode())
+    # reply = str(ser.read(800))
     return reply
-p
-#def submit(address):
 
-#def refresh(address):
+def save_regs(mode="all"):
+    if "tec" in mode:
+        print("tec selected")
+        address = ["1932"]
+    elif "pzt" in mode:
+        address = ["2932"]
+    elif "ld" in mode:
+        address = ["3932"]
 
-# query=getvalue(addres)
-# #number=int(format(query['value'], '064b'),2)
-# number=query['value']
-#print(bin(number >> 15 & 1)[2:])
-#print(query['value'])
-#print(query['success'])
-
-#print(ser.read(29))
-
-#ser.close()
+    else:
+        address = ["1932", "2932", "3932"]
+    for item in address:
+        val = "0x00000000"
+        arg = "0x" + str(item.lower())
+        ser.write(("SET$" + arg + "$" + str(val) + chr(13)).encode())
+        result = dict()
+        reply = str(ser.read(8))
+    Globals.incident_message = mode.upper() + " registers are saved."

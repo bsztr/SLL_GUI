@@ -170,6 +170,15 @@ class ClientPanel(tk.Frame):
             self.l_tec3_temp_actual.grid(row=Globals.rowtec, column=4, columnspan=1, rowspan=2, sticky="nw")
             Globals.rowtec = Globals.rowtec + 2
 
+        if "TEC4" in Globals.available:
+            if not hasattr(self, "l_tec4_temp_actual"):
+                self.l_tec4_temp_actual = temp_label(self.gui)
+                self.l_tec4_temp_actual.update_temp_main("tec4", "act")
+        if "TEC5" in Globals.available:
+            if not hasattr(self, "l_tec5_temp_actual"):
+                self.l_tec5_temp_actual = temp_label(self.gui)
+                self.l_tec5_temp_actual.update_temp_main("tec5", "act")
+
         self.c_power = tk.Canvas(self.gui, width=20, height=10)
         # self.c_power.create_oval(0,0,10,10)
         self.getindicatorcolour("power", self.c_power)
@@ -348,14 +357,14 @@ class ClientPanel(tk.Frame):
         self.gui.mainloop()
 
     def status(self):
-        available = Globals.available
-        config = ""
+        available=Globals.available
+        config =""
         for i in range(0, len(available)):
             config = "Configuration: " + ", ".join(available) + "\n"
         return config
 
     def status_bit(self):
-        Globals.status_bit = getvalue(control["address"])["value"]
+        Globals.status_bit = getvalue(status["address"])["value"]
 
     def refresh(self):
         self.gui.update_idletasks()
@@ -398,19 +407,25 @@ class ClientPanel(tk.Frame):
 
 
     def update_messages(self, canvas):
-        self.status_bit()
-        config = self.status()
-        self.text = canvas.create_text(0, 0, font=fonts['messages'], fill=Colours['darkgrey'],
-                                       text=config + message, anchor="nw")
-        canvas.move(self.text, 10, 10)
-        self.getmessage()
-        self.geterror()
-        # self.incident_error(canvas)
-        if Globals.refresh == 1:
-            canvas.delete("all")
-            self.front_panel()
-        self.refresh()
-        self.update_messages_after = canvas.after(1500, lambda: self.update_messages(canvas))
+        if Globals.disconnect != 1:
+
+            self.status_bit()
+            config = self.status()
+            canvas.delete('all')
+            self.text=canvas.create_text(0,0,font=fonts['messages'], fill=Colours['darkgrey'], text=config + message, anchor="nw")
+            canvas.move(self.text, 10, 10)
+            self.getmessage()
+            self.geterror()
+            #self.incident_error(canvas)
+            if Globals.refresh == 1:
+                canvas.delete("all")
+                self.front_panel()
+            self.refresh()
+            self.update_messages_after = canvas.after(1500, lambda: self.update_messages(canvas))
+            Globals.runnning_PROC.append(self.update_messages_after)
+            if Globals.disconnect_trigger == 1:
+                Globals.disconnect_trigger == 0
+                self.disconnect()
 
     def clear(self, canvas):
         canvas.delete('all')
@@ -425,32 +440,24 @@ class ClientPanel(tk.Frame):
         if Globals.subscription_off == 1:
             Globals.laser_off = 1
 
+
     def geterror(self):
-        if Globals.laser_off == 0:
-            error_c = getvalue(error["address"], "u", "1")["value"]
-            if Globals.incident_error != Globals.recorded_error:
-                self.message_trigger("ERROR" + Globals.incident_errorn + ": " + Globals.incident_error + "\n")
-                self.c_error.configure(bg=Colours["red"])
-                Globals.recorded_error = Globals.incident_error
-            else:
-                self.c_error.configure(bg=Colours["darkgrey"])
-            if error_c != Globals.error_count:
-                error_t=error[str(getvalue(hex(int(error["address"],16) - 1 - 2*(error_c-1)), "i", "1")["value"])]
-                if error_t != Globals.incident_error:
-                    self.c_error.configure(bg=Colours["red"])
-                    self.message_trigger("ERROR: " + error_t + "\n")
-                Globals.error_count=error_c
-            else:
-                self.c_error.configure(bg=Colours["darkgrey"])
+        if readbit(Globals.status_bit, status["ERROR"]) == "1" and Globals.error_disp != 1:
+            self.c_error.configure(bg=Colours["red"])
+            error_t = str(getvalue("0003", "u", "1")["value"])
+            self.message_trigger("ERROR: " + error_t + "\n")
+            Globals.error_disp = 1
+
 
     def getcolour(self, result):
-        if result > 60:
+        if result > 30:
             return Colours['red']
         else:
             return Colours['green']
 
     def geterrorcolour(self, canvas):
-        canvas.configure(bg=Colours["darkgrey"])
+        if Globals.disconnect != 1:
+            canvas.configure(bg=Colours["darkgrey"])
 
     def getindicatorcolour(self, id, canvas):
         self.indicator()
@@ -459,19 +466,38 @@ class ClientPanel(tk.Frame):
 
     def indicator(self):
         source = Globals.status_bit
-        list = {"ld", "pzt", "tec"}
+        item = "ld"
+        if "PZT0" in Globals.available:
+            list = {"ld", "pzt0", "tec"}
+        else:
+            list = {"ld", "pzt1", "tec"}
+        #print(source, bin(source))
         for item in list:
-            if readbit(source, eval("indicator[item]")["grey"]) == "1":
-                if readbit(source, eval("indicator[item]")["amber"]) == "1":
-                    if readbit(source, eval("indicator[item]")["green"]) == "1":
-                        exec("Globals." + item + " = Colours['green']")
-                    else:
-                        exec("Globals." + item + " = Colours['amber']")
-                else:
-                    exec("Globals." + item + " = Colours['amber']")
+            if item == "pzt0" or item == "pzt1":
+                itemo = "pzt"
             else:
-                exec("Globals." + item + " = Colours['darkgrey']")
-        if readbit(source, 3) == "1":
+                itemo = item
+            if readbit(source, eval("indicator[item]")["grey"]) == "1":
+
+                if readbit(source, eval("indicator[item]")["amber"]) == "1":
+
+                    if readbit(source, eval("indicator[item]")["green"]) == "1":
+
+                        exec("Globals." + itemo + " = Colours['green']")
+                    elif item == "pzt1" or item == "pzt0":
+                        if readbit (source, eval("indicator[item]")["blue"]) == "1":
+                            exec("Globals." + itemo + " = Colours['blue']")
+                        elif readbit (source, eval("indicator[item]")["orange"]) == "1":
+                            exec("Globals." + itemo + " = Colours['orange']")
+                        else:
+                            exec("Globals." + itemo + " = Colours['amber']")
+                    else:
+                        exec("Globals." + itemo + " = Colours['amber']")
+                else:
+                    exec("Globals." + itemo + " = Colours['darkgrey']")
+            else:
+                exec("Globals." + itemo + " = Colours['darkgrey']")
+        if readbit(source, 0)=="1":
             Globals.power = Colours["green"]
         else:
             Globals.power = Colours["darkgrey"]
@@ -515,14 +541,21 @@ class ClientPanel(tk.Frame):
                 Globals.row = Globals.row + 2
 
             elif self.l_ld_curr_actual_n == 0 or Globals.ldrr == 1:
+                # self.ldr_n = tk.StringVar()
+                # self.l_ld_curr = tk.Label(self.gui, textvariable=self.ldr_n, font=fonts['temperature'],
+                #                           bg=Background['main'])
                 self.getnametec("ldr", self.l_ld_curr, self.ldr_n)
+                # self.l_ld_curr_actual = ld_label(self.gui)
                 self.l_ld_curr_actual.update_ld_main("ld", "act")
-
+                # self.l_ld_curr.grid(row=Globals.row, column=1, columnspan=1, rowspan=2, sticky="nw")
+                # self.l_ld_curr_actual.grid(row=Globals.row, column=2, columnspan=1, rowspan=2, sticky="nw")
+                # Globals.row = Globals.row + 2
 
         elif hasattr(self, "l_ld_curr_actual"):
             self.l_ld_curr.grid_forget()
             self.l_ld_curr_actual.stop_ld_main()
             self.l_ld_curr_actual.grid_forget()
+            del (self.l_ld_curr_actual)
             Globals.row = Globals.row - 2
 
         if "PZT0" in Globals.available:
@@ -548,17 +581,36 @@ class ClientPanel(tk.Frame):
                 Globals.row = Globals.row + 2
 
             elif self.l_clp_curr_actual_n == 0 or Globals.pzt0r == 1:
+                # self.l_clp_curr = tk.Label(self.gui, text="CLP power:", font=fonts['temperature'],
+                #                            bg=Background['main'])
+                # self.l_clp_curr_actual = pzt_label(self.gui)
                 self.l_clp_curr_actual.update_clp_main(getaddress("pzt0", "clp_power"), "clp_power")
-                self.getnametec("pzt0", self.l_pzt0_stat, self.pzt0_n)
-                self.l_pzt0_stat_actual.update_status_main("pzt0")
+                # self.l_clp_curr.grid(row=Globals.row, column=1, columnspan=1, rowspan=2, sticky="nw")
+                # self.l_clp_curr_actual.grid(row=Globals.row, column=2, columnspan=1, rowspan=2, sticky="nw")
 
-        elif hasattr(self, "l_clp_curr"):
+                # Globals.row = Globals.row + 2
+
+                # self.pzt0_n = tk.StringVar()
+                # self.l_pzt0_stat = tk.Label(self.gui, textvariable=self.pzt0_n, font=fonts['temperature'],
+                #                             bg=Background['main'])
+                self.getnametec("pzt0", self.l_pzt0_stat, self.pzt0_n)
+                # self.l_pzt0_stat_actual = pzt_label(self.gui)
+                self.l_pzt0_stat_actual.update_status_main("pzt0")
+                # self.l_pzt0_stat.grid(row=Globals.row, column=1, columnspan=1, rowspan=2, sticky="nw")
+                # self.l_pzt0_stat_actual.grid(row=Globals.row, column=2, columnspan=1, rowspan=2, sticky="nw")
+
+                # Globals.row = Globals.row + 2
+
+        elif hasattr(self, "l_clp_curr") and hasattr(self, "l_pzt0_stat"):
             self.l_pzt0_stat.grid_forget()
             self.l_pzt0_stat_actual.stop_status()
             self.l_pzt0_stat_actual.grid_forget()
             self.l_clp_curr.grid_forget()
             self.l_clp_curr_actual.stop_clp()
             self.l_clp_curr_actual.grid_forget()
+            del (self.l_pzt0_stat_actual)
+            del (self.l_clp_curr_actual)
+            del (self.l_clp_curr)
             Globals.row = Globals.row - 4
 
         if "PZT1" in Globals.available:
@@ -584,17 +636,36 @@ class ClientPanel(tk.Frame):
                 Globals.row = Globals.row + 2
 
             elif self.l_clp1_curr_actual_n == 0 or Globals.pzt1r == 1:
+                # self.l_clp1_curr = tk.Label(self.gui, textvariable="CLP1 power:", font=fonts['temperature'],
+                #                            bg=Background['main'])
+                # self.l_clp1_curr_actual = pzt_label(self.gui)
                 self.l_clp1_curr_actual.update_clp_main(getaddress("pzt1", "clp_power"), "clp_power")
-                self.getnametec("pzt1", self.l_pzt1_stat, self.pzt1_n)
-                self.l_pzt1_stat_actual.update_status_main("pzt1")
+                # self.l_clp1_curr.grid(row=Globals.row, column=1, columnspan=1, rowspan=2, sticky="nw")
+                # self.l_clp1_curr_actual.grid(row=Globals.row, column=2, columnspan=1, rowspan=2, sticky="nw")
 
-        elif hasattr(self, "l_clp1_curr"):
+                # Globals.row = Globals.row + 2
+
+                # self.pzt1_n = tk.StringVar()
+                # self.l_pzt1_stat = tk.Label(self.gui, textvariable=self.pzt1_n, font=fonts['temperature'],
+                #                            bg=Background['main'])
+                self.getnametec("pzt1", self.l_pzt1_stat, self.pzt1_n)
+                # self.l_pzt1_stat_actual = pzt_label(self.gui)
+                self.l_pzt1_stat_actual.update_status_main("pzt1")
+                # self.l_pzt1_stat.grid(row=Globals.row, column=1, columnspan=1, rowspan=2, sticky="nw")
+                # self.l_pzt1_stat_actual.grid(row=Globals.row, column=2, columnspan=1, rowspan=2, sticky="nw")
+
+                # Globals.row = Globals.row + 2
+
+        elif hasattr(self, "l_clp1_curr") and hasattr(self, "l_pzt1_stat"):
             self.l_pzt1_stat.grid_forget()
             self.l_pzt1_stat_actual.stop_status()
             self.l_pzt1_stat_actual.grid_forget()
             self.l_clp1_curr.grid_forget()
             self.l_clp1_curr_actual.stop_clp()
             self.l_clp1_curr_actual.grid_forget()
+            del (self.l_pzt1_stat_actual)
+            del (self.l_clp1_curr_actual)
+            del (self.l_clp1_curr)
             Globals.row = Globals.row - 4
 
         if "TEC0" in Globals.available:
@@ -610,13 +681,21 @@ class ClientPanel(tk.Frame):
                 Globals.rowtec = Globals.rowtec + 2
 
             elif self.l_tec0_temp_actual_n == 0 or Globals.tec0r == 1:
+                # self.tec0_n = tk.StringVar()
+                # self.l_tec0_temp = tk.Label(self.gui, textvariable=self.tec0_n, font=fonts['temperature'],
+                #                            bg=Background['main'])
                 self.getnametec("tec0", self.l_tec0_temp, self.tec0_n)
+                # self.l_tec0_temp_actual = temp_label(self.gui)
                 self.l_tec0_temp_actual.update_temp_main("tec0", "act")
+                # self.l_tec0_temp.grid(row=Globals.rowtec, column=3, columnspan=1, rowspan=2, sticky="nw")
+                # self.l_tec0_temp_actual.grid(row=Globals.rowtec, column=4, columnspan=1, rowspan=2, sticky="nw")
+                # Globals.rowtec = Globals.rowtec + 2
 
         elif hasattr(self, "l_tec0_temp_actual"):
             self.l_tec0_temp.grid_forget()
             self.l_tec0_temp_actual.grid_forget()
             self.l_tec0_temp_actual.stop_temp_main()
+            del (self.l_tec0_temp_actual)
             Globals.rowtec = Globals.rowtec - 2
 
         if "TEC1" in Globals.available:
@@ -632,14 +711,21 @@ class ClientPanel(tk.Frame):
                 Globals.rowtec = Globals.rowtec + 2
 
             elif self.l_tec1_temp_actual_n == 0 or Globals.tec1r == 1:
+                # self.tec1_n = tk.StringVar()
+                # self.l_tec1_temp = tk.Label(self.gui, textvariable=self.tec1_n, font=fonts['temperature'],
+                #                            bg=Background['main'])
                 self.getnametec("tec1", self.l_tec1_temp, self.tec1_n)
+                # self.l_tec1_temp_actual = temp_label(self.gui)
                 self.l_tec1_temp_actual.update_temp_main("tec1", "act")
-
+                # self.l_tec1_temp.grid(row=Globals.rowtec, column=3, columnspan=1, rowspan=2, sticky="nw")
+                # self.l_tec1_temp_actual.grid(row=Globals.rowtec, column=4, columnspan=1, rowspan=2, sticky="nw")
+                # Globals.rowtec = Globals.rowtec + 2
 
         elif hasattr(self, "l_tec1_temp_actual"):
             self.l_tec1_temp.grid_forget()
             self.l_tec1_temp_actual.grid_forget()
             self.l_tec1_temp_actual.stop_temp_main()
+            del (self.l_tec1_temp_actual)
             Globals.rowtec = Globals.rowtec - 2
 
         if "TEC2" in Globals.available:
@@ -655,14 +741,21 @@ class ClientPanel(tk.Frame):
                 Globals.rowtec = Globals.rowtec + 2
 
             elif self.l_tec2_temp_actual_n == 0 or Globals.tec2r == 1:
+                # self.tec2_n = tk.StringVar()
+                # self.l_tec2_temp = tk.Label(self.gui, textvariable=self.tec2_n, font=fonts['temperature'],
+                #                            bg=Background['main'])
                 self.getnametec("tec2", self.l_tec2_temp, self.tec2_n)
+                # self.l_tec2_temp_actual = temp_label(self.gui)
                 self.l_tec2_temp_actual.update_temp_main("tec2", "act")
-
+                # self.l_tec2_temp.grid(row=Globals.rowtec, column=3, columnspan=1, rowspan=2, sticky="nw")
+                # self.l_tec2_temp_actual.grid(row=Globals.rowtec, column=4, columnspan=1, rowspan=2, sticky="nw")
+                # Globals.rowtec = Globals.rowtec + 2
 
         elif hasattr(self, "l_tec2_temp_actual"):
             self.l_tec2_temp.grid_forget()
             self.l_tec2_temp_actual.grid_forget()
             self.l_tec2_temp_actual.stop_temp_main()
+            del (self.l_tec2_temp_actual)
             Globals.rowtec = Globals.rowtec - 2
 
         if "TEC3" in Globals.available:
@@ -678,14 +771,31 @@ class ClientPanel(tk.Frame):
                 Globals.rowtec = Globals.rowtec + 2
 
             elif self.l_tec3_temp_actual_n == 0 or Globals.tec3r == 1:
+                # self.tec3_n = tk.StringVar()
+                # self.l_tec3_temp = tk.Label(self.gui, textvariable=self.tec3_n, font=fonts['temperature'],
+                #                            bg=Background['main'])
                 self.getnametec("tec3", self.l_tec3_temp, self.tec3_n)
+                # elf.l_tec3_temp_actual = temp_label(self.gui)
                 self.l_tec3_temp_actual.update_temp_main("tec3", "act")
+                # self.l_tec3_temp.grid(row=Globals.rowtec, column=3, columnspan=1, rowspan=2, sticky="nw")
+                # self.l_tec3_temp_actual.grid(row=Globals.rowtec, column=4, columnspan=1, rowspan=2, sticky="nw")
+                # Globals.rowtec = Globals.rowtec + 2
 
         elif hasattr(self, "l_tec3_temp_actual"):
             self.l_tec3_temp.grid_forget()
             self.l_tec3_temp_actual.grid_forget()
             self.l_tec3_temp_actual.stop_temp_main()
+            del (self.l_tec3_temp_actual)
             Globals.rowtec = Globals.rowtec - 2
+
+        if "TEC4" in Globals.available:
+            if not hasattr(self, "l_tec4_temp_actual"):
+                self.l_tec4_temp_actual = temp_label(self.gui)
+                self.l_tec4_temp_actual.update_temp_main("tec4", "act")
+        if "TEC5" in Globals.available:
+            if not hasattr(self, "l_tec5_temp_actual"):
+                self.l_tec5_temp_actual = temp_label(self.gui)
+                self.l_tec5_temp_actual.update_temp_main("tec5", "act")
 
         Globals.refresh = 0
         Globals.ldrr = 0
@@ -725,60 +835,87 @@ class ClientPanel(tk.Frame):
 
             self.tec_on()
 
-    def tec_on(self):
+    def laser_on(self):
+        if Globals.disconnect == 1:
+            self.connect()
+        if Globals.tec_stab == 1:
+            self.ld_on()
+        else:
+            self.activation()
+            self.actual = Globals.status_bit
 
+            self.message_trigger("System is powering up. \n")
+
+            # self.actual=getvalue(control["address"])['value']
+
+            if getbit(status["address"], status["STATUS_OK"]) == "1" and getbit(status["address"],
+                                                                                status["TEC_WARMING_UP"]) == "0":
+                addvalue(control['address'],
+                         2 ** control["tec0"] + 2 ** control["tec1"] + 2 ** control["tec2"] + 2 ** control[
+                             "tec3"] + 2 ** control["tec4"] + 2 ** control["tec5"])
+                self.message_trigger("TECs are turning on.\n")
+
+            self.tec_on()
+
+    def tec_on(self):
         if Globals.laser_off == 0:
             if Globals.tec_stab == 1:
                 self.ld_on()
             else:
                 self.actual = Globals.status_bit
                 self.tec_after = self.gui.after(1000, self.tec_on)
-                if readbit(self.actual, 17) == "1":
-                    self.message_trigger("TECs have stabalised. \n")
+                Globals.runnning_PROC.append(self.tec_after)
+                if readbit(self.actual, status["TEC_READY"]) == "1":
                     self.gui.after_cancel(self.tec_after)
                     Globals.tec_stab = 1
-                    self.b_ldon.configure(bg = Colours["green"], fg=Colours["white"], command=lambda: self.ld_on())
-                    #self.b_ldoff.configure(bg = Colours["red"], fg=Colours["white"], command=lambda: self.ld_off())
+                    self.b_ldon.configure(bg=Colours["green"], fg=Colours["white"], command=lambda: self.ld_on())
                     self.message_trigger("Initialisation complete, the pump can now be switched on.\n")
 
     def ld_on(self):
         if Globals.laser_off == 0 or Globals.laser_turnhigh == 1:
 
             if Globals.tec_stab == 1:
-                self.actual = getvalue(control["address"])["value"]
+                self.actual = Globals.status_bit
+                if hasattr(self, 'ld_after'):
+                    self.gui.after_cancel(self.ld_after)
                 self.ld_after = self.gui.after(1000, self.ld_on)
+                Globals.runnning_PROC.append(self.ld_after)
                 self.b_ldon.configure(text="PUMP OFF", bg=Colours["red"], fg=Colours["white"],
                                       command=lambda: self.ld_off())
-                if readbit(self.actual, 17) == "1":
-                    # self.message_trigger("TECs have stabalised. \n")
-                    if readbit(self.actual, 0) != "1":
-                        addvalue(control['address'], 1)
+                if readbit(self.actual, status["TEC_READY"]) == "1" and readbit(self.actual,
+                                                                                status["LD_WARMING_UP"]) == "0":
+                    addvalue(control['address'], 2 ** control['ld'])
+                    self.message_trigger("Pump LD is turning on. \n")
+                    self.gui.after_cancel(self.ld_after)
+                    self.pzt_on()
+                    setvalue(getaddress("ld_d", "curr"), Globals.Names['high'], "u", "u")
+                if readbit(self.actual, status["TEC_READY"]) == "1" and Globals.laser_turnhigh == 1:
                     Globals.ramp_enabled = 0
                     Globals.laser_turnhigh = 0
                     setvalue(getaddress("ld_d", "curr"), Globals.Names['high'], "u", "u")
-                    self.message_trigger("Pump LD is turning on. \n")
-                    # if readbit(self.actual, 1) != "1":
-                    #     addvalue(control["address"], control["pzt"])
-                    self.gui.after_cancel(self.ld_after)
-                    self.pzt_on()
+                    self.lock_on()
+
             else:
                 self.message_trigger("TECs not stabilised yet.")
         else:
             return "break"
 
     def ld_off(self):
-        if Globals.opmrunning == 1:
-            self.opm_off()
         if hasattr(self, 'ld_after'):
             self.gui.after_cancel(self.ld_after)
         if hasattr(self, 'pzt_after'):
             self.gui.after_cancel(self.pzt_after)
         if hasattr(self, 'lock_after'):
             self.gui.after_cancel(self.lock_after)
-        if getbit(control['address'], 0) == "1":
-            resvalue(control['address'], 1)
-        if getbit(control['address'], 1) == "1":
-            resvalue(control['address'], 2)
+        # if getbit(control['address'], 6) == "1":
+        #     resvalue(control['address'], 2**control["pzt0"])
+        # if getbit(control['address'], 7) == "1":
+        #     resvalue(control['address'], 2**control["pzt1"])
+        if getbit(control['address'], control["ld"]) == "1":
+            print("SWITCHING OFF")
+            setvalue(control["address"],
+                     2 ** control["tec0"] + 2 ** control["tec1"] + 2 ** control["tec2"] + 2 ** control["tec3"] + 2 **
+                     control["tec4"] + 2 ** control["tec5"])
             self.message_trigger("Pump LD has been swithched off.\n")
         else:
             self.message_trigger("Pump LD has already been switched off.\n")
@@ -791,37 +928,40 @@ class ClientPanel(tk.Frame):
 
         if Globals.laser_off == 0:
             self.actual = Globals.status_bit
-            if readbit(self.actual, 1) != "1":
-                addvalue(control["address"], control["pzt"])
+            if getbit(status["address"], status["LD_STABLE"]) == "1":
+                addvalue(control['address'], 2 ** control['pzt0'] + 2 ** control['pzt1'])
+                time.sleep(3)
+                # self.ramp_enabled()
             self.pzt_after = self.gui.after(1000, self.pzt_on)
-            if readbit(self.actual, 19) == "1":
+            Globals.runnning_PROC.append(self.pzt_after)
+            if getbit(status["address"], status["LD_STABLE"]) == "1":
 
-                if readbit(self.actual, 20) == "1":
-                    if Globals.opmsetting == 1:
-                        self.message_trigger("Pump LD has stabilised, adjust power if necessary. \n")
-                        self.gui.after_cancel(self.pzt_after)
-                        self.b_lock.configure(fg=Colours["solo"], command=lambda: self.opm_on())
-                    else:
-                        self.message_trigger("Pump LD has stabilised, locking will be initiated \n")
-                        if "PZT0" in Globals.available:
-                            if readbit(self.actual, 6) == "1":
-                                resvalue(control['address'], control["pzt0_m"])
-                                self.actual = self.actual - control["pzt0_m"]
-                            if readbit(self.actual, 8) == "0":
-                                addvalue(control['address'], control["pzt0_l"])
-                                self.actual = self.actual + control["pzt0_l"]
+                if getbit(status["address"], status["LD_STABLE"]) == "1":
+                    self.message_trigger("Pump LD has stabilised, locking will be initiated \n")
+                    if "PZT0" in Globals.available:
+                        control_bit = getvalue(control["address"])["value"]
+                        if readbit(control_bit, control["pzt0_lock"]) == "1":
+                            resvalue(control["address"], 2 ** control["pzt0_lock"])
+                        if readbit(control_bit, control["pzt0_ramp"]) == "1":
+                            resvalue(control["address"], 2 ** control["pzt0_ramp"])
+                        if readbit(control_bit, control["pzt0_park"]) == "1":
+                            resvalue(control["address"], 2 ** control["pzt0_park"])
+                        if readbit(control_bit, control["pzt0_tune"]) != "1":
+                            addvalue(control["address"], 2 ** control["pzt0_tune"])
 
-                        if "PZT1" in Globals.available:
-                            if readbit(self.actual, 7) == "1":
-                                resvalue(control['address'], control["pzt1_m"])
-                                self.actual = self.actual - control["pzt1_m"]
-                            if readbit(self.actual, 9) == "0":
-                                addvalue(control['address'], control["pzt1_l"])
-                                self.actual = self.actual + control["pzt1_l"]
+                    if "PZT1" in Globals.available:
+                        control_bit = getvalue(control["address"])["value"]
+                        if readbit(control_bit, control["pzt1_lock"]) == "1":
+                            resvalue(control["address"], 2 ** control["pzt1_lock"])
+                        if readbit(control_bit, control["pzt1_ramp"]) == "1":
+                            resvalue(control["address"], 2 ** control["pzt1_ramp"])
+                        if readbit(control_bit, control["pzt1_park"]) == "1":
+                            resvalue(control["address"], 2 ** control["pzt1_park"])
+                        if readbit(control_bit, control["pzt1_tune"]) != "1":
+                            addvalue(control["address"], 2 ** control["pzt1_tune"])
 
-                        self.gui.after_cancel(self.pzt_after)
-
-                        self.lock()
+                    self.gui.after_cancel(self.pzt_after)
+                    self.lock()
         else:
             return "break"
 
@@ -830,8 +970,10 @@ class ClientPanel(tk.Frame):
             timeout = time.time() + 400
             self.actual = Globals.status_bit
             self.lock_after = self.gui.after(1000, self.lock)
+            Globals.runnning_PROC.append(self.lock_after)
             self.b_lock.configure(fg=Colours["solo"], command=lambda: self.lock_on())
-            if readbit(self.actual, 21) == "1":
+            if getbit(status["address"], status["PZT_0_Locked"]) == "1" or getbit(status["address"],
+                                                                                  status["PZT_1_Locked"]) == "1":
                 self.message_trigger("The laser has been locked. \n")
                 self.gui.after_cancel(self.lock_after)
             if time.time() > timeout:
@@ -879,6 +1021,14 @@ class ClientPanel(tk.Frame):
                 self.l_tec1_temp_actual.stop_temp_main()
                 self.l_tec1_temp_actual_n = 0
                 #Globals.rowtec = Globals.rowtec - 2
+            if hasattr(self, 'l_tec4_temp_actual'):
+                self.l_tec4_temp_actual.stop_temp_main()
+                #self.l_tec4_temp_actual_n = 0
+                #Globals.rowtec=Globals.rowtec-2
+            if hasattr(self, 'l_tec5_temp_actual'):
+                self.l_tec5_temp_actual.stop_temp_main()
+                #self.l_tec5_temp_actual_n = 0
+                #Globals.rowtec=Globals.rowtec-2
             if hasattr(self, 'l_ld_curr_actual'):
                 self.l_ld_curr_actual.stop_ld_main()
                 self.l_ld_curr_actual_n = 0
@@ -921,13 +1071,9 @@ class ClientPanel(tk.Frame):
 
         Globals.laser_off = 1
         Globals.tec_stab = 0
-
-        if getbit(control['address'], 1) == "1":
-            resvalue(control['address'], 2)
-        if getbit(control['address'], 0) == "1":
-            resvalue(control['address'], 1)
-        if getbit(control['address'], 10) == "1":
-            resvalue(control['address'], 1024)
+        self.actual = getvalue(control["address"])["value"]
+        if readbit(self.actual, status["TEC_READY"]) == "1":
+            setvalue(control["address"], 0)
             self.message_trigger("The system is turning off." + "\n")
         elif Globals.subscription_off == 1:
             self.message_trigger("License expired, turning off." + "\n")
@@ -961,6 +1107,14 @@ class ClientPanel(tk.Frame):
             self.l_tec1_temp_actual.stop_temp_main()
             self.l_tec1_temp_actual_n = 0
             # Globals.rowtec = Globals.rowtec - 2
+        if hasattr(self, 'l_tec4_temp_actual'):
+            self.l_tec4_temp_actual.stop_temp_main()
+            # self.l_tec4_temp_actual_n = 0
+            # Globals.rowtec=Globals.rowtec-2
+        if hasattr(self, 'l_tec5_temp_actual'):
+            self.l_tec5_temp_actual.stop_temp_main()
+            # self.l_tec5_temp_actual_n = 0
+            # Globals.rowtec=Globals.rowtec-2
         if hasattr(self, 'l_ld_curr_actual'):
             self.l_ld_curr_actual.stop_ld_main()
             self.l_ld_curr_actual_n = 0
@@ -987,86 +1141,86 @@ class ClientPanel(tk.Frame):
         #     print("here")
         #     self.gui.after_cancel(self.status_bit_after)
 
-        setvalue(control['address'], 0)
+        # setvalue(control['address'], 0)
         self.gui.update()
         if hasattr(self, 'update_messages_after'):
             self.gui.after_cancel(self.update_messages_after)
         # ser.close()
 
     def lock_on(self):
-        # if readbit(self.bit, 18) == "1":
-        #     if readbit(self.bit, 19) == "1":
-        actual = getvalue(control['address'])['value']
-        if readbit(actual, 0) == "1":
-            if readbit(actual, 1) == "1":
-                if "PZT0" in Globals.available:
-                    if readbit(actual, 6) == "1":
-                        resvalue(control['address'], control["pzt0" + "_m"])
-                        actual=actual-control["pzt0" + "_m"]
-                    if readbit(actual, 8) == "0":
-                        addvalue(control['address'], control["pzt0" + "_l"])
-                        actual=actual + control["pzt0" + "_l"]
-                    else:
-                        setvalue(base["pzt0"][0], "0x4043b000", "1", "1")
-                        self.message_trigger("PZT0 is relocked. \n")
 
-                if "PZT1" in Globals.available:
-                    if readbit(actual, 7) == "1":
-                        resvalue(control['address'], control["pzt1" + "_m"])
-                        actual = actual - control["pzt1" + "_m"]
-                    if readbit(actual, 9) == "0":
-                        addvalue(control['address'], control["pzt1" + "_l"])
-                        actual = actual + control["pzt1" + "_l"]
-                    else:
-                        setvalue(base["pzt1"][0], "0x4043b000", "1", "1")
-                        self.message_trigger("PZT1 is relocked \n")
+        if getbit(status["address"], status["LD_STABLE"]) == "1":
+            self.message_trigger("PZT is now locking.\n")
+            if "PZT0" in Globals.available:
+                control_bit = getvalue(control["address"])["value"]
+                if readbit(control_bit, control["pzt0_lock"]) == "1":
+                    resvalue(control["address"], 2 ** control["pzt0_lock"])
+                if readbit(control_bit, control["pzt0_ramp"]) == "1":
+                    resvalue(control["address"], 2 ** control["pzt0_ramp"])
+                if readbit(control_bit, control["pzt0_park"]) == "1":
+                    resvalue(control["address"], 2 ** control["pzt0_park"])
+                if readbit(control_bit, control["pzt0_tune"]) != "1":
+                    addvalue(control["address"], 2 ** control["pzt0_tune"])
+
+            if "PZT1" in Globals.available:
+                control_bit = getvalue(control["address"])["value"]
+                if readbit(control_bit, control["pzt1_lock"]) == "1":
+                    resvalue(control["address"], 2 ** control["pzt1_lock"])
+                if readbit(control_bit, control["pzt1_ramp"]) == "1":
+                    resvalue(control["address"], 2 ** control["pzt1_ramp"])
+                if readbit(control_bit, control["pzt1_park"]) == "1":
+                    resvalue(control["address"], 2 ** control["pzt1_park"])
+                if readbit(control_bit, control["pzt1_tune"]) != "1":
+                    addvalue(control["address"], 2 ** control["pzt1_tune"])
             else:
                 self.message_trigger("PZT is not switched on.\n")
         else:
             self.message_trigger("Pump is not switched on.\n")
 
     def alignment(self):
-        if Globals.opmsetting != 1:
-            self.alignment_bit = getvalue(control["address"])["value"]
-            if readbit(self.alignment_bit, 0) == "1":
-                if hasattr(self, "ld_scale") and Globals.opmsetting == 1:
-                    self.ld_scale.configure(command="")
-                    self.ld_scale.set(Globals.Names["low"])
-                    self.ld_scale.configure(command=lambda x: self.ld_powerscale())
-                setvalue(getaddress("ld_d", "curr"), Globals.Names['low'], "u", "u")
-                self.ramp_enabled()
-                self.message_trigger("Power level set to external alignment. \n")
+        if hasattr(self, 'pzt_after'):
+            self.gui.after_cancel(self.pzt_after)
+        if hasattr(self, 'lock_after'):
+            self.gui.after_cancel(self.lock_after)
+        self.alignment_bit = getvalue(control["address"])["value"]
+        if readbit(self.alignment_bit, 0) == "1":
+            if hasattr(self, "ld_scale"):
+                self.ld_scale.configure(command="")
+                self.ld_scale.set(Globals.Names["low"])
+                self.ld_scale.configure(command=lambda x: self.ld_powerscale())
+            setvalue(getaddress("ld_d", "curr"), Globals.Names['low'], "u", "u")
+            self.ramp_enabled()
+            self.message_trigger("Power level set to external alignment. \n")
+        else:
+            self.message_trigger("Pump LD needs to stabilise first. \n")
+
+    def highp(self):
+        if hasattr(self, 'pzt_after'):
+            self.gui.after_cancel(self.pzt_after)
+        if hasattr(self, 'lock_after'):
+            self.gui.after_cancel(self.lock_after)
+        if readbit(self.actual, status["TEC_READY"]) == "1":
+            if readbit(self.actual, status["TEC_READY"]) == "1":
+                if Globals.ramp_enabled == 1:
+
+                    if hasattr(self, "ld_scale"):
+                        self.ld_scale.configure(command="")
+                        self.ld_scale.set(Globals.Names["high"])
+                        self.ld_scale.configure(command=lambda x: self.ld_powerscale())
+
+                    self.message_trigger(
+                        "Power level set to full power, make sure to comply with safety regulations. \n")
+
+                    Globals.ramp_enabled = 0
+                    Globals.laser_turnhigh = 1
+                    self.ld_on()
+
+                else:
+                    self.message_trigger("Pump LD is already set to full power \n")
             else:
                 self.message_trigger("Pump LD needs to stabilise first. \n")
         else:
-            self.message_trigger("Power adjustment available through slider. \n")
-
-
-    def highp(self):
-        if Globals.opmsetting != 1:
-            if getbit(control['address'], 10) == "1":
-                if getbit(control['address'], 0) == "1":
-                    if Globals.ramp_enabled == 1:
-
-                        if hasattr(self, "ld_scale") and Globals.opmsetting == 1:
-                            self.ld_scale.configure(command="")
-                            self.ld_scale.set(Globals.Names["high"])
-                            self.ld_scale.configure(command=lambda x: self.ld_powerscale())
-
-                        self.message_trigger(
-                            "Power level set to full power, make sure to comply with safety regulations. \n")
-                        Globals.ramp_enabled = 0
-                        Globals.laser_turnhigh = 1
-                        self.ld_on()
-
-                    else:
-                        self.message_trigger("Pump LD is already set to full power \n")
-                else:
-                    self.message_trigger("Pump LD needs to stabilise first. \n")
-            else:
-                self.message_trigger("TECs need to stabilise first. \n")
-        else:
-            self.message_trigger("Power adjustment available through slider. \n")
+            self.message_trigger("TECs need to stabilise first. \n")
 
     def ld_powerscale(self):
         if hasattr(self, "ld_scale"):
@@ -1083,30 +1237,29 @@ class ClientPanel(tk.Frame):
     def pzt_regscale(self):
         if hasattr(self, "reg_scale"):
             result = float(self.reg_scale.get())
-            #print(result)
             if result > 20:
                 result = 20
                 self.message_trigger("Regulation offset limit reached at +20. \n")
-            if result < -20:
-                result = -20
+            if result < -1:
+                result = -1
                 self.message_trigger("Regulation offset limit reached at -20. \n")
 
-            if "PZT0" in Globals.available:
-                towrite = Globals.regoffset0 + result
+        if "PZT0" in Globals.available:
+            towrite = Globals.regoffset0 + result
 
-                if towrite > 255:
-                    towrite = 255
-                elif towrite < 0:
-                    towrite = 0
-                setvalue(getaddress("pzt0_d", "dpotb_amp"), towrite, "u", "1")
-            if "PZT1" in Globals.available:
-                towrite = Globals.regoffset1 + result
+            if towrite > 255:
+                towrite = 255
+            elif towrite < 0:
+                towrite = 0
+            # setvalue(getaddress("dphd", "dpot0"), towrite, "u", "1")
+        if "PZT1" in Globals.available:
+            towrite = Globals.regoffset1 + result
 
-                if towrite > 255:
-                    towrite = 255
-                elif towrite < 0:
-                    towrite = 0
-                setvalue(getaddress("pzt1_d", "dpotb_amp"), towrite, "u", "1")
+            if towrite > 255:
+                towrite = 255
+            elif towrite < 0:
+                towrite = 0
+            # setvalue(getaddress("dphd", "dpot1"), towrite, "u", "1")
 
     def regoffset(self, x):
         if x == 1:
@@ -1132,7 +1285,7 @@ class ClientPanel(tk.Frame):
                 towrite = 255
             elif towrite < 0:
                 towrite = 0
-            setvalue(getaddress("pzt0_d", "dpotb_amp"), towrite, "u", "1")
+            setvalue(getaddress("dphd", "dpot0"), towrite, "u", "1")
         if "PZT1" in Globals.available:
             towrite = Globals.regoffset1 + result
 
@@ -1140,7 +1293,7 @@ class ClientPanel(tk.Frame):
                 towrite = 255
             elif towrite < 0:
                 towrite = 0
-            setvalue(getaddress("pzt1_d", "dpotb_amp"), towrite, "u", "1")
+            setvalue(getaddress("dphd", "dpot1"), towrite, "u", "1")
 
     def ld_regscale(self):
         if hasattr(self, "ld_scale"):
@@ -1378,44 +1531,40 @@ class ClientPanel(tk.Frame):
 
     def ramp_enabled(self):
         Globals.ramp_enabled = 1
-        actual = getvalue(control['address'])['value']
+
         if "PZT0" in Globals.available:
-            bit = [8, 6]
-
-            if readbit(actual, 1) != "1":
-                addvalue(control['address'], 2)
-
-            if readbit(actual, bit[1]) == "1":
-                resvalue(control['address'], control["pzt0_m"])
-                actual = actual - control["pzt0_m"]
-
-            if readbit(actual, bit[0]) == "1":
-                resvalue(control['address'], control["pzt0_l"])
-                actual = actual - control["pzt0_l"]
+            control_bit = getvalue(control["address"])["value"]
+            if readbit(control_bit, control["pzt0_tune"]) == "1":
+                resvalue(control["address"], 2 ** control["pzt0_tune"])
+            if readbit(control_bit, control["pzt0_park"]) == "1":
+                resvalue(control["address"], 2 ** control["pzt0_park"])
+            if readbit(control_bit, control["pzt0_lock"]) == "1":
+                resvalue(control["address"], 2 ** control["pzt0_lock"])
+            if readbit(control_bit, control["pzt0_ramp"]) != "1":
+                addvalue(control["address"], 2 ** control["pzt0_ramp"])
 
         if "PZT1" in Globals.available:
-            bit = [9, 7]
-
-            if readbit(actual, 1) != "1":
-                addvalue(control['address'], 2)
-
-            if readbit(actual, bit[1]) == "1":
-                resvalue(control['address'], control["pzt1_m"])
-                actual = actual - control["pzt1_m"]
-
-            if readbit(actual, bit[0]) == "1":
-                resvalue(control['address'], control["pzt1_l"])
-                actual = actual - control["pzt1_l"]
+            control_bit = getvalue(control["address"])["value"]
+            if readbit(control_bit, control["pzt1_tune"]) == "1":
+                resvalue(control["address"], 2 ** control["pzt1_tune"])
+            if readbit(control_bit, control["pzt1_park"]) == "1":
+                resvalue(control["address"], 2 ** control["pzt1_park"])
+            if readbit(control_bit, control["pzt1_lock"]) == "1":
+                resvalue(control["address"], 2 ** control["pzt1_lock"])
+            if readbit(control_bit, control["pzt1_ramp"]) != "1":
+                addvalue(control["address"], 2 ** control["pzt1_ramp"])
 
     def reset(self):
 
-        if getbit(control['address'], 3) != "1":
-            comm_start()
-            comm_init()
-            self.front_panel()
-        else:
-            comm_init()
-
+        # if getbit(control['address'], 3) != "1":
+        #     comm_start()
+        #     comm_init()
+        #     self.front_panel()
+        # else:
+        #     comm_init()
+        setvalue(control["address"], 2**control["reset_errors"], "u", "1")
+        time.sleep(3)
+        setvalue(control["address"], 0)
         self.message_trigger("Reset completed. \n")
         self.c_error.configure(bg=Colours["darkgrey"])
 

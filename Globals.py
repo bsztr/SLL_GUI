@@ -67,7 +67,7 @@ global errorno
 global pztreset
 
 fwver = "0"
-guiver = "2.6"
+guiver = "3.2.2"
 #Fixed analogue pzt driver bugs.
 
 
@@ -101,16 +101,21 @@ tec0_set=25
 tec1_set=25
 tec2_set=25
 tec3_set=25
+tec4_set = 25
+tec5_set = 25
 tec0_set_init=25
 tec1_set_init=25
 tec2_set_init=25
 tec3_set_init=25
-
+tec4_set_init = 25
+tec5_set_init = 25
 
 tec0 = [0,0]
 tec1 = [0,0]
 tec2 = [0,0]
 tec3 = [0,0]
+tec4 = [0,0]
+tec5 = [0,0]
 ld_d = [0,0]
 shiftlimit = 4
 shiftpopup = 0
@@ -123,10 +128,14 @@ tec0threshold = 0
 tec1threshold = 0
 tec2threshold = 0
 tec3threshold = 0
+tec4threshold = 0
+tec5threshold = 0
 tec0threshold_main = 0
 tec1threshold_main = 0
 tec2threshold_main = 0
 tec3threshold_main = 0
+tec4threshold_main = 0
+tec5threshold_main = 0
 
 power=Colours['lightgrey']
 tec=Colours['lightgrey']
@@ -155,7 +164,18 @@ rowtec=6
 
 clp_power=""
 
-Names={}
+Names={"tec0": "TEC0",
+       "tec1": "TEC1",
+       "tec2": "TEC2",
+       "tec3": "TEC3",
+       "tec4": "TEC4",
+       "tec5": "TEC5",
+       "ldr": "LD",
+       "pzt0": "PZT0",
+       "pzt1": "PZT1",
+       "pzt2": "PZT2",
+       "pzt3": "PZT3"
+       }
 
 refresh=0
 Toplevel = 0
@@ -166,6 +186,8 @@ tec0r = 0
 tec1r = 0
 tec2r = 0
 tec3r = 0
+tec4r = 0
+tec5r = 0
 pzt0r = 0
 pzt1r = 0
 ldrr = 0
@@ -176,6 +198,8 @@ tec0_statusbit = 0
 tec1_statusbit = 0
 tec2_statusbit = 0
 tec3_statusbit = 0
+tec4_statusbit = 0
+tec5_statusbit = 0
 
 tec_stab = 0
 

@@ -28,6 +28,13 @@ class LDPanel(tk.Frame):
 
         if "LDR" in Globals.available:
 
+            fwv = str(getvalue(getaddress("ld", "fw"), "u", "1")["value"])
+
+            try:
+                ld_fwv = f"ver: {fwv[0]}.{fwv[1]}.{fwv[2]}"
+            except:
+                ld_fwv = f"ver: {fwv}"
+
             self.base="ld"
             self.configure(bg=Background['main'])
             # self.l_logo = Logo(self)
@@ -57,13 +64,13 @@ class LDPanel(tk.Frame):
             self.b_cl = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
                                   command=lambda: submit(self, self.base+"_d", "cl"))
 
-            self.l_dc = tk.Label(self, text="Supply Voltage (V)*", font=fonts['main'], bg=Background['main'])
-            self.t_dc = tk.Text(self, width=6, height=1)
-            self.s_dc = ld_label(self)
-            self.s_dc.update_status(getaddress(self.base+"_d", "dc"), "dc", "driver")
-            self.b_dc = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
-                                  bg=Background['submit'],
-                                  command=lambda: submit(self, self.base+"_d", "dc"))
+            # self.l_dc = tk.Label(self, text="Supply Voltage (V)*", font=fonts['main'], bg=Background['main'])
+            # self.t_dc = tk.Text(self, width=6, height=1)
+            # self.s_dc = ld_label(self)
+            # self.s_dc.update_status(getaddress(self.base+"_d", "dc"), "dc", "driver")
+            # self.b_dc = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+            #                       bg=Background['submit'],
+            #                       command=lambda: submit(self, self.base+"_d", "dc"))
 
             self.l_ld_disclaimer = tk.Label(self, text="*Only change when there is no doubt.", font=fonts['main'],
                                             bg=Background['main'])
@@ -76,20 +83,23 @@ class LDPanel(tk.Frame):
                                   bg=Background['submit'],
                                   command=lambda: submit(self, self.base + "_d", "delay"))
 
-            self.l_Kp = tk.Label(self, text="LD PID compensation value", font=fonts['main'], bg=Background['main'])
-            self.t_Kp = tk.Text(self, width=6, height=1)
-            self.s_Kp = ld_label(self)
-            self.s_Kp.update_status(getaddress(self.base, "Kp"), "Kp", "slot")
-            self.b_Kp = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
-                                  bg=Background['submit'],
-                                  command=lambda: submit(self, self.base, "Kp"))
+            # self.l_Kp = tk.Label(self, text="LD PID compensation value", font=fonts['main'], bg=Background['main'])
+            # self.t_Kp = tk.Text(self, width=6, height=1)
+            # self.s_Kp = ld_label(self)
+            # self.s_Kp.update_status(getaddress(self.base, "Kp"), "Kp", "slot")
+            # self.b_Kp = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+            #                       bg=Background['submit'],
+            #                       command=lambda: submit(self, self.base, "Kp"))
 
             self.b_on=tk.Button(self, text="Pump on", width=13, command=lambda: self.laser_on(), bg=Colours['green'], fg="snow", font=fonts['main'])
             self.b_off=tk.Button(self, text="Pump off", width=13, command=lambda: self.laser_off(), bg=Colours['red'], fg="snow", font=fonts['main'])
+            self.b_save = tk.Button(self, text="SAVE", width=13, command=lambda: save_regs('ld'), bg=Colours['grey'],
+                                   fg="black", font=fonts['main'])
+            self.l_ldver = tk.Label(self, text=ld_fwv, font=fonts['main'], bg=Background['main'])
 
-            self.b_clpc = tk.Button(self, text="OPM settings", width=20, font=fonts['main'],
-                                        bg=Background['submit'],
-                                        command=lambda: self.openclp(master, base))
+            # self.b_clpc = tk.Button(self, text="OPM settings", width=20, font=fonts['main'],
+            #                             bg=Background['submit'],
+            #                             command=lambda: self.openclp(master, base))
 
             #LD grid
             # self.l_logo.grid(row=0, column=1, columnspan=4, rowspan=1, sticky="e", pady=5)
@@ -110,41 +120,42 @@ class LDPanel(tk.Frame):
             self.s_delay.grid(row=5, column=3, columnspan=1, sticky="nwse", pady=2)
             self.b_delay.grid(row=5, column=4, columnspan=1, sticky="nw", pady=2)
 
-            self.l_Kp.grid(row=6, column=1, columnspan=1, sticky="nw", pady=2)
-            self.t_Kp.grid(row=6, column=2, columnspan=1, sticky="nw", pady=2)
-            self.s_Kp.grid(row=6, column=3, columnspan=1, sticky="nwse", pady=2)
-            self.b_Kp.grid(row=6, column=4, columnspan=1, sticky="nw", pady=2)
+            # self.l_Kp.grid(row=6, column=1, columnspan=1, sticky="nw", pady=2)
+            # self.t_Kp.grid(row=6, column=2, columnspan=1, sticky="nw", pady=2)
+            # self.s_Kp.grid(row=6, column=3, columnspan=1, sticky="nwse", pady=2)
+            # self.b_Kp.grid(row=6, column=4, columnspan=1, sticky="nw", pady=2)
 
             self.l_cl.grid(row=7, column=1, columnspan=1, sticky="nw", pady=2)
             self.t_cl.grid(row=7, column=2, columnspan=1, sticky="nw", pady=2)
             self.s_cl.grid(row=7, column=3, columnspan=1, sticky="esnw", pady=2)
             self.b_cl.grid(row=7, column=4, columnspan=1, sticky="nw", pady=2)
 
-            self.l_dc.grid(row=8, column=1, columnspan=1, sticky="nw", pady=2)
-            self.t_dc.grid(row=8, column=2, columnspan=1, sticky="nw", pady=2)
-            self.s_dc.grid(row=8, column=3, columnspan=1, sticky="nwse", pady=2)
-            self.b_dc.grid(row=8, column=4, columnspan=1, sticky="nw", pady=2)
+            # self.l_dc.grid(row=8, column=1, columnspan=1, sticky="nw", pady=2)
+            # self.t_dc.grid(row=8, column=2, columnspan=1, sticky="nw", pady=2)
+            # self.s_dc.grid(row=8, column=3, columnspan=1, sticky="nwse", pady=2)
+            # self.b_dc.grid(row=8, column=4, columnspan=1, sticky="nw", pady=2)
 
             self.b_on.grid(row=9, column=1, columnspan=1, sticky="nw", pady=(5, 0), padx=2)
             self.b_off.grid(row=9, column=2, columnspan=1, sticky="nw", pady=(5, 0), padx=2)
+            self.b_save.grid(row=9, column=3, columnspan=2, sticky="nw", pady=(5, 0), padx=2)
+            self.l_ldver.grid(row=9, column=5, columnspan=1, sticky="nw", pady=(5, 0), padx=2)
             self.l_ld_disclaimer.grid(row=10, column=1, columnspan=4, sticky="nw", pady=2)
-            self.b_clpc.grid(row=11, column=1, columnspan=4, sticky="nw", pady=2)
+            # self.b_clpc.grid(row=11, column=1, columnspan=4, sticky="nw", pady=2)
 
     def laser_on(self):
-            self.bit=getvalue(control['address'])['value']
-            if readbit(self.bit, 3) == "1":
-                if readbit(self.bit, 17) == "1":
-                    if readbit(self.bit, 0) != "1":
-                        addvalue(control['address'], 1)
+            self.bit=getvalue(status['address'])['value']
+            if readbit(self.bit, status["TEC_READY"]) == "1" and readbit(self.bit, status["LD_OK"]) == "0":
+                        addvalue(control['address'], 2**control['ld'])
+                        time.sleep(0.5)
                         Globals.incident_message = "LD pump is switching on."
-                    else:
+            elif readbit(self.bit, status["LD_OK"]) == "1":
                         Globals.incident_message = "LD pump is switched on already."
-                else:
-                    Globals.incident_message = "TECs need to stabilise first."
+            else:
+                Globals.incident_message = "TECs need to stabilise first."
 
     def laser_off(self):
-            if getbit(control['address'], 0) == "1":
-                resvalue(control['address'], 1)
+            if getbit(status['address'], status["LD_OK"]) == "1":
+                resvalue(control['address'], 2**control['ld'])
                 Globals.incident_message = "Laser pump turned off. \n"
             else:
                 Globals.incident_message = "Laser pump turned off already. \n"

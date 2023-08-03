@@ -62,7 +62,7 @@ class temp_label(tk.Label):
     def update_temp_main(self, base, rel):
         if self.threshold == "":
             target = getaddress(base+"_d", "set")
-            self.threshold = round(getvalue(target, "u", "k")['value'], 2)
+            self.threshold = round(getvalue(target, "f", "1")['value'], 2)
 
         if eval("Globals." + base + "threshold_main" ) != 0:
             self.threshold = eval("Globals." + base + "threshold_main" )
@@ -219,36 +219,53 @@ class pzt_label(tk.Label):
         self.after_cancel(self.timer_status)
 
     def getstatus(self, bas):
-        if bas=="pzt0":
-            bit=[8,6]
-        else:
-            bit=[9,7]
         actual = Globals.status_bit
-        pzt= int(readbit(actual, 1))
-        lock=int(readbit(actual, bit[0]))
-        manual=int(readbit(actual, bit[1]))
-        if pzt==0:
-            return "Off"
-        else:
-            if lock==0:
-                if manual==0:
-                    return "Ramping"
 
-                if manual==1:
-                    return "Park"
-            if lock==1:
-                if manual==0:
-                    if readbit(actual, 21) == "1":
-                        return "Locked"
-                    else:
-                        return "Locking"
-                else:
-                    return "Error"
+        if bas == "pzt0":
+            if readbit(actual, status["STATUS_OK"]) == "1" and readbit(actual, status["PZT_0_PARK"]) == "1":
+                return "PARK"
+            elif readbit(actual, status["STATUS_OK"]) == "1" and readbit(actual, status["PZT_0_RAMP"]) == "1":
+                return "RAMP"
+            elif readbit(actual, status["STATUS_OK"]) == "1" and readbit(actual, status["PZT_0_Locking"]) == "1":
+                return "Locking"
+            elif readbit(actual, status["STATUS_OK"]) == "1" and readbit(actual, status["PZT_0_Tuning"]) == "1":
+                return "Tuning"
+            elif readbit(actual, status["STATUS_OK"]) == "1" and readbit(actual, status["PZT_0_Locked"]) == "1":
+                return "Locked"
+            elif readbit(actual, status["STATUS_OK"]) == "1":
+                return "OFF"
             else:
-                return "Error"
+                return "ERROR"
+        if bas == "pzt1":
+            if readbit(actual, status["STATUS_OK"]) == "1" and readbit(actual, status["PZT_1_PARK"]) == "1":
+                return "PARK"
+            elif readbit(actual, status["STATUS_OK"]) == "1" and readbit(actual, status["PZT_1_RAMP"]) == "1":
+                return "RAMP"
+            elif readbit(actual, status["STATUS_OK"]) == "1" and readbit(actual, status["PZT_1_Locking"]) == "1":
+                return "Locking"
+            elif readbit(actual, status["STATUS_OK"]) == "1" and readbit(actual, status["PZT_1_Tuning"]) == "1":
+                return "Tuning"
+            elif readbit(actual, status["STATUS_OK"]) == "1" and readbit(actual, status["PZT_1_Locked"]) == "1":
+                return "Locked"
+            elif readbit(actual, status["STATUS_OK"]) == "1":
+                return "OFF"
+            else:
+                return "ERROR"
 
     def getcolour(self, result):
         return Colours['green']
+
+class dpot_label(tk.Label):
+    def __init__(self, parent):
+        tk.Label.__init__(self, parent)
+        self.parent=parent
+
+
+    def update_status(self, address, rel="p", loc="slot"):
+
+        self.result = round(getvalue(address, eval("dphd")[rel][1], eval("dphd")[rel][2])['value'], 2)
+        self.configure(text=str(self.result), fg=Colours['darkgrey'], font=fonts['status'],
+                        bg=Background['main'])
 
 class pzt_label_bit(tk.Label):
     def __init__(self, parent):
@@ -335,8 +352,8 @@ class iterate(tk.Label):
         self.stop = 0
 
         if self.pzt==True:
-             self.lock = control[b[:4] + "_l"]
-             self.manual = control[b[:4] + "_m"]
+             self.lock =0# control[b[:4] + "_l"]
+             self.manual =0# control[b[:4] + "_m"]
              self.sign="(V)"
 
         self.l_status = tk.Label(master, text="", font=fonts['main'], bg=Background['main'])
@@ -460,7 +477,10 @@ class Logo(tk.Label):
         fontuse = fonts['submodel']
         if type != "NX":
             fontuse = fonts['model']
-        logo=str(Names["wavelength"])+ " " + str(type)
+        try:
+            logo=str(Names["wavelength"])+ " " + str(type)
+        except:
+            logo = str("0" + " " + str(type))
         self.configure(text=logo, fg=Colours['solo'], font=fontuse, bg=Background['main'])
         self.logo_after = self.after(1500, lambda: self.update_logo())
 

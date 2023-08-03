@@ -113,86 +113,135 @@ class LockArch(tk.Frame):
         self.l_adelay = tk.Label(master, text="Activation delay (s)", font=fonts['main'], bg=Background['main'])
         self.t_adelay = tk.Text(master, width=6, height=1)
         self.s_adelay = pzt_label(self.master)
-        self.s_adelay.update_status(getaddress(base + "_d", "adelay"), "p", "adelay")
+        self.s_adelay.update_status(getaddress(base + "_d", "adelay"), "adelay", "driver")
         self.b_adelay = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
                              command=lambda: submit(self, base+"_d", "adelay"))
 
-        self.l_difftitle=tk.Label(master, text="Diff Photodiode Settings", font=fonts['title'], bg=Background['main'])
+        self.l_difftitle=tk.Label(master, text="Lock signal inputs", font=fonts['title'], bg=Background['main'])
+        
+        self.l_display_signal = tk.Label(master, text="Display signals", font=fonts['main'], bg=Background['main'])
+        self.t_display_signal = tk.Text(master, width=6, height=1)
+        self.s_display_signal = pzt_label(self.master)
+        self.s_display_signal.update_status(getaddress(base, "display_signal"), "display_signal", "slot")
+        self.b_display_signal = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+                             command=lambda: submit(self, base, "display_signal"))
+        
+        self.l_dpot0 = tk.Label(master, text="DPOT0 Input(0 to 255)", font=fonts['main'], bg=Background['main'])
+        self.t_dpot0 = tk.Text(master, width=6, height=1)
+        self.s_dpot0 = dpot_label(self.master)
+        self.s_dpot0.update_status(getaddress("dphd", "dpot0"), "dpot0", "slot")
+        self.b_dpot0 = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+                                command=lambda: submit_r(self, "dphd", "dpot0",0,255))
 
-        self.l_dpota_cr = tk.Label(master, text="Diff A Input(0 to 255)", font=fonts['main'], bg=Background['main'])
-        self.t_dpota_cr = tk.Text(master, width=6, height=1)
-        self.s_dpota_cr = pzt_label(self.master)
-        self.s_dpota_cr.update_status(getaddress(base + "_d", "dpota_cr"), "dpota_cr", "driver")
-        self.b_dpota_cr = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
-                                command=lambda: submit_r(self, base + "_d", "dpota_cr",0,255))
+        self.l_dpot1 = tk.Label(master, text="DPOT1 Input (0 to 255)", font=fonts['main'], bg=Background['main'])
+        self.t_dpot1 = tk.Text(master, width=6, height=1)
+        self.s_dpot1 = dpot_label(self.master)
+        self.s_dpot1.update_status(getaddress("dphd", "dpot1"), "dpot1", "slot")
+        self.b_dpot1 = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+                                command=lambda: submit_r(self,"dphd", "dpot1",0,255))
 
-        self.l_dpota_amp = tk.Label(master, text="Diff A Gain(0 to 255)", font=fonts['main'], bg=Background['main'])
-        self.t_dpota_amp = tk.Text(master, width=6, height=1)
-        self.s_dpota_amp = pzt_label(self.master)
-        self.s_dpota_amp.update_status(getaddress(base + "_d", "dpota_amp"), "dpota_amp", "driver")
-        self.b_dpota_amp = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
-                                command=lambda: submit_r(self, base + "_d", "dpota_amp",0,255))
+        # self.l_dpotb_cr = tk.Label(master, text="Diff B Input(0 to 255)", font=fonts['main'], bg=Background['main'])
+        # self.t_dpotb_cr = tk.Text(master, width=6, height=1)
+        # self.s_dpotb_cr = pzt_label(self.master)
+        # self.s_dpotb_cr.update_status(getaddress(base + "_d", "dpotb_cr"), "dpotb_cr", "driver")
+        # self.b_dpotb_cr = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'],
+        #                              bg=Background['submit'],
+        #                              command=lambda: submit_r(self, base + "_d", "dpotb_cr",0,255))
+        #
+        # self.l_dpotb_amp = tk.Label(master, text="Diff B Gain(0 to 255)", font=fonts['main'], bg=Background['main'])
+        # self.t_dpotb_amp = tk.Text(master, width=6, height=1)
+        # self.s_dpotb_amp = pzt_label(self.master)
+        # self.s_dpotb_amp.update_status(getaddress(base + "_d", "dpotb_amp"), "dpotb_amp", "driver")
+        # self.b_dpotb_amp = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'],
+        #                              bg=Background['submit'],
+        #                              command=lambda: submit_r(self, base + "_d", "dpotb_amp",0,255))
 
-        self.l_dpotb_cr = tk.Label(master, text="Diff B Input(0 to 255)", font=fonts['main'], bg=Background['main'])
-        self.t_dpotb_cr = tk.Text(master, width=6, height=1)
-        self.s_dpotb_cr = pzt_label(self.master)
-        self.s_dpotb_cr.update_status(getaddress(base + "_d", "dpotb_cr"), "dpotb_cr", "driver")
-        self.b_dpotb_cr = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'],
-                                     bg=Background['submit'],
-                                     command=lambda: submit_r(self, base + "_d", "dpotb_cr",0,255))
-
-        self.l_dpotb_amp = tk.Label(master, text="Diff B Gain(0 to 255)", font=fonts['main'], bg=Background['main'])
-        self.t_dpotb_amp = tk.Text(master, width=6, height=1)
-        self.s_dpotb_amp = pzt_label(self.master)
-        self.s_dpotb_amp.update_status(getaddress(base + "_d", "dpotb_amp"), "dpotb_amp", "driver")
-        self.b_dpotb_amp = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'],
-                                     bg=Background['submit'],
-                                     command=lambda: submit_r(self, base + "_d", "dpotb_amp",0,255))
-
-        self.l_dpot_sampl = tk.Label(master, text="Sampling (ms)", font=fonts['main'], bg=Background['main'])
+        self.l_dpot_sampl = tk.Label(master, text="DPOT0 Sampling (ms)", font=fonts['main'], bg=Background['main'])
         self.t_dpot_sampl = tk.Text(master, width=6, height=1)
         self.b_dpot_sampl = tk.Button(master, width=3, height=1, text="Plot", font=fonts['submit'],
                                   bg=Background['plot'], fg="white",
-                                  command=lambda: self.plot(base, "DPhD power", "dp_power", self.t_dpot_sampl))
-
-
-        self.l_clptitle = tk.Label(master, text="CLP Photodiode Settings", font=fonts['title'], bg=Background['main'])
-
-        self.l_clp_ci = tk.Label(master, text="CLP V-I Conversion", font=fonts['main'], bg=Background['main'])
-        self.t_clp_ci = tk.Text(master, width=6, height=1)
-        self.s_clp_ci = pzt_label(self.master)
-        self.s_clp_ci.update_status(getaddress(base + "_d", "clp_ci"), "clp_ci", "driver")
-        self.b_clp_ci = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'],
-                                  bg=Background['submit'],
-                                  command=lambda: submit(self, base + "_d", "clp_ci"))
-
-        self.l_clp_cr = tk.Label(master, text="CLP Input(0 to 255)", font=fonts['main'], bg=Background['main'])
-        self.t_clp_cr = tk.Text(master, width=6, height=1)
-        self.s_clp_cr = pzt_label(self.master)
-        self.s_clp_cr.update_status(getaddress(base + "_d", "clp_cr"), "clp_cr", "driver")
-        self.b_clp_cr = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'],
-                                   bg=Background['submit'],
-                                   command=lambda: submit_r(self, base + "_d", "clp_cr",0,255))
-
-        self.l_clp_amp = tk.Label(master, text="CLP Gain(0 to 255)", font=fonts['main'], bg=Background['main'])
-        self.t_clp_amp = tk.Text(master, width=6, height=1)
-        self.s_clp_amp = pzt_label(self.master)
-        self.s_clp_amp.update_status(getaddress(base + "_d", "clp_amp"), "clp_amp", "driver")
-        self.b_clp_amp = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'],
-                                     bg=Background['submit'],
-                                     command=lambda: submit_r(self, base + "_d", "clp_amp",0,255))
-
-        self.l_clp_power = tk.Label(master, text="CLP Power (W)", font=fonts['main'], bg=Background['main'])
-        self.s_clp_power = pzt_label(self.master)
-        self.s_clp_power.update_clp(self.s_clp_power)
-
-        self.l_clptitle = tk.Label(master, text="CLP Photodiode Settings", font=fonts['title'], bg=Background['main'])
-
-        self.l_clp_sampl = tk.Label(master, text="Sampling (ms)", font=fonts['main'], bg=Background['main'])
-        self.t_clp_sampl = tk.Text(master, width=6, height=1)
-        self.b_clp_sampl = tk.Button(master, width=3, height=1, text="Plot", font=fonts['submit'],
+                                  command=lambda: self.plot(base, "DPhD power", "dpot0", self.t_dpot_sampl))
+        self.l_dpot_sampl2 = tk.Label(master, text="DPOT1 Sampling (ms)", font=fonts['main'], bg=Background['main'])
+        self.t_dpot_sampl2 = tk.Text(master, width=6, height=1)
+        self.b_dpot_sampl2 = tk.Button(master, width=3, height=1, text="Plot", font=fonts['submit'],
                                   bg=Background['plot'], fg="white",
-                                  command=lambda: self.plot(base, "CLP power", "clp_power", self.t_clp_sampl))
+                                  command=lambda: self.plot(base, "DPhD power", "dpot1", self.t_dpot_sampl2))
+
+
+        self.l_clptitle = tk.Label(master, text="CLP Photodiode Settings", font=fonts['title'], bg=Background['main'])
+
+        self.l_dpot2= tk.Label(master, text="DPOT2 Input (0 to 255)", font=fonts['main'], bg=Background['main'])
+        self.t_dpot2 = tk.Text(master, width=6, height=1)
+        self.s_dpot2 = dpot_label(self.master)
+        self.s_dpot2.update_status(getaddress("dphd", "dpot2"), "dpot2", "slot")
+        self.b_dpot2 = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+                                 command=lambda: submit_r(self, "dphd", "dpot2", 0, 255))
+
+        self.l_dpot_sampl3 = tk.Label(master, text="DPOT2 Sampling (ms)", font=fonts['main'], bg=Background['main'])
+        self.t_dpot_sampl3 = tk.Text(master, width=6, height=1)
+        self.b_dpot_sampl3 = tk.Button(master, width=3, height=1, text="Plot", font=fonts['submit'],
+                                      bg=Background['plot'], fg="white",
+                                      command=lambda: self.plot(base, "DPhD power", "dpot2", self.t_dpot_sampl3))
+        
+        self.l_clp_cal = tk.Label(master, text="CLP calibration", font=fonts['main'], bg=Background['main'])
+        self.t_clp_cal = tk.Text(master, width=6, height=1)
+        self.s_clp_cal = pzt_label(master)
+        self.s_clp_cal.update_status(getaddress(base, "clp_cal"), "clp_cal", "slot")
+        self.b_clp_cal = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'],
+                                  bg=Background['submit'],
+                                  command=lambda: submit(self,base, "clp_cal"))
+
+        self.l_minm = tk.Label(master, text="Minimum mirror voltage", font=fonts['main'], bg=Background['main'])
+        self.t_minm = tk.Text(master, width=6, height=1)
+        self.s_minm = pzt_label(master)
+        self.s_minm.update_status(getaddress(base + "_d", "minm"), "minm", "driver")
+        self.b_minm = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'],
+                                  bg=Background['submit'],
+                                  command=lambda: submit_r(self,base+"d", "minm",3.5,85))
+
+        self.l_maxm = tk.Label(master, text="Maximum mirror voltage", font=fonts['main'], bg=Background['main'])
+        self.t_maxm = tk.Text(master, width=6, height=1)
+        self.s_maxm = pzt_label(master)
+        self.s_maxm.update_status(getaddress(base + "_d", "maxm"), "maxm", "driver")
+        self.b_maxm = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'],
+                                  bg=Background['submit'],
+                                  command=lambda: submit_r(self,base+"d", "maxm",3.5,85))
+
+        # self.l_clp_ci = tk.Label(master, text="CLP V-I Conversion", font=fonts['main'], bg=Background['main'])
+        # self.t_clp_ci = tk.Text(master, width=6, height=1)
+        # self.s_clp_ci = pzt_label(self.master)
+        # self.s_clp_ci.update_status(getaddress(base + "_d", "clp_ci"), "clp_ci", "driver")
+        # self.b_clp_ci = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'],
+        #                           bg=Background['submit'],
+        #                           command=lambda: submit(self, base + "_d", "clp_ci"))
+        #
+        # self.l_clp_cr = tk.Label(master, text="CLP Input(0 to 255)", font=fonts['main'], bg=Background['main'])
+        # self.t_clp_cr = tk.Text(master, width=6, height=1)
+        # self.s_clp_cr = pzt_label(self.master)
+        # self.s_clp_cr.update_status(getaddress(base + "_d", "clp_cr"), "clp_cr", "driver")
+        # self.b_clp_cr = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'],
+        #                            bg=Background['submit'],
+        #                            command=lambda: submit_r(self, base + "_d", "clp_cr",0,255))
+        #
+        # self.l_clp_amp = tk.Label(master, text="CLP Gain(0 to 255)", font=fonts['main'], bg=Background['main'])
+        # self.t_clp_amp = tk.Text(master, width=6, height=1)
+        # self.s_clp_amp = pzt_label(self.master)
+        # self.s_clp_amp.update_status(getaddress(base + "_d", "clp_amp"), "clp_amp", "driver")
+        # self.b_clp_amp = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'],
+        #                              bg=Background['submit'],
+        #                              command=lambda: submit_r(self, base + "_d", "clp_amp",0,255))
+        #
+        # self.l_clp_power = tk.Label(master, text="CLP Power (W)", font=fonts['main'], bg=Background['main'])
+        # self.s_clp_power = pzt_label(self.master)
+        # self.s_clp_power.update_clp(self.s_clp_power)
+        #
+        # self.l_clptitle = tk.Label(master, text="CLP Photodiode Settings", font=fonts['title'], bg=Background['main'])
+        #
+        # self.l_clp_sampl = tk.Label(master, text="Sampling (ms)", font=fonts['main'], bg=Background['main'])
+        # self.t_clp_sampl = tk.Text(master, width=6, height=1)
+        # self.b_clp_sampl = tk.Button(master, width=3, height=1, text="Plot", font=fonts['submit'],
+        #                           bg=Background['plot'], fg="white",
+        #                           command=lambda: self.plot(base, "CLP power", "clp_power", self.t_clp_sampl))
 
 
         #Secondary display
@@ -201,7 +250,7 @@ class LockArch(tk.Frame):
 
         # self.s_parkp = pzt_label(self.master)
         # self.s_parkp.update_status(getaddress(base + "_d", "park"), "park", "driver")
-        self.b_park = tk.Button(master, text="PARK", bg=Colours['orange'], fg="white", width=9, font=fonts['status'],
+        self.b_park = tk.Button(master, text="PARK", bg=Colours['amber'], fg="black", width=9, font=fonts['status'],
                                 command=lambda: self.park(base, self.t_parkp))
 
         self.l_park = tk.Label(master, text="Set voltage (V)", font=fonts['main'], bg=Background['main'])
@@ -217,44 +266,91 @@ class LockArch(tk.Frame):
         self.s_rate.update_status(getaddress(base + "_d", "rate"), "rate", "driver")
         self.b_rate = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
                              command=lambda: submit(self, base+"_d", "rate"))
+        
+        self.l_tune_enable = tk.Label(master, text="Tuning enable", font=fonts['main'], bg=Background['main'])
+        self.t_tune_enable = tk.Text(master, width=12, height=1, font=fonts['status'])
+        self.s_tune_enable = pzt_label(self.master)
+        self.s_tune_enable.update_status(getaddress(base, "tune_enable"), "tune_enable", "slot")
+        self.b_tune_enable = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+                             command=lambda: submit(self, base, "tune_enable"))
+        
+        self.l_tune_module = tk.Label(master, text="Ref TEC select", font=fonts['main'], bg=Background['main'])
+        self.t_tune_module = tk.Text(master, width=12, height=1, font=fonts['status'])
+        self.s_tune_module = pzt_label(self.master)
+        self.s_tune_module.update_status(getaddress(base, "tune_module"), "tune_module", "slot")
+        self.b_tune_module = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+                             command=lambda: submit(self, base, "tune_module"))
 
+        try:
+            self.l_tune_threshold = tk.Label(master, text="Tune threshold", font=fonts['main'], bg=Background['main'])
+            self.t_tune_threshold = tk.Text(master, width=12, height=1, font=fonts['status'])
+            self.s_tune_threshold = pzt_label(self.master)
+            self.s_tune_threshold.update_status(getaddress(base, "tune_threshold"), "tune_threshold", "slot")
+            self.b_tune_threshold = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+                                 command=lambda: submit(self, base, "tune_threshold"))
 
+            self.l_tune_normal_step = tk.Label(master, text="Normal step", font=fonts['main'], bg=Background['main'])
+            self.t_tune_normal_step = tk.Text(master, width=12, height=1, font=fonts['status'])
+            self.s_tune_normal_step = pzt_label(self.master)
+            self.s_tune_normal_step.update_status(getaddress(base, "tune_normal_step"), "tune_normal_step", "slot")
+            self.b_tune_normal_step = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+                                 command=lambda: submit(self, base, "tune_normal_step"))
+
+            self.l_tune_large_step = tk.Label(master, text="Large step", font=fonts['main'], bg=Background['main'])
+            self.t_tune_large_step = tk.Text(master, width=12, height=1, font=fonts['status'])
+            self.s_tune_large_step = pzt_label(self.master)
+            self.s_tune_large_step.update_status(getaddress(base, "tune_large_step"), "tune_large_step", "slot")
+            self.b_tune_large_step = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+                                 command=lambda: submit(self, base, "tune_large_step"))
+
+            self.l_tune_delay = tk.Label(master, text="Tune delay", font=fonts['main'], bg=Background['main'])
+            self.t_tune_delay = tk.Text(master, width=12, height=1, font=fonts['status'])
+            self.s_tune_delay = pzt_label(self.master)
+            self.s_tune_delay.update_status(getaddress(base, "tune_delay"), "tune_delay", "slot")
+            self.b_tune_delay = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+                                 command=lambda: submit(self, base, "tune_delay"))
+        except:
+            print("FW update needed.")
         self.l_control = tk.Label(master, text= base.upper() + " Control", font=fonts['title'], bg=Background['main'])
-        self.b_lock= tk.Button(master, text="Lock/Relock", width=15, bg=Colours['grey'], font=fonts['main'], command= lambda: self.lock(base))
+        self.b_lock= tk.Button(master, text="Lock", width=15, bg=Colours['grey'], font=fonts['main'], command= lambda: self.lock(base))
         self.b_scan=tk.Button(master, text="Ramp",bg=Colours['lightgrey'], fg="black", width=15, font=fonts['main'], command= lambda: self.ramp(base))
-        #self.b_park=tk.Button(master, text="Park",bg=Colours['orange'], fg="white", width=9, font=fonts['main'], command= lambda: self.park(base))
+        self.b_tune=tk.Button(master, text="Tune",bg=Colours['orange'], fg="white", width=9, font=fonts['main'], command= lambda: self.tune(base))
 
         self.status=tk.Label(master, text="Status:     ", font=fonts['title'], bg=Background['main'])
         self.formatstatus(self.status, base)
 
-        self.l_lockm = tk.Label(master, text="Lock mechanism", font=fonts['main'], bg=Background['main'])
-        self.lock_option=tk.StringVar(master)
-        self.t_lockm=tk.OptionMenu(master, self.lock_option, *lock_mech)
-        self.t_lockm.config(font=fonts['main'], bg=Background['main'], height=1, width=9)
-        self.s_lockm = lockm_label(self.master)
-        self.s_lockm.read_lockm(base+"_d", self.lock_option)
-        self.b_lockm = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
-                                command= self.write_lockm)
+        # self.l_lockm = tk.Label(master, text="Lock mechanism", font=fonts['main'], bg=Background['main'])
+        # self.lock_option=tk.StringVar(master)
+        # self.t_lockm=tk.OptionMenu(master, self.lock_option, *lock_mech)
+        # self.t_lockm.config(font=fonts['main'], bg=Background['main'], height=1, width=9)
+        # self.s_lockm = lockm_label(self.master)
+        # self.s_lockm.read_lockm(base+"_d", self.lock_option)
+        # self.b_lockm = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+        #                         command= self.write_lockm)
+        #
+        # self.l_phase = tk.Label(master, text="Phase reverse(1 or 0)", font=fonts['main'], bg=Background['main'])
+        # self.t_phase = tk.Text(master, width=12, height=1, font=fonts['status'])
+        # self.s_phase = pzt_label_bit(self.master)
+        # self.s_phase.update_status(base + "_d",5,"lockm")
+        # self.b_phase = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+        #                      command=lambda: self.phaserev(self.t_phase, self.s_phase, base))
 
-        self.l_phase = tk.Label(master, text="Phase reverse(1 or 0)", font=fonts['main'], bg=Background['main'])
-        self.t_phase = tk.Text(master, width=12, height=1, font=fonts['status'])
-        self.s_phase = pzt_label_bit(self.master)
-        self.s_phase.update_status(base + "_d",5,"lockm")
-        self.b_phase = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
-                             command=lambda: self.phaserev(self.t_phase, self.s_phase, base))
+        # self.b_advanced = tk.Button(master, text="Advanced settings", width=20, font=fonts['main'], bg=Background['submit'],
+        #                           command=lambda: self.message_trigger("Function disabled."))
 
-        self.b_advanced = tk.Button(master, text="Advanced settings", width=20, font=fonts['main'], bg=Background['submit'],
-                                  command=lambda: self.openadvance(master, base))
-
-        self.pzt_ramp = iterate(master, "Scan voltage", base, "ov", 13, y+5, True)
+        self.pzt_ramp = iterate(master, "Scan voltage", base, "ov", 16, y+5, True)
 
         self.l_errorl = tk.Label(master, text="Error signal acquisition", font=fonts['title'], bg=Background['main'])
         self.l_errord = tk.Label(master, text="Ensure system is locked!", font=fonts['main'], bg=Background['main'])
         self.l_errorc = tk.Label(master, text="This operation will take at least one hour to complete.", font=fonts['main'], bg=Background['main'])
         self.b_errorb = tk.Button(master, text="ACQUIRE", bg=Background['main'], width=9, font=fonts['status'],
                                 command=lambda: self.signalac(base))
-        self.minv = round(getvalue(getaddress(base+"_d", "min"), "u", "u")["value"],1)
-        self.maxv = round(getvalue(getaddress(base + "_d", "max"), "u", "u")["value"],1)
+        try:
+            self.minv = round(getvalue(getaddress(base+"_d", "minm"), "u", "m")["value"],1)
+            self.maxv = round(getvalue(getaddress(base + "_d", "maxm"), "u", "m")["value"],1)
+        except:
+            self.minv = "TEST_ENV"
+            self.maxv = "TEST_ENV"
         self.error_min = tk.Label(master, text="Min: " + str(self.minv) + " V", font=fonts['main'], bg=Background['main'])
         self.error_max = tk.Label(master, text="Max: " + str(self.maxv) + " V", font=fonts['main'], bg=Background['main'])
 
@@ -293,44 +389,46 @@ class LockArch(tk.Frame):
         self.b_adelay.grid(row=12, column=y + 3, columnspan=1, sticky="nw", pady=self.pady)
 
         self.l_difftitle.grid(row=13, column=y, columnspan=4, sticky="nw", pady=self.pady)
-        self.l_dpota_cr.grid(row=14, column=y, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_dpota_cr.grid(row=14, column=y+1, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_dpota_cr.grid(row=14, column=y+2, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_dpota_cr.grid(row=14, column=y + 3, columnspan=1, sticky="nw", pady=self.pady)
-        self.l_dpota_amp.grid(row=15, column=y, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_dpota_amp.grid(row=15, column=y+1, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_dpota_amp.grid(row=15, column=y+2, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_dpota_amp.grid(row=15, column=y + 3, columnspan=1, sticky="nw", pady=self.pady)
-        self.l_dpotb_cr.grid(row=16, column=y, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_dpotb_cr.grid(row=16, column=y+1, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_dpotb_cr.grid(row=16, column=y+2, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_dpotb_cr.grid(row=16, column=y + 3, columnspan=1, sticky="nw", pady=self.pady)
-        self.l_dpotb_amp.grid(row=17, column=y, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_dpotb_amp.grid(row=17, column=y+1, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_dpotb_amp.grid(row=17, column=y+2, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_dpotb_amp.grid(row=17, column=y + 3, columnspan=1, sticky="nw", pady=self.pady)
-        self.l_dpot_sampl.grid(row=18, column=y, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_dpot_sampl.grid(row=18, column=y+1, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_dpot_sampl.grid(row=18, column=y+3, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_display_signal.grid(row=14, column=y, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_display_signal.grid(row=14, column=y+1, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_display_signal.grid(row=14, column=y+2, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_display_signal.grid(row=14, column=y + 3, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_dpot0.grid(row=15, column=y, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_dpot0.grid(row=15, column=y+1, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_dpot0.grid(row=15, column=y+2, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_dpot0.grid(row=15, column=y + 3, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_dpot1.grid(row=16, column=y, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_dpot1.grid(row=16, column=y+1, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_dpot1.grid(row=16, column=y+2, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_dpot1.grid(row=16, column=y + 3, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_dpot_sampl.grid(row=17, column=y, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_dpot_sampl.grid(row=17, column=y+1, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_dpot_sampl.grid(row=17, column=y+3, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_dpot_sampl2.grid(row=18, column=y, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_dpot_sampl2.grid(row=18, column=y+1, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_dpot_sampl2.grid(row=18, column=y+3, columnspan=1, sticky="nw", pady=self.pady)
 
         self.l_clptitle.grid(row=19, column=y, columnspan=4, sticky="nw", pady=self.pady)
-        self.l_clp_ci.grid(row=20, column=y, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_clp_ci.grid(row=20, column=y+1, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_clp_ci.grid(row=20, column=y+2, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_clp_ci.grid(row=20, column=y+3, columnspan=1, sticky="nw", pady=self.pady)
-        self.l_clp_cr.grid(row=21, column=y, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_clp_cr.grid(row=21, column=y+1, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_clp_cr.grid(row=21, column=y+2, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_clp_cr.grid(row=21, column=y+3, columnspan=1, sticky="nw", pady=self.pady)
-        self.l_clp_amp.grid(row=22, column=y, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_clp_amp.grid(row=22, column=y+1, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_clp_amp.grid(row=22, column=y+2, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_clp_amp.grid(row=22, column=y+3, columnspan=1, sticky="nw", pady=self.pady)
-        self.l_clp_power.grid(row=23, column=y, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_clp_power.grid(row=23, column=y+1, columnspan=3, sticky="nwes", pady=self.pady)
-        self.l_clp_sampl.grid(row=24, column=y, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_clp_sampl.grid(row=24, column=y+1, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_clp_sampl.grid(row=24, column=y+3, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_dpot2.grid(row=20, column=y, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_dpot2.grid(row=20, column=y+1, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_dpot2.grid(row=20, column=y+2, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_dpot2.grid(row=20, column=y + 3, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_dpot_sampl3.grid(row=21, column=y, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_dpot_sampl3.grid(row=21, column=y+1, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_dpot_sampl3.grid(row=21, column=y+3, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_clp_cal.grid(row=22, column=y, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_clp_cal.grid(row=22, column=y + 1, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_clp_cal.grid(row=22, column=y + 2, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_clp_cal.grid(row=22, column=y + 3, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_minm.grid(row=23, column=y, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_minm.grid(row=23, column=y+1, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_minm.grid(row=23, column=y+2, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_minm.grid(row=23, column=y+3, columnspan=1, sticky="nw", pady=self.pady)
+
+        self.l_maxm.grid(row=24, column=y, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_maxm.grid(row=24, column=y+1, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_maxm.grid(row=24, column=y+2, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_maxm.grid(row=24, column=y+3, columnspan=1, sticky="nw", pady=self.pady)
 
 
         self.getvs(master).grid(row=1, column=y+4, rowspan=22, sticky="ns", padx=10)
@@ -339,6 +437,7 @@ class LockArch(tk.Frame):
         self.status.grid(row=2, column=y + 7, columnspan=1, sticky="nw", pady=self.pady)
         self.b_lock.grid(row=3, column=y+5, columnspan=1, sticky="nw", pady=self.pady, padx=2)
         self.b_scan.grid(row=3, column=y+6, columnspan=1, sticky="nw", pady=self.pady, padx=2)
+        self.b_tune.grid(row=3, column=y + 7, columnspan=1, sticky="nw", pady=self.pady, padx=2)
         self.b_park.grid(row=5, column=y+7, columnspan=2, sticky="nw", pady=3*self.pady, padx=2)
         self.l_parkp.grid(row=5, column=y+5, columnspan=1, sticky="nw", pady=4*self.pady)
         self.t_parkp.grid(row=5, column=y+6, columnspan=1, sticky="nw", pady=4*self.pady)
@@ -350,24 +449,42 @@ class LockArch(tk.Frame):
         self.t_rate.grid(row=9, column=y+6, columnspan=1, sticky="nw", pady=self.pady)
         self.s_rate.grid(row=9, column=y+7, columnspan=1, sticky="nwse", pady=self.pady)
         self.b_rate.grid(row=9, column=y+8, columnspan=1, sticky="nw", pady=self.pady)
-
-        self.l_lockm.grid(row=10, column=y + 5, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_lockm.grid(row=10, column=y + 6, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_lockm.grid(row=10, column=y + 7, columnspan=1, sticky="nwse", pady=self.pady)
-        self.b_lockm.grid(row=10, column=y + 8, columnspan=1, sticky="nw", pady=self.pady)
-        self.l_phase.grid(row=11, column=y + 5, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_phase.grid(row=11, column=y + 6, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_phase.grid(row=11, column=y + 7, columnspan=1, sticky="nwse", pady=self.pady)
-        self.b_phase.grid(row=11, column=y + 8, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_advanced.grid(row=12, column=y + 5, columnspan=2, sticky="nw", pady=self.pady)
+        self.l_tune_enable.grid(row=10, column=y+5, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_tune_enable.grid(row=10, column=y+6, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_tune_enable.grid(row=10, column=y+7, columnspan=1, sticky="nwse", pady=self.pady)
+        self.b_tune_enable.grid(row=10, column=y+8, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_tune_module.grid(row=11, column=y+5, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_tune_module.grid(row=11, column=y+6, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_tune_module.grid(row=11, column=y+7, columnspan=1, sticky="nwse", pady=self.pady)
+        self.b_tune_module.grid(row=11, column=y+8, columnspan=1, sticky="nw", pady=self.pady)
+        try:
+            self.l_tune_threshold.grid(row=12, column=y+5, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_tune_threshold.grid(row=12, column=y+6, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_tune_threshold.grid(row=12, column=y+7, columnspan=1, sticky="nwse", pady=self.pady)
+            self.b_tune_threshold.grid(row=12, column=y+8, columnspan=1, sticky="nw", pady=self.pady)
+            self.l_tune_normal_step.grid(row=13, column=y+5, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_tune_normal_step.grid(row=13, column=y+6, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_tune_normal_step.grid(row=13, column=y+7, columnspan=1, sticky="nwse", pady=self.pady)
+            self.b_tune_normal_step.grid(row=13, column=y+8, columnspan=1, sticky="nw", pady=self.pady)
+            self.l_tune_large_step.grid(row=14, column=y+5, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_tune_large_step.grid(row=14, column=y+6, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_tune_large_step.grid(row=14, column=y+7, columnspan=1, sticky="nwse", pady=self.pady)
+            self.b_tune_large_step.grid(row=14, column=y+8, columnspan=1, sticky="nw", pady=self.pady)
+            self.l_tune_delay.grid(row=15, column=y+5, columnspan=1, sticky="nw", pady=self.pady)
+            self.t_tune_delay.grid(row=15, column=y+6, columnspan=1, sticky="nw", pady=self.pady)
+            self.s_tune_delay.grid(row=15, column=y+7, columnspan=1, sticky="nwse", pady=self.pady)
+            self.b_tune_delay.grid(row=15, column=y+8, columnspan=1, sticky="nw", pady=self.pady)
+        except:
+            print("FW update needed.")
+        #self.b_advanced.grid(row=12, column=y + 5, columnspan=2, sticky="nw", pady=self.pady)
 
         self.getvs(master).grid(row=1, column=y + 9, rowspan=22, sticky="ns", padx=10)
 
-        self.l_errorl.grid(row=19, column=y+5, columnspan=3, sticky="nw", pady=self.pady)
-        self.l_errord.grid(row=20, column=y+5, columnspan=4, sticky="nw", pady=self.pady, padx=2)
-        self.b_errorb.grid(row=21, column=y + 5, columnspan=1, sticky="nw", pady=self.pady, padx=2)
-        self.error_max.grid(row=21, column=y + 6, columnspan=1, sticky="nw", pady=self.pady, padx=2)
-        self.error_min.grid(row=21, column=y + 7, columnspan=2, sticky="nw", pady=self.pady, padx=2)
+        self.l_errorl.grid(row=21, column=y+5, columnspan=3, sticky="nw", pady=self.pady)
+        self.l_errord.grid(row=22, column=y+5, columnspan=4, sticky="nw", pady=self.pady, padx=2)
+        self.b_errorb.grid(row=23, column=y + 5, columnspan=1, sticky="nw", pady=self.pady, padx=2)
+        self.error_max.grid(row=23, column=y + 6, columnspan=1, sticky="nw", pady=self.pady, padx=2)
+        self.error_min.grid(row=23, column=y + 7, columnspan=2, sticky="nw", pady=self.pady, padx=2)
 
     def geths(self, parent):
             hs = ttk.Separator(parent, orient=tk.HORIZONTAL)
@@ -377,6 +494,9 @@ class LockArch(tk.Frame):
             vs = ttk.Separator(parent, orient=tk.VERTICAL)
             return vs
 
+    def message_trigger(self, message):
+        Globals.incident_message = message
+
     def get_lockm(self,b):
         address=getaddress(b,"lockm")
         arg1=eval(base[b][1])["lockm"][1]
@@ -384,92 +504,160 @@ class LockArch(tk.Frame):
         self.lock=int(getvalue(address, arg1, arg2)['value'])
 
     def ramp(self, bas):
-        actual = getvalue(control['address'])['value']
-        if bas=="pzt0":
-            bit=[8,6]
-        else:
-            bit=[9,7]
-        if readbit(actual, 1) != "1":
-            addvalue(control['address'], 2)
+        if "pzt0" in bas:
+            control_bit = getvalue(control["address"])["value"]
+            if readbit(control_bit, control["pzt0_tune"]) == "1":
+                resvalue(control["address"], 2**control["pzt0_tune"])
+            if readbit(control_bit, control["pzt0_park"]) == "1":
+                resvalue(control["address"], 2**control["pzt0_park"])
+            if readbit(control_bit, control["pzt0_lock"]) == "1":
+                resvalue(control["address"], 2**control["pzt0_lock"])
+            if readbit(control_bit, control["pzt0_ramp"]) != "1":
+                addvalue(control["address"], 2 ** control["pzt0_ramp"])
+                Globals.incident_message = bas.upper() + " is ramping."
+            else:
+                Globals.incident_message = bas.upper() + " is already ramping."
+        if "pzt1" in bas:
+            control_bit = getvalue(control["address"])["value"]
+            if readbit(control_bit, control["pzt1_tune"]) == "1":
+                resvalue(control["address"], 2**control["pzt1_tune"])
+            if readbit(control_bit, control["pzt1_park"]) == "1":
+                resvalue(control["address"], 2**control["pzt1_park"])
+            if readbit(control_bit, control["pzt1_lock"]) == "1":
+                resvalue(control["address"], 2**control["pzt1_lock"])
+            if readbit(control_bit, control["pzt1_ramp"]) != "1":
+                addvalue(control["address"], 2 ** control["pzt1_ramp"])
+                Globals.incident_message = bas.upper() + " is ramping."
+            else:
+                Globals.incident_message = bas.upper() + " is already ramping."
 
-        if readbit(actual, bit[1]) == "1":
-            resvalue(control['address'], control[bas + "_m"])
-            actual=actual-control[bas + "_m"]
-
-        if readbit(actual, bit[0]) == "1":
-            resvalue(control['address'], control[bas + "_l"])
-            actual=actual-control[bas + "_l"]
-
-        Globals.incident_message=bas.upper() + " is now ramping."
 
     def park(self, bas, text):
+        if "pzt0" in bas:
+            control_bit = getvalue(control["address"])["value"]
+            if readbit(control_bit, control["pzt0_tune"]) == "1":
+                resvalue(control["address"], 2**control["pzt0_tune"])
+            if readbit(control_bit, control["pzt0_ramp"]) == "1":
+                resvalue(control["address"], 2**control["pzt0_ramp"])
+            if readbit(control_bit, control["pzt0_lock"]) == "1":
+                resvalue(control["address"], 2**control["pzt0_lock"])
+            if readbit(control_bit, control["pzt0_park"]) != "1":
+                addvalue(control["address"], 2 ** control["pzt0_park"])
+                Globals.incident_message = bas.upper() + " is parked."
+            else:
+                Globals.incident_message = bas.upper() + " is already parked."
+            instance = float(text.get("1.0", 'end-1c'))
+            setvalue(getaddress(bas, "ov"), instance,"u" ,"m")
+        if "pzt1" in bas:
+            control_bit = getvalue(control["address"])["value"]
+            if readbit(control_bit, control["pzt1_tune"]) == "1":
+                resvalue(control["address"], 2**control["pzt1_tune"])
+            if readbit(control_bit, control["pzt1_ramp"]) == "1":
+                resvalue(control["address"], 2**control["pzt1_ramp"])
+            if readbit(control_bit, control["pzt1_lock"]) == "1":
+                resvalue(control["address"], 2**control["pzt1_lock"])
+            if readbit(control_bit, control["pzt1_park"]) != "1":
+                addvalue(control["address"], 2 ** control["pzt1_park"])
+                Globals.incident_message = bas.upper() + " is parked."
+            else:
+                Globals.incident_message = bas.upper() + " is already parked."
+            instance = float(text.get("1.0", 'end-1c'))
+            setvalue(getaddress(bas, "ov"), instance,"u" ,"m")
 
-        actual = getvalue(control['address'])['value']
-        if bas=="pzt0":
-            bit=[8,6]
-        else:
-            bit=[9,7]
-        if readbit(actual, 1) != "1":
-            addvalue(control['address'], 2)
-        if readbit(actual, bit[1]) == "0":
-            setvalue(control['address'], actual+control[bas + "_m"])
-            actual=actual+control[bas + "_m"]
-        if readbit(actual, bit[0]) == "1":
-            resvalue(control['address'], control[bas + "_l"])
-            actual=actual-control[bas + "_l"]
 
-        instance = float(text.get("1.0", 'end-1c'))
-        setvalue(getaddress(bas, "ov"), instance,"u" ,"u")
 
-        Globals.incident_message = bas.upper() + " is now parked."
+
+    def tune(self, bas):
+
+        if "pzt0" in bas:
+            control_bit = getvalue(control["address"])["value"]
+            if readbit(control_bit, control["pzt0_lock"]) == "1":
+                resvalue(control["address"], 2 ** control["pzt0_lock"])
+            if readbit(control_bit, control["pzt0_ramp"]) == "1":
+                resvalue(control["address"], 2 ** control["pzt0_ramp"])
+            if readbit(control_bit, control["pzt0_park"]) == "1":
+                resvalue(control["address"], 2 ** control["pzt0_park"])
+            if readbit(control_bit, control["pzt0_tune"]) != "1":
+                addvalue(control["address"], 2 ** control["pzt0_tune"])
+                Globals.incident_message = bas.upper() + " is tuning."
+            else:
+                Globals.incident_message = bas.upper() + " is already tuning."
+        if "pzt1" in bas:
+            control_bit = getvalue(control["address"])["value"]
+            if readbit(control_bit, control["pzt1_lock"]) == "1":
+                resvalue(control["address"], 2 ** control["pzt1_lock"])
+            if readbit(control_bit, control["pzt1_ramp"]) == "1":
+                resvalue(control["address"], 2 ** control["pzt1_ramp"])
+            if readbit(control_bit, control["pzt1_park"]) == "1":
+                resvalue(control["address"], 2 ** control["pzt1_park"])
+            if readbit(control_bit, control["pzt1_tune"]) != "1":
+                addvalue(control["address"], 2 ** control["pzt1_tune"])
+                Globals.incident_message = bas.upper() + " is tuning."
+            else:
+                Globals.incident_message = bas.upper() + " is already tuning."
 
     def lock(self, bas):
-        actual = getvalue(control['address'])['value']
-        if bas=="pzt0":
-            bit=[8,6]
-        else:
-            bit=[9,7]
-
-        if readbit(actual, 1) != "1":
-            addvalue(control['address'], 2)
-        if readbit(actual, bit[1]) == "1":
-            resvalue(control['address'], control[bas + "_m"])
-            actual=actual-control[bas + "_m"]
-        if readbit(actual, bit[0]) == "0":
-            setvalue(control['address'], actual+control[bas + "_l"])
-            actual=actual+control[bas + "_l"]
-        else:
-            setvalue(base[bas][0], "0x4043b000", "1", "1")
-            Globals.incident_message = bas.upper() + " is now relocked."
+        if "pzt0" in bas:
+            control_bit = getvalue(control["address"])["value"]
+            if readbit(control_bit, control["pzt0_tune"]) == "1":
+                resvalue(control["address"], 2 ** control["pzt0_tune"])
+            if readbit(control_bit, control["pzt0_ramp"]) == "1":
+                resvalue(control["address"], 2 ** control["pzt0_ramp"])
+            if readbit(control_bit, control["pzt0_park"]) == "1":
+                resvalue(control["address"], 2 ** control["pzt0_park"])
+            if readbit(control_bit, control["pzt0_lock"]) != "1":
+                addvalue(control["address"], 2 ** control["pzt0_lock"])
+                Globals.incident_message = bas.upper() + " is locked."
+            else:
+                Globals.incident_message = bas.upper() + " is already locked."
+        if "pzt1" in bas:
+            control_bit = getvalue(control["address"])["value"]
+            if readbit(control_bit, control["pzt1_tune"]) == "1":
+                resvalue(control["address"], 2 ** control["pzt1_tune"])
+            if readbit(control_bit, control["pzt1_ramp"]) == "1":
+                resvalue(control["address"], 2 ** control["pzt1_ramp"])
+            if readbit(control_bit, control["pzt1_park"]) == "1":
+                resvalue(control["address"], 2 ** control["pzt1_park"])
+            if readbit(control_bit, control["pzt1_lock"]) != "1":
+                addvalue(control["address"], 2 ** control["pzt1_lock"])
+                Globals.incident_message = bas.upper() + " is locked."
+            else:
+                Globals.incident_message = bas.upper() + " is already locked."
 
     def getstatus(self, bas):
-        if bas=="pzt0":
-            bit=[8,6]
-        else:
-            bit=[9,7]
         actual = Globals.status_bit
-        pzt= int(readbit(actual, 1))
-        lock=int(readbit(actual, bit[0]))
-        manual=int(readbit(actual, bit[1]))
-        if pzt==0:
-            return "OFF","grey"
-        else:
-            if lock==0:
-                if manual==0:
-                    return "RAMPING","blue"
-
-                if manual==1:
-                    return "PARK", "orange"
-            if lock==1:
-                if manual==0:
-                    if readbit(actual, 21) == "1":
-                        return "LOCKED", "darkgreen"
-                    else:
-                        return "LOCKING", "green"
-                else:
-                    return "ERROR", "red"
+        #print(actual, "REGISTER PZT")
+        if bas == "pzt0":
+            if readbit(actual, status["STATUS_OK"]) == "1" and readbit(actual, status["PZT_0_PARK"]) == "1":
+                return "PARK", Colours["amber"]
+            elif readbit(actual, status["STATUS_OK"]) == "1" and readbit(actual, status["PZT_0_RAMP"]) == "1":
+                return "RAMP", Colours["blue"]
+            elif readbit(actual, status["STATUS_OK"]) == "1" and readbit(actual, status["PZT_0_Locking"]) == "1":
+                return "Locking", Colours["lightgreen"]
+            elif readbit(actual, status["STATUS_OK"]) == "1" and readbit(actual, status["PZT_0_Tuning"]) == "1":
+                return "Tuning", Colours["orange"]
+            elif readbit(actual, status["STATUS_OK"]) == "1" and readbit(actual, status["PZT_0_Locked"]) == "1":
+                return "Locked", Colours["green"]
+            elif readbit(actual, status["STATUS_OK"]) == "1":
+                return "OFF", Colours["darkgrey"]
             else:
-                return "ERROR", "red"
+                return "ERROR", Colours["red"]
+        if bas == "pzt1":
+            if readbit(actual, status["STATUS_OK"]) == "1" and readbit(actual, status["PZT_1_PARK"]) == "1":
+                return "PARK", Colours["amber"]
+            elif readbit(actual, status["STATUS_OK"]) == "1" and readbit(actual, status["PZT_1_RAMP"])== "1":
+                return "RAMP", Colours["blue"]
+            elif readbit(actual, status["STATUS_OK"]) == "1" and readbit(actual, status["PZT_1_Locking"])== "1":
+                return "Locking", Colours["lightgreen"]
+            elif readbit(actual, status["STATUS_OK"]) == "1" and readbit(actual, status["PZT_1_Tuning"]) == "1":
+                return "Tuning", Colours["orange"]
+            elif readbit(actual, status["STATUS_OK"]) == "1" and readbit(actual, status["PZT_1_Locked"]) == "1":
+                return "Locked", Colours["green"]
+            elif readbit(actual, status["STATUS_OK"]) == "1":
+                return "OFF", Colours["darkgrey"]
+            else:
+                return "ERROR", Colours["red"]
+ 
 
     def formatstatus(self, text, bas):
         result = self.getstatus(bas)

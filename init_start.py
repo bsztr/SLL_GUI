@@ -1,6 +1,6 @@
 import time
 import tkinter as tk
-from COMM import setvalue, getvalue, comm_start, comm_init, comm_reset
+from COMM import setvalue, getvalue, comm_start, comm_init, comm_reset, getbit, readbit
 from CONFIG import *
 import threading
 import queue
@@ -21,7 +21,7 @@ def disp(b, rel):
     return getvalue(hex(int(base[b][0],16)-(eval(base[b][1])[rel][0]))[2:])['value']
 
 def getaddress(b, rel):
-    return hex(int(base[b][0],16)-(eval(base[b][1])[rel][0]))[2:]
+    return hex(int(base[b][0],16)+(eval(base[b][1])[rel][0]))[2:]
 
 def iteradr(b, rel, incr):
     result = int(base[b][0],16) - int(incr)
@@ -186,6 +186,7 @@ def getmodules():
     result=result.splitlines()
     modules=[]
     Globals.errorno = []
+    print((result))
     for line in result:
         if "ok" in line or "failed" in line:
             modules.append(line.split())
@@ -236,7 +237,7 @@ def getmodules():
                     "Kp": [267, "f", "1"]
                 }
 
-
+    #modules = ["TEC0", "TEC1", "TEC2", "TEC3"]
     return modules
 
 # def fw_verison():
@@ -250,22 +251,40 @@ def getmodules():
 def getnames_init():
     Names={}
     Names['low'] = getvalue(getaddress("gui", "low"), "u", "u")["value"]
+    ###DPOT INIT
+    dp0 = getvalue(getaddress("gui", "dpot0"))["value"]
+    dp1 = getvalue(getaddress("gui", "dpot1"))["value"]
+    if dp0 > 255:
+        dp0 = 255
+    if dp1 > 255:
+        dp1 = 255
+    setvalue(getaddress("dphd", "dpot0"),dp0)
+    setvalue(getaddress("dphd", "dpot1"),dp1)
+
+    ###LD INIT
     if Names['low'] > 4:
         Names['low'] = 2
         setvalue(getaddress("gui", "low"),Names["low"], "u", "u")
     Names['high'] = getvalue(getaddress("gui", "high"), "u", "u")["value"]
-    if Names['high'] > 10:
+
+    if Names['high'] > 4:
         Names['high'] = getvalue(getaddress("ld_d", "curr"), "u", "u")["value"]
-        setvalue(getaddress("gui", "high"), Names["high"], "u", "u")
+        if Names['high'] > 9:
+            Names["high"] = 9
+            setvalue(getaddress("gui", "high"), Names["high"], "u", "u")
+        else:
+            setvalue(getaddress("gui", "high"), Names["high"], "u", "u")
     Names['modell'] = getvalue(getaddress("gui", "modell"), "s", "1")["value"]
     Names['tec0'] = getvalue(getaddress("gui", "tec0"), "s", "1")["value"]
     Names['tec1'] = getvalue(getaddress("gui", "tec1"), "s", "1")["value"]
     Names['tec2'] = getvalue(getaddress("gui", "tec2"), "s", "1")["value"]
     Names['tec3'] = getvalue(getaddress("gui", "tec3"), "s", "1")["value"]
+    Names['tec4'] = getvalue(getaddress("gui", "tec4"), "s", "1")["value"]
+    Names['tec5'] = getvalue(getaddress("gui", "tec5"), "s", "1")["value"]
     Names['pzt0'] = getvalue(getaddress("gui", "pzt0"), "s", "1")["value"]
     Names['pzt1'] = getvalue(getaddress("gui", "pzt1"), "s", "1")["value"]
-    Names['cb'] = getvalue(getaddress("gui", "cb"), "s", "1")["value"]
-    Names['lh'] = getvalue(getaddress("gui", "lh"), "s", "1")["value"]
+    Names['pzt2'] = getvalue(getaddress("gui", "pzt2"), "s", "1")["value"]
+    Names['pzt3'] = getvalue(getaddress("gui", "pzt3"), "s", "1")["value"]
     Names['ldr'] = getvalue(getaddress("gui", "ldr"), "s", "1")["value"]
     Names['wavelength'] = getvalue(getaddress("lh", "wavelength"), "u", "1")["value"]
 
@@ -317,85 +336,39 @@ def init():
 
     comm_start()
 
-    # full_active = activate["tec0"] + activate["tec1"] + activate["tec2"] + activate["tec3"] + activate["pzt0"] + activate["pzt1"] + activate["ldr"]
-    #setvalue(activate['address'], 81)
-    query = getmodules()
-    setvalue("03F6",0,"u","1")
-    Globals.shiftenabled = getvalue(getaddress("gui", "shift_enable"))["value"]
+    available = ["LH", "CB"]
+    fwv = str(getvalue("0004", "u", "1")["value"])
+    #setvalue("0001", 256, "u", "1")
+    Globals.fwver = f"v{fwv[0]}.{fwv[1]}.{fwv[2]}"
+
+    valu  = int(getvalue(activate["address"], "u", "1")["value"])
+
+    for item in activate:
+        if item != "address" and item != "LH" and item != "CB" and valu != 0:
+            if readbit(valu, mod_check[item]) == "1":
+                available.append(item.upper())
     getnames_init()
-    #Check if subscription is valid:
-    #setvalue(getaddress("gui", "ban"), 0, "u", "1")
-    set = int(getvalue(getaddress("gui", "trial"), "u", "1")["value"])
-    start = int(getvalue(getaddress("gui", "start"), "u", "1")["value"])
-    end = int(getvalue(getaddress("gui", "dur"), "u", "1")["value"])
-    ban = int(getvalue(getaddress("gui", "ban"), "u", "1")["value"])
-    now = int(time.time())
-
-    if Globals.engineer != 1:
-        if ban == 1:
-            Globals.incident_message = "Sorry, your trial has expired.\nPlease contact UniKLasers to renew your license.\n"
-            Globals.subscription_off = 1
-            setvalue(getaddress("gui", "ban"), 1, "u", "1")
-            setvalue(getaddress("ld_d", "curr"),0, "u", "u")
-            return []
-
-        if set == 1:
-            if start > now:
-                Globals.incident_message = "Sorry, your trial has expired.\nPlease contact UniKLasers to renew your license.\n"
-                Globals.subscription_off = 1
-                setvalue(getaddress("gui", "ban"), 1, "u", "1")
-                setvalue(getaddress("ld_d", "curr"), 0, "u", "u")
-                return []
-
-            if end < now:
-                Globals.incident_message = "Sorry, your trial has expired.\nPlease contact UniKLasers to renew your license.\n"
-                Globals.subscription_off = 1
-                setvalue(getaddress("gui", "ban"), 1, "u", "1")
-                setvalue(getaddress("ld_d", "curr"), 0, "u", "u")
-                return []
-    full_active = getvalue(activate['address'])["value"]
-    while query[-1][-1] == "failed":
-        if str(Globals.errorno[0]) == "-51" and Globals.pztreset == 0:
-            setvalue(getaddress("pzt0_d", "minm"),5,"u","u")
-            setvalue(getaddress("pzt0_d", "maxm"),80,"u","u")
-            setvalue(getaddress("pzt1_d", "minm"),5,"u","u")
-            setvalue(getaddress("pzt1_d", "maxm"),80,"u","u")
-            Globals.pztreset = 1
-            query = getmodules()
-
-        else:
-            argu = ctypes.windll.user32.MessageBoxW(0, f"{query[-1][0]} failed, do you want to go in recovery mode?", "Module failed", 4)
-            if argu == 6 and Globals.engineer == 1:
-                remove = query[-1][-3].lower()
-                setvalue(activate['address'], full_active - activate[remove])
-                full_active = full_active - activate[remove]
-                query = getmodules()
-            else:
-                break
-
-    available = []
-    for item in query:
-        available.append(item[0])
+    print(available)
 
 
-    if Globals.shiftenabled > 0:
-
-        address = getaddress("gui", "shift_threshold")
-        result = getvalue(address, "u", "u")["value"]
-        Globals.shiftlimit = result
-        address = getaddress("gui", "shift_mincurrent")
-        result = getvalue(address, "u", "u")["value"]
-        if result > 3e+6:
-            result = 3e+6
-        Globals.shiftmincurrent = result
-        Globals.shiftldrange = Globals.shiftlimit - Globals.shiftmincurrent
-        if Globals.shiftldrange < 0:
-            Globals.shiftldrange = 0
-
-        Globals.opmsetting = getvalue(getaddress("gui", "opm_setting"), "u", "u")["value"]
-        #print("opm set to", Globals.opmsetting)
-    #comm_reset()
-    #print(available)
+    # if Globals.shiftenabled > 0:
+    #
+    #     address = getaddress("gui", "shift_threshold")
+    #     result = getvalue(address, "u", "u")["value"]
+    #     Globals.shiftlimit = result
+    #     address = getaddress("gui", "shift_mincurrent")
+    #     result = getvalue(address, "u", "u")["value"]
+    #     if result > 3e+6:
+    #         result = 3e+6
+    #     Globals.shiftmincurrent = result
+    #     Globals.shiftldrange = Globals.shiftlimit - Globals.shiftmincurrent
+    #     if Globals.shiftldrange < 0:
+    #         Globals.shiftldrange = 0
+    #
+    #     Globals.opmsetting = getvalue(getaddress("gui", "opm_setting"), "u", "u")["value"]
+    #     #print("opm set to", Globals.opmsetting)
+    # #comm_reset()
+    # #print(available)
     return available
 
 

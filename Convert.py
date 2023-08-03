@@ -133,6 +133,10 @@ def micro(inte):
     result = round((inte/10e+5),10)
     return result
 
+def mili(inte):
+    result = round((inte/10e+2),10)
+    return result
+
 def int2hex4(hx):
 
         if isinstance(hx, int):
@@ -162,6 +166,11 @@ def demicro(micro):
     result=result*10e+5
     result=int(round(result,10))
     #print(result)
+    return result
+def demili(micro):
+    result=float(micro)
+    result=result*10e+2
+    result=int(round(result,10))
     return result
 
 def sci(val):

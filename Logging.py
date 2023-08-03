@@ -10,13 +10,12 @@ from COMM import getvalue
 import re
 
 def getaddress_l(b, rel):
-    return hex(int(base_l[b][0],16)-(eval(base_l[b][1])[rel][0]))[2:]
+    return hex(int(base_l[b][0],16)+(eval(base_l[b][1])[rel][0]))[2:]
 
 
 def get_value(module, address):
     register = eval(base_l[module][1])[address]
     address = getaddress_l(module, address)
-
     return getvalue(address, register[1], register[2])
 
 
@@ -24,7 +23,7 @@ def get_value(module, address):
 def Logger_wrap(modules, name):
 
     documents_path = expanduser("~\\Documents")
-    path = f"{documents_path}\\UniKLasers Logging\\"
+    path = f"{documents_path}\\SLL Logging\\"
     if not exists(path):
         makedirs(path)
 
@@ -48,10 +47,15 @@ def Logger_wrap(modules, name):
         tecs.append("tec2_l")
     if "TEC3" in modules:
         tecs.append("tec3_l")
+    if "TEC4" in modules:
+        tecs.append("tec4_l")
+    if "TEC5" in modules:
+        tecs.append("tec5_l")
 
     pzt_measurements = ["REG_PZTx_OV",
                         "REG_PZTx_CLP_VOLTAGE",
-                        "REG_PZTx_DPhD_VOLTAGE"]
+                        "REG_PZTx_DPhD_VOLTAGE",
+                        "REG_PZTx_DPhD1_VOLTAGE"]
 
 
     tec_measurements = ["REG_TECx_OUT_CURRENT",
@@ -62,7 +66,8 @@ def Logger_wrap(modules, name):
 
     labels = {"REG_PZTx_OV": "Output Voltage",
               "REG_PZTx_CLP_VOLTAGE": "CLP Voltage",
-              "REG_PZTx_DPhD_VOLTAGE": "Differential Voltage",
+              "REG_PZTx_DPhD_VOLTAGE": "DPhD 0",
+              "REG_PZTx_DPhD1_VOLTAGE": "DPhD 1",
               "REG_TECx_OUT_CURRENT": "Current",
               "REG_TECx_CURRENT_T": "Temperature",
               "REG_LD_CO_CURRENT": "Laser Driver Current"}
@@ -93,7 +98,7 @@ def Logger_wrap(modules, name):
 
     #try:
 
-    try:
+    if Globals.regoffset0<1000:
         last_controller = datetime.now()
         for pzt in pzts:
             for measurement in pzt_measurements:
@@ -113,8 +118,8 @@ def Logger_wrap(modules, name):
             csv_writer = DictWriter(f, fieldnames=field_names)
             csv_writer.writerow(results)
 
-    except IndexError:
-        pass
+    # except IndexError:
+    #     pass
 
     # except:
     #     Globals.logoff == 1

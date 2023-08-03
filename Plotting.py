@@ -94,23 +94,23 @@ class pidplot(tk.Label):
     def plot(self, base, subject, box):
         self.duration=int(round(float(self.t_time.get("1.0", 'end-1c')),0))
         self.set=round(float(self.t_set.get("1.0", 'end-1c')),2)
-        if round(getvalue(getaddress(base+"_d", "set"), "u", "k")["value"],2) != self.set:
-            setvalue(getaddress(base + "_d", "set"), self.set, "u", "k")
+        if round(getvalue(getaddress(base+"_d", "set"), "f", "1")["value"],2) != self.set:
+            setvalue(getaddress(base + "_d", "set"), self.set, "f", "1")
 
         self.p=float(self.t_p.get("1.0", 'end-1c'))
         self.resultp = round(getvalue(getaddress(base+"_d", "p"), "f", "1")["value"],2)
-        self.i=float(self.t_i.get("1.0", 'end-1c'))
+        self.i=float(self.t_i.get("1.0", 'end-1c')) 
         self.resulti = round(getvalue(getaddress(base+"_d", "i"), "f", "1")["value"],2)
         self.d=float(self.t_d.get("1.0", 'end-1c'))
         self.resultd = round(getvalue(getaddress(base+"_d", "d"), "f", "1")["value"],2)
 
-        if base != "tec3":
-            if self.p != self.resultp:
-                setvalue(getaddress(base+"_d", "p"), self.p, "f", "1")
-            if self.i != self.resulti:
-                setvalue(getaddress(base+"_d", "i"), self.i, "f", "1")
-            if self.d != self.resultd:
-                setvalue(getaddress(base+"_d", "d"), self.d, "f", "1")
+        # if base != "tec3":
+        #     if self.p != self.resultp:
+        #         setvalue(getaddress(base+"_d", "p"), self.p, "f", "1")
+        #     if self.i != self.resulti:
+        #         setvalue(getaddress(base+"_d", "i"), self.i, "f", "1")
+        #     if self.d != self.resultd:
+        #         setvalue(getaddress(base+"_d", "d"), self.d, "f", "1")
 
         plot=graph(self, base, subject, 'act', box)
 
@@ -126,7 +126,7 @@ class graph(tk.Toplevel):
             self.arg1=eval(base[b][1])[rel][1]
             self.arg2=eval(base[b][1])[rel][2]
             self.interval=master.duration
-            self.alltec=["tec0", "tec1", "tec2", "tec3"]
+            self.alltec=["tec0", "tec1", "tec2", "tec3", "tec4", "tec5"]
             self.alltec.remove(b)
             self.alltec[:] = [item for item in self.alltec if item.upper() in Globals.available]
             self.x=[]
@@ -134,6 +134,8 @@ class graph(tk.Toplevel):
             self.x1 = []
             self.x2 = []
             self.x3 = []
+            self.x4 = []
+            self.x5 = []
             self.y = []
             self.v = []
             self.w = []
@@ -143,7 +145,9 @@ class graph(tk.Toplevel):
             self.tec_lib= {"tec0": [self.v, getaddress("tec0", "act"), self.x0],
             "tec1": [self.w , getaddress("tec1", "act"), self.x1],
             "tec2": [self.q, getaddress("tec2", "act"), self.x2],
-            "tec3": [self.z, getaddress("tec3", "act"), self.x3]}
+            "tec3": [self.z, getaddress("tec3", "act"), self.x3],
+            "tec4": [self.z, getaddress("tec4", "act"), self.x4],
+            "tec5": [self.z, getaddress("tec5", "act"), self.x5]}
 
             self.base=b
             self.check=box.get()
@@ -292,6 +296,10 @@ class graph(tk.Toplevel):
                     Globals.tec2_statusbit = getvalue(base["tec2"][0])["value"]
                 if "TEC3" in Globals.available:
                     Globals.tec3_statusbit = getvalue(base["tec3"][0])["value"]
+                if "TEC4" in Globals.available:
+                    Globals.tec2_statusbit = getvalue(base["tec4"][0])["value"]
+                if "TEC5" in Globals.available:
+                    Globals.tec3_statusbit = getvalue(base["tec5"][0])["value"]
 
                 if readbit(Globals.tec0_statusbit, 17) == "1":
                     if readbit(Globals.tec0_statusbit, 14) == "1":
@@ -327,7 +335,7 @@ class PlotMagic(object):
 
     def __call__(self, bas, interval, box, lib, tecall):
         self.x = self.x + interval/1000
-        result = getvalue(lib[bas][1], "u", "k")["value"]
+        result = getvalue(lib[bas][1], "f", "1")["value"]
         self.y = result
         lib[bas][2].append(self.x)
         lib[bas][0].append(result)
@@ -335,7 +343,7 @@ class PlotMagic(object):
             for item in tecall:
 
                 lib[item][2].append(self.x)
-                lib[item][0].append(getvalue(lib[item][1], "u", "k")["value"])
+                lib[item][0].append(getvalue(lib[item][1], "f", "1")["value"])
             return self.x, self.y
         else:
             return self.x, self.y
