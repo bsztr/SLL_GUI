@@ -185,9 +185,10 @@ tec_d= {
 pzt = {
     "fw": [2305, "u", "1"],
     "parkv": [83, "u", "1"],
+    "livev": [82, "u", "1"],
     "clp_power": [84, "f", "1"],
     "dp_power": [80, "u", "1"],
-    "ov": [9, "u", "m"],
+    "ov": [82, "u", "m"],
     "id": [1, "u", "1"],
     "dphd": [1, "u", "1"],
     "clp": [1, "u", "1"],
@@ -286,6 +287,16 @@ ld={
     "act": [82, "u", "u"],
     "curr": [80, "u", "u"],
     "clp_error": [1, "u", "1"],
+    "opm_low": [8, "u", "1"],
+    "opm_high": [9, "u", "1"],
+    "opm_target": [10, "u", "1"],
+    "opm_enable": [14, "u", "1"],
+    "opm_period": [11, "u", "1"],
+    "opm_init": [12, "u", "1"],
+    "opm_step": [13, "u", "1"],
+    "opm_threshold": [15, "f", "1"],
+    "opm_large_threshold": [16, "f", "1"],
+    "opm_large": [17, "u", "1"],
     "Kp": [1, "u", "1"]
 }
 

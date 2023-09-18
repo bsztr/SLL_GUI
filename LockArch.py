@@ -197,7 +197,7 @@ class LockArch(tk.Frame):
         self.s_minm.update_status(getaddress(base + "_d", "minm"), "minm", "driver")
         self.b_minm = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'],
                                   bg=Background['submit'],
-                                  command=lambda: submit_r(self,base+"d", "minm",3.5,85))
+                                  command=lambda: submit_r(self,base+"_d", "minm",3.5,85))
 
         self.l_maxm = tk.Label(master, text="Maximum mirror voltage", font=fonts['main'], bg=Background['main'])
         self.t_maxm = tk.Text(master, width=6, height=1)
@@ -205,7 +205,7 @@ class LockArch(tk.Frame):
         self.s_maxm.update_status(getaddress(base + "_d", "maxm"), "maxm", "driver")
         self.b_maxm = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'],
                                   bg=Background['submit'],
-                                  command=lambda: submit_r(self,base+"d", "maxm",3.5,85))
+                                  command=lambda: submit_r(self,base+"_d", "maxm",3.5,85))
 
         # self.l_clp_ci = tk.Label(master, text="CLP V-I Conversion", font=fonts['main'], bg=Background['main'])
         # self.t_clp_ci = tk.Text(master, width=6, height=1)

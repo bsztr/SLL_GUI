@@ -33,7 +33,7 @@ class TECArch(tk.Frame):
         #self.t_c.update_status(getaddress(base, "current"), "current", "slot")
         self.b_c = tk.Button(master, width=3, height=1, text="Plot", font=fonts['submit'],
                                   bg=Background['plot'], fg="white",
-                                  command=lambda: self.plot(base, "current (A)", "current", self.t_c, "req current"))
+                                  command=lambda: self.plot(base, "Voltage (V)", "current", self.t_c, "req current"))
 
         if base != "tec7":
             self.l_p = tk.Label(master, text="P Gain", font=fonts['main'], bg=Background['main'])
@@ -235,14 +235,14 @@ class graph(tk.Toplevel):
         # Put a legend below current axis
 
         #self.ax.axhline(y=self.set, color='r', linestyle='-', label="Set temperature")
-        self.ax.plot(self.x, self.y, color='darkviolet', label=self.base.upper() + " Actual current (A)")
+        self.ax.plot(self.x, self.y, color='darkviolet', label=self.base.upper() + " Actual voltage (V)")
         if self.second != "":
-            self.ax.plot(self.x, self.z, color='b', label="Requested current (A)")
+            self.ax.plot(self.x, self.z, color='b', label="Requested voltage (V)")
 
         # ax.plot([1,2,3,4,5],[1,2,3,4,5])
         self.ax.set_xlabel('time (s)')
         self.ax.xaxis.set_label_position('top')
-        self.ax.set_ylabel('Current (A)')
+        self.ax.set_ylabel('Voltage (V)')
         self.ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
                        fancybox=True, shadow=True, ncol=5)
 
@@ -262,17 +262,17 @@ class graph(tk.Toplevel):
         if self.second != "":
             self.z.append(args[2])
 
-            return self.ax.plot(self.x, self.y, color='darkviolet', label=self.base.upper() + " Actual current (A)")#, self.ax.plot(
+            return self.ax.plot(self.x, self.y, color='darkviolet', label=self.base.upper() + " Actual voltage (V)")#, self.ax.plot(
                #self.x, self.z, 'b--', label="Requested current")
 
         else:
-            return self.ax.plot(self.x, self.y, color='darkviolet', label=self.base.upper() + " Actual current (A)")
+            return self.ax.plot(self.x, self.y, color='darkviolet', label=self.base.upper() + " Actual voltage (V)")
 
     def write(self, x, y, z=[], type=False, subject=""):
         if type == True:
-            df = pandas.DataFrame(data={"time(s)": x, self.base.upper() + "Actual current (A)": y, "Requested current (A)": z})
+            df = pandas.DataFrame(data={"time(s)": x, self.base.upper() + "Actual voltage (V)": y, "Requested voltage (V)": z})
         else:
-            df = pandas.DataFrame(data={"time(s)": x,self.base.upper() + "Actual current (A)" : y})
+            df = pandas.DataFrame(data={"time(s)": x,self.base.upper() + "Actual voltage (V)" : y})
         df_folder = "C:/Plotting/"
         if not os.path.exists(df_folder):
             os.makedirs(df_folder)

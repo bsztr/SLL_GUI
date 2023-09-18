@@ -97,9 +97,9 @@ class LDPanel(tk.Frame):
                                    fg="black", font=fonts['main'])
             self.l_ldver = tk.Label(self, text=ld_fwv, font=fonts['main'], bg=Background['main'])
 
-            # self.b_clpc = tk.Button(self, text="OPM settings", width=20, font=fonts['main'],
-            #                             bg=Background['submit'],
-            #                             command=lambda: self.openclp(master, base))
+            self.b_clpc = tk.Button(self, text="OPM settings", width=20, font=fonts['main'],
+                                        bg=Background['submit'],
+                                        command=lambda: self.openclp(master, base))
 
             #LD grid
             # self.l_logo.grid(row=0, column=1, columnspan=4, rowspan=1, sticky="e", pady=5)
@@ -140,7 +140,7 @@ class LDPanel(tk.Frame):
             self.b_save.grid(row=9, column=3, columnspan=2, sticky="nw", pady=(5, 0), padx=2)
             self.l_ldver.grid(row=9, column=5, columnspan=1, sticky="nw", pady=(5, 0), padx=2)
             self.l_ld_disclaimer.grid(row=10, column=1, columnspan=4, sticky="nw", pady=2)
-            # self.b_clpc.grid(row=11, column=1, columnspan=4, sticky="nw", pady=2)
+            self.b_clpc.grid(row=11, column=1, columnspan=4, sticky="nw", pady=2)
 
     def laser_on(self):
             self.bit=getvalue(status['address'])['value']

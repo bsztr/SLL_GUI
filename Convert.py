@@ -72,6 +72,7 @@ def hex2signed(hx):
     return val
 
 def float2hex(hx):
+    hx = float(hx)
     val=hex(struct.unpack('<I', struct.pack('<f', hx))[0])
     return val
 
