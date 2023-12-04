@@ -160,12 +160,12 @@ class LockArch(tk.Frame):
         self.t_dpot_sampl = tk.Text(master, width=6, height=1)
         self.b_dpot_sampl = tk.Button(master, width=3, height=1, text="Plot", font=fonts['submit'],
                                   bg=Background['plot'], fg="white",
-                                  command=lambda: self.plot(base, "DPhD power", "dpot0", self.t_dpot_sampl))
+                                  command=lambda: self.plot(base, "PD0 power", "dpot0", self.t_dpot_sampl))
         self.l_dpot_sampl2 = tk.Label(master, text="DPOT1 Sampling (ms)", font=fonts['main'], bg=Background['main'])
         self.t_dpot_sampl2 = tk.Text(master, width=6, height=1)
         self.b_dpot_sampl2 = tk.Button(master, width=3, height=1, text="Plot", font=fonts['submit'],
                                   bg=Background['plot'], fg="white",
-                                  command=lambda: self.plot(base, "DPhD power", "dpot1", self.t_dpot_sampl2))
+                                  command=lambda: self.plot(base, "PD1 power", "dpot1", self.t_dpot_sampl2))
 
 
         self.l_clptitle = tk.Label(master, text="CLP Photodiode Settings", font=fonts['title'], bg=Background['main'])
@@ -181,7 +181,7 @@ class LockArch(tk.Frame):
         self.t_dpot_sampl3 = tk.Text(master, width=6, height=1)
         self.b_dpot_sampl3 = tk.Button(master, width=3, height=1, text="Plot", font=fonts['submit'],
                                       bg=Background['plot'], fg="white",
-                                      command=lambda: self.plot(base, "DPhD power", "dpot2", self.t_dpot_sampl3))
+                                      command=lambda: self.plot(base, "PD2 power", "dpot2", self.t_dpot_sampl3))
         
         self.l_clp_cal = tk.Label(master, text="CLP calibration", font=fonts['main'], bg=Background['main'])
         self.t_clp_cal = tk.Text(master, width=6, height=1)
@@ -197,7 +197,7 @@ class LockArch(tk.Frame):
         self.s_minm.update_status(getaddress(base + "_d", "minm"), "minm", "driver")
         self.b_minm = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'],
                                   bg=Background['submit'],
-                                  command=lambda: submit_r(self,base+"_d", "minm",3.5,85))
+                                  command=lambda: submit(self,base+"_d", "minm"))
 
         self.l_maxm = tk.Label(master, text="Maximum mirror voltage", font=fonts['main'], bg=Background['main'])
         self.t_maxm = tk.Text(master, width=6, height=1)
@@ -205,7 +205,7 @@ class LockArch(tk.Frame):
         self.s_maxm.update_status(getaddress(base + "_d", "maxm"), "maxm", "driver")
         self.b_maxm = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'],
                                   bg=Background['submit'],
-                                  command=lambda: submit_r(self,base+"_d", "maxm",3.5,85))
+                                  command=lambda: submit(self,base+"_d", "maxm"))
 
         # self.l_clp_ci = tk.Label(master, text="CLP V-I Conversion", font=fonts['main'], bg=Background['main'])
         # self.t_clp_ci = tk.Text(master, width=6, height=1)
@@ -335,8 +335,8 @@ class LockArch(tk.Frame):
         # self.b_phase = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
         #                      command=lambda: self.phaserev(self.t_phase, self.s_phase, base))
 
-        # self.b_advanced = tk.Button(master, text="Advanced settings", width=20, font=fonts['main'], bg=Background['submit'],
-        #                           command=lambda: self.message_trigger("Function disabled."))
+        self.b_advanced = tk.Button(master, text="Compensation settings", width=20, font=fonts['main'], bg=Background['submit'],
+                                   command=lambda: self.openadvance(master, base))
 
         self.pzt_ramp = iterate(master, "Scan voltage", base, "ov", 16, y+5, True)
 
@@ -476,7 +476,7 @@ class LockArch(tk.Frame):
             self.b_tune_delay.grid(row=15, column=y+8, columnspan=1, sticky="nw", pady=self.pady)
         except:
             print("FW update needed.")
-        #self.b_advanced.grid(row=12, column=y + 5, columnspan=2, sticky="nw", pady=self.pady)
+        self.b_advanced.grid(row=24, column=y + 5, columnspan=4, sticky="nwe", pady=self.pady)
 
         self.getvs(master).grid(row=1, column=y + 9, rowspan=22, sticky="ns", padx=10)
 
@@ -547,7 +547,7 @@ class LockArch(tk.Frame):
             else:
                 Globals.incident_message = bas.upper() + " is already parked."
             instance = float(text.get("1.0", 'end-1c'))
-            setvalue(getaddress(bas, "ov"), instance,"u" ,"m")
+            setvalue(getaddress(bas, "parkv"), instance,"u" ,"m")
         if "pzt1" in bas:
             control_bit = getvalue(control["address"])["value"]
             if readbit(control_bit, control["pzt1_tune"]) == "1":
@@ -562,7 +562,7 @@ class LockArch(tk.Frame):
             else:
                 Globals.incident_message = bas.upper() + " is already parked."
             instance = float(text.get("1.0", 'end-1c'))
-            setvalue(getaddress(bas, "ov"), instance,"u" ,"m")
+            setvalue(getaddress(bas, "parkv"), instance,"u" ,"m")
 
 
 
@@ -1050,236 +1050,233 @@ class advdata(tk.Frame):
         self.pady = 3
 
 
-        self.title = tk.Label(self, text=b.upper() + " advanced settings", font=fonts['title'], bg=Background['main'])
+        self.title = tk.Label(self, text="Wavelength compensation settings", font=fonts['title'], bg=Background['main'])
 
-        self.l_minm = tk.Label(self, text="Minimum mirror voltage", font=fonts['main'], bg=Background['main'])
-        self.t_minm = tk.Text(self, width=6, height=1)
-        self.s_minm = pzt_label(self)
-        self.s_minm.update_status(getaddress(b + "_d", "minm"), "minm", "driver")
-        self.b_minm = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+        self.l_comp_lock = tk.Label(self, text="Only when locked (0)", font=fonts['main'], bg=Background['main'])
+        self.t_comp_lock = tk.Text(self, width=6, height=1)
+        self.s_comp_lock = pzt_label(self)
+        self.s_comp_lock.update_status(getaddress(b + "_d", "comp_lock"), "comp_lock", "driver")
+        self.b_comp_lock = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
                                   bg=Background['submit'],
-                                  command=lambda: submit(self, b + "_d", "minm"))
+                                  command=lambda: submit(self, b + "_d", "comp_lock"))
 
-        self.l_maxm = tk.Label(self, text="Maximum mirror voltage", font=fonts['main'], bg=Background['main'])
-        self.t_maxm = tk.Text(self, width=6, height=1)
-        self.s_maxm = pzt_label(self)
-        self.s_maxm.update_status(getaddress(b + "_d", "maxm"), "maxm", "driver")
-        self.b_maxm = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+        self.l_wl_e = tk.Label(self, text="Compensation enabled (1)", font=fonts['main'], bg=Background['main'])
+        self.t_wl_e = tk.Text(self, width=6, height=1)
+        self.s_wl_e = pzt_label(self)
+        self.s_wl_e.update_status(getaddress(b + "_d", "wl_e"), "wl_e", "driver")
+        self.b_wl_e = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
                                   bg=Background['submit'],
-                                  command=lambda: submit(self, b + "_d", "maxm"))
+                                  command=lambda: submit(self, b + "_d", "wl_e"))
 
-        # self.l_minsl = tk.Label(self, text="Minimum slope", font=fonts['main'], bg=Background['main'])
-        # self.t_minsl = tk.Text(self, width=6, height=1)
-        # self.s_minsl = pzt_label(self)
-        # self.s_minsl.update_status(getaddress(b + "_d", "minsl"), "minsl", "driver")
-        # self.b_minsl = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
-        #                           bg=Background['submit'],
-        #                           command=lambda: submit(self, b + "_d", "minsl"))
-        #
-        # self.l_maxsl = tk.Label(self, text="Maximum slope", font=fonts['main'], bg=Background['main'])
-        # self.t_maxsl = tk.Text(self, width=6, height=1)
-        # self.s_maxsl = pzt_label(self)
-        # self.s_maxsl.update_status(getaddress(b + "_d", "maxsl"), "maxsl", "driver")
-        # self.b_maxsl = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
-        #                           bg=Background['submit'],
-        #                           command=lambda: submit(self, b + "_d", "maxsl"))
 
-        self.l_minwp = tk.Label(self, text="Minimum WP offset", font=fonts['main'], bg=Background['main'])
-        self.t_minwp = tk.Text(self, width=6, height=1)
-        self.s_minwp = pzt_label(self)
-        self.s_minwp.update_status(getaddress(b + "_d", "minwp"), "minwp", "driver")
-        self.b_minwp = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+        self.l_wl_tec = tk.Label(self, text="Wavelength TEC select", font=fonts['main'], bg=Background['main'])
+        self.t_wl_tec = tk.Text(self, width=6, height=1)
+        self.s_wl_tec = pzt_label(self)
+        self.s_wl_tec.update_status(getaddress(b + "_d", "wl_tec"), "wl_tec", "driver")
+        self.b_wl_tec = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
                                   bg=Background['submit'],
-                                  command=lambda: submit(self, b + "_d", "minwp"))
+                                  command=lambda: submit(self, b + "_d", "wl_tec"))
 
-        self.l_maxwp = tk.Label(self, text="Maximum WP offset", font=fonts['main'], bg=Background['main'])
-        self.t_maxwp = tk.Text(self, width=6, height=1)
-        self.s_maxwp = pzt_label(self)
-        self.s_maxwp.update_status(getaddress(b + "_d", "maxwp"), "maxwp", "driver")
-        self.b_maxwp = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+        self.l_wl_step = tk.Label(self, text="TEC step (K)", font=fonts['main'], bg=Background['main'])
+        self.t_wl_step = tk.Text(self, width=6, height=1)
+        self.s_wl_step = pzt_label(self)
+        self.s_wl_step.update_status(getaddress(b + "_d", "wl_step"), "wl_step", "driver")
+        self.b_wl_step = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
                                   bg=Background['submit'],
-                                  command=lambda: submit(self, b + "_d", "maxwp"))
+                                  command=lambda: submit(self, b + "_d", "wl_step"))
 
-        self.l_clpt = tk.Label(self, text="CLP unlock window (s)", font=fonts['main'], bg=Background['main'])
-        self.t_clpt = tk.Text(self, width=6, height=1)
-        self.s_clpt = pzt_label(self)
-        self.s_clpt.update_status(getaddress(b + "_d", "clpt"), "clpt", "driver")
-        self.b_clpt = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+        self.l_wl_max = tk.Label(self, text="TEC max offset (K)", font=fonts['main'], bg=Background['main'])
+        self.t_wl_max = tk.Text(self, width=6, height=1)
+        self.s_wl_max = pzt_label(self)
+        self.s_wl_max.update_status(getaddress(b + "_d", "wl_max"), "wl_max", "driver")
+        self.b_wl_max = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
                                   bg=Background['submit'],
-                                  command=lambda: submit(self, b + "_d", "clpt"))
+                                  command=lambda: submit(self, b + "_d", "wl_max"))
         
-        self.l_lock_tune = tk.Label(self, text="Tuning (PEAK/AVG/LOCK)", font=fonts['main'], bg=Background['main'])
-        self.t_lock_tune = tk.Text(self, width=6, height=1)
-        self.s_lock_tune = gui_label(self)
-        self.s_lock_tune.update_status(getaddress("gui", "lock_tune"), "lock_tune")
-        self.b_lock_tune = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+        self.l_wl_init = tk.Label(self, text="Initial delay (ms)", font=fonts['main'], bg=Background['main'])
+        self.t_wl_init = tk.Text(self, width=6, height=1)
+        self.s_wl_init = pzt_label(self)
+        self.s_wl_init.update_status(getaddress(b + "_d", "wl_init"), "wl_init", "driver")
+        self.b_wl_init = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
                                   bg=Background['submit'],
-                                  command=lambda: submit(self, "gui", "lock_tune"))
+                                  command=lambda: submit(self, b + "_d", "wl_init"))
         
-        self.l_tec_tune = tk.Label(self, text="Ref TEC select (1 or 2)", font=fonts['main'], bg=Background['main'])
-        self.t_tec_tune = tk.Text(self, width=6, height=1)
-        self.s_tec_tune = gui_label(self)
-        self.s_tec_tune.update_status(getaddress("gui", "tec_tune"), "tec_tune")
-        self.b_tec_tune = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+        self.l_wl_delay = tk.Label(self, text="Period (ms)", font=fonts['main'], bg=Background['main'])
+        self.t_wl_delay = tk.Text(self, width=6, height=1)
+        self.s_wl_delay = pzt_label(self)
+        self.s_wl_delay.update_status(getaddress(b + "_d", "wl_delay"), "wl_delay", "driver")
+        self.b_wl_delay = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
                                   bg=Background['submit'],
-                                  command=lambda: submit(self, "gui", "tec_tune"))
+                                  command=lambda: submit(self, b + "_d", "wl_delay"))
         
-        self.l_tec_tune_ic = tk.Label(self, text="IC TEC select (1 or 2)", font=fonts['main'], bg=Background['main'])
-        self.t_tec_tune_ic = tk.Text(self, width=6, height=1)
-        self.s_tec_tune_ic = gui_label(self)
-        self.s_tec_tune_ic.update_status(getaddress("gui", "tec_tune_ic"), "tec_tune_ic")
-        self.b_tec_tune_ic = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+        self.l_wl_thresh = tk.Label(self, text="Threshold (%, 0.01)", font=fonts['main'], bg=Background['main'])
+        self.t_wl_thresh = tk.Text(self, width=6, height=1)
+        self.s_wl_thresh = pzt_label(self)
+        self.s_wl_thresh.update_status(getaddress(b + "_d", "wl_thresh"), "wl_thresh", "driver")
+        self.b_wl_thresh = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
                                   bg=Background['submit'],
-                                  command=lambda: submit(self, "gui", "tec_tune_ic"))
-        
-        self.l_tec_tune_ramp = tk.Label(self, text="Ramp TEC select (3)", font=fonts['main'], bg=Background['main'])
-        self.t_tec_tune_ramp = tk.Text(self, width=6, height=1)
-        self.s_tec_tune_ramp = gui_label(self)
-        self.s_tec_tune_ramp.update_status(getaddress("gui", "tec_tune_ramp"), "tec_tune_ramp")
-        self.b_tec_tune_ramp = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
-                                  bg=Background['submit'],
-                                  command=lambda: submit(self, "gui", "tec_tune_ramp"))
-        
-        self.l_dphd_thres = tk.Label(self, text="DPhD threshold (V)", font=fonts['main'], bg=Background['main'])
-        self.t_dphd_thres = tk.Text(self, width=6, height=1)
-        self.s_dphd_thres = gui_label(self)
-        self.s_dphd_thres.update_status(getaddress("gui", "dphd_thres"), "dphd_thres")
-        self.b_dphd_thres = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
-                                  bg=Background['submit'],
-                                  command=lambda: submit(self, "gui", "dphd_thres"))
-        
-        self.l_pid_timer = tk.Label(self, text="PID stabilisation", font=fonts['main'], bg=Background['main'])
-        self.t_pid_timer = tk.Text(self, width=6, height=1)
-        self.s_pid_timer = gui_label(self)
-        self.s_pid_timer.update_status(getaddress("gui", "pid_timer"), "pid_timer")
-        self.b_pid_timer = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
-                                  bg=Background['submit'],
-                                  command=lambda: submit(self, "gui", "pid_timer"))
+                                  command=lambda: submit(self, b + "_d", "wl_thresh"))
 
 
-        self.l_tec0_pid = tk.Label(self, text="TEC0 PID DISABLE (==0)", font=fonts['main'], bg=Background['main'])
-        self.t_tec0_pid = tk.Text(self, width=6, height=1)
-        self.s_tec0_pid = gui_label(self)
-        self.s_tec0_pid.update_status(getaddress("gui", "tec0_pid"), "tec0_pid")
-        self.b_tec0_pid = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+        self.s_wpq1 = tk.Label(self, text="-", font=fonts['main'], bg=Background['main'])
+        self.b_wpq1 = tk.Button(self, text="Wavelength target", bg=Background['submit'], width=35, font=fonts['main'],
+                                command=lambda: self.wltarget(self.s_wpq1))
+
+        self.title2 = tk.Label(self, text="Power compensation settings", font=fonts['title'], bg=Background['main'])
+
+        self.l_pwr_e = tk.Label(self, text="Compensation enabled (1)", font=fonts['main'], bg=Background['main'])
+        self.t_pwr_e = tk.Text(self, width=6, height=1)
+        self.s_pwr_e = pzt_label(self)
+        self.s_pwr_e.update_status(getaddress(b + "_d", "pwr_e"), "pwr_e", "driver")
+        self.b_pwr_e = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                         bg=Background['submit'],
+                                         command=lambda: submit(self, b + "_d", "pwr_e"))
+
+        self.l_pwr_tec = tk.Label(self, text="Power TEC Select", font=fonts['main'], bg=Background['main'])
+        self.t_pwr_tec = tk.Text(self, width=6, height=1)
+        self.s_pwr_tec = pzt_label(self)
+        self.s_pwr_tec.update_status(getaddress(b + "_d", "pwr_tec"), "pwr_tec", "driver")
+        self.b_pwr_tec = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                  bg=Background['submit'],
+                                  command=lambda: submit(self, b + "_d", "pwr_tec"))
+        
+        self.l_pwr_step = tk.Label(self, text="TEC Step (K)", font=fonts['main'], bg=Background['main'])
+        self.t_pwr_step = tk.Text(self, width=6, height=1)
+        self.s_pwr_step = pzt_label(self)
+        self.s_pwr_step.update_status(getaddress(b + "_d", "pwr_step"), "pwr_step", "driver")
+        self.b_pwr_step = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                  bg=Background['submit'],
+                                  command=lambda: submit(self, b + "_d", "pwr_step"))
+
+
+        self.l_pwr_max = tk.Label(self, text="TEC max offset (K)", font=fonts['main'], bg=Background['main'])
+        self.t_pwr_max = tk.Text(self, width=6, height=1)
+        self.s_pwr_max = pzt_label(self)
+        self.s_pwr_max.update_status(getaddress(b + "_d", "pwr_max"), "pwr_max", "driver")
+        self.b_pwr_max = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
                                      bg=Background['submit'],
-                                     command=lambda: submit(self, "gui", "tec0_pid"))
+                                     command=lambda: submit(self, b + "_d", "pwr_max"))
 
-        self.l_tec1_pid = tk.Label(self, text="TEC1 PID DISABLE (==0)", font=fonts['main'], bg=Background['main'])
-        self.t_tec1_pid = tk.Text(self, width=6, height=1)
-        self.s_tec1_pid = gui_label(self)
-        self.s_tec1_pid.update_status(getaddress("gui", "tec1_pid"), "tec1_pid")
-        self.b_tec1_pid = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+        self.l_pwr_init = tk.Label(self, text="Initial delay (ms)", font=fonts['main'], bg=Background['main'])
+        self.t_pwr_init = tk.Text(self, width=6, height=1)
+        self.s_pwr_init = pzt_label(self)
+        self.s_pwr_init.update_status(getaddress(b + "_d", "pwr_init"), "pwr_init", "driver")
+        self.b_pwr_init = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
                                      bg=Background['submit'],
-                                     command=lambda: submit(self, "gui", "tec1_pid"))
+                                     command=lambda: submit(self, b + "_d", "pwr_init"))
 
-        self.l_tec2_pid = tk.Label(self, text="TEC2 PID DISABLE (==0)", font=fonts['main'], bg=Background['main'])
-        self.t_tec2_pid = tk.Text(self, width=6, height=1)
-        self.s_tec2_pid = gui_label(self)
-        self.s_tec2_pid.update_status(getaddress("gui", "tec2_pid"), "tec2_pid")
-        self.b_tec2_pid = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+        self.l_pwr_delay = tk.Label(self, text="Period (ms)", font=fonts['main'], bg=Background['main'])
+        self.t_pwr_delay = tk.Text(self, width=6, height=1)
+        self.s_pwr_delay = pzt_label(self)
+        self.s_pwr_delay.update_status(getaddress(b + "_d", "pwr_delay"), "pwr_delay", "driver")
+        self.b_pwr_delay = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
                                      bg=Background['submit'],
-                                     command=lambda: submit(self, "gui", "tec2_pid"))
-        self.l_lock_timer = tk.Label(self, text="Lock warm-up", font=fonts['main'], bg=Background['main'])
-        self.t_lock_timer = tk.Text(self, width=6, height=1)
-        self.s_lock_timer = gui_label(self)
-        self.s_lock_timer.update_status(getaddress("gui", "lock_timer"), "lock_timer")
-        self.b_lock_timer = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                     command=lambda: submit(self, b + "_d", "pwr_delay"))
+        self.l_pwr_thresh = tk.Label(self, text="Threshold (%, 0.01)", font=fonts['main'], bg=Background['main'])
+        self.t_pwr_thresh = tk.Text(self, width=6, height=1)
+        self.s_pwr_thresh = pzt_label(self)
+        self.s_pwr_thresh.update_status(getaddress(b + "_d", "pwr_thresh"), "pwr_thresh", "driver")
+        self.b_pwr_thresh = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
                                      bg=Background['submit'],
-                                     command=lambda: submit(self, "gui", "lock_timer"))
+                                     command=lambda: submit(self, b + "_d", "pwr_thresh"))
 
-        self.b_wpq = tk.Button(self, text="Acquire potential lock points", bg=Background['submit'], width=35, font=fonts['main'],
-                                command=lambda: self.wpaq(self, b))
+        self.s_wpq = tk.Label(self, text="-", font=fonts['main'], bg=Background['main'])
+        self.b_wpq = tk.Button(self, text="Power target", bg=Background['submit'], width=35, font=fonts['main'],
+                                command=lambda: self.pwrtarget(self.s_wpq))
 
         self.title.grid(row=1, column=1, columnspan=2, sticky="nw", pady=self.pady)
 
-        self.l_minm.grid(row=2, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_minm.grid(row=2, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_minm.grid(row=2, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_minm.grid(row=2, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_comp_lock.grid(row=2, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_comp_lock.grid(row=2, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_comp_lock.grid(row=2, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_comp_lock.grid(row=2, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-        self.l_maxm.grid(row=3, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_maxm.grid(row=3, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_maxm.grid(row=3, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_maxm.grid(row=3, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_wl_e.grid(row=3, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_wl_e.grid(row=3, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_wl_e.grid(row=3, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_wl_e.grid(row=3, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-        # self.l_minsl.grid(row=4, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        # self.t_minsl.grid(row=4, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        # self.s_minsl.grid(row=4, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        # self.b_minsl.grid(row=4, column=4, columnspan=1, sticky="nw", pady=self.pady)
-        #
-        # self.l_maxsl.grid(row=5, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        # self.t_maxsl.grid(row=5, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        # self.s_maxsl.grid(row=5, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        # self.b_maxsl.grid(row=5, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_wl_tec.grid(row=6, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_wl_tec.grid(row=6, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_wl_tec.grid(row=6, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_wl_tec.grid(row=6, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-        self.l_minwp.grid(row=6, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_minwp.grid(row=6, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_minwp.grid(row=6, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_minwp.grid(row=6, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_wl_step.grid(row=7, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_wl_step.grid(row=7, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_wl_step.grid(row=7, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_wl_step.grid(row=7, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-        self.l_maxwp.grid(row=7, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_maxwp.grid(row=7, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_maxwp.grid(row=7, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_maxwp.grid(row=7, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_wl_max.grid(row=8, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_wl_max.grid(row=8, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_wl_max.grid(row=8, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_wl_max.grid(row=8, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-        self.l_clpt.grid(row=8, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_clpt.grid(row=8, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_clpt.grid(row=8, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_clpt.grid(row=8, column=4, columnspan=1, sticky="nw", pady=self.pady)
-
-        self.l_lock_tune.grid(row=9, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_lock_tune.grid(row=9, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_lock_tune.grid(row=9, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_lock_tune.grid(row=9, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_wl_init.grid(row=9, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_wl_init.grid(row=9, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_wl_init.grid(row=9, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_wl_init.grid(row=9, column=4, columnspan=1, sticky="nw", pady=self.pady)
         
-        self.l_tec_tune.grid(row=10, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_tec_tune.grid(row=10, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_tec_tune.grid(row=10, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_tec_tune.grid(row=10, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_wl_delay.grid(row=10, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_wl_delay.grid(row=10, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_wl_delay.grid(row=10, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_wl_delay.grid(row=10, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-        self.l_tec_tune_ramp.grid(row=11, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_tec_tune_ramp.grid(row=11, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_tec_tune_ramp.grid(row=11, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_tec_tune_ramp.grid(row=11, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_wl_thresh.grid(row=11, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_wl_thresh.grid(row=11, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_wl_thresh.grid(row=11, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_wl_thresh.grid(row=11, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-        self.l_tec_tune_ic.grid(row=12, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_tec_tune_ic.grid(row=12, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_tec_tune_ic.grid(row=12, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_tec_tune_ic.grid(row=12, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_wpq1.grid(row=12, column=3, columnspan=2, sticky="nw", pady=self.pady)
+        self.b_wpq1.grid(row=12, column=1, columnspan=2, sticky="nw", pady=self.pady)
 
-        self.l_dphd_thres.grid(row=13, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_dphd_thres.grid(row=13, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_dphd_thres.grid(row=13, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_dphd_thres.grid(row=13, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        self.title2.grid(row=13, column=1, columnspan=2, sticky="nw", pady=self.pady)
+
+        self.l_pwr_e.grid(row=14, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_pwr_e.grid(row=14, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_pwr_e.grid(row=14, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_pwr_e.grid(row=14, column=4, columnspan=1, sticky="nw", pady=self.pady)
+
+
+        self.l_pwr_tec.grid(row=15, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_pwr_tec.grid(row=15, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_pwr_tec.grid(row=15, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_pwr_tec.grid(row=15, column=4, columnspan=1, sticky="nw", pady=self.pady)
         
-        self.l_pid_timer.grid(row=14, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_pid_timer.grid(row=14, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_pid_timer.grid(row=14, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_pid_timer.grid(row=14, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_pwr_step.grid(row=16, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_pwr_step.grid(row=16, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_pwr_step.grid(row=16, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_pwr_step.grid(row=16, column=4, columnspan=1, sticky="nw", pady=self.pady)
         
-        self.l_tec0_pid.grid(row=15, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_tec0_pid.grid(row=15, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_tec0_pid.grid(row=15, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_tec0_pid.grid(row=15, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_pwr_max.grid(row=17, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_pwr_max.grid(row=17, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_pwr_max.grid(row=17, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_pwr_max.grid(row=17, column=4, columnspan=1, sticky="nw", pady=self.pady)
         
-        self.l_tec1_pid.grid(row=16, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_tec1_pid.grid(row=16, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_tec1_pid.grid(row=16, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_tec1_pid.grid(row=16, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_pwr_init.grid(row=18, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_pwr_init.grid(row=18, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_pwr_init.grid(row=18, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_pwr_init.grid(row=18, column=4, columnspan=1, sticky="nw", pady=self.pady)
         
-        self.l_tec2_pid.grid(row=17, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_tec2_pid.grid(row=17, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_tec2_pid.grid(row=17, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_tec2_pid.grid(row=17, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_pwr_delay.grid(row=19, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_pwr_delay.grid(row=19, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_pwr_delay.grid(row=19, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_pwr_delay.grid(row=19, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-        self.l_lock_timer.grid(row=18, column=1, columnspan=1, sticky="nw", pady=self.pady)
-        self.t_lock_timer.grid(row=18, column=2, columnspan=1, sticky="nw", pady=self.pady)
-        self.s_lock_timer.grid(row=18, column=3, columnspan=1, sticky="nw", pady=self.pady)
-        self.b_lock_timer.grid(row=18, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        self.l_pwr_thresh.grid(row=20, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_pwr_thresh.grid(row=20, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_pwr_thresh.grid(row=20, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_pwr_thresh.grid(row=20, column=4, columnspan=1, sticky="nw", pady=self.pady)
 
-        self.b_wpq.grid(row=19, column=1, columnspan=6, sticky="nw", pady=self.pady)
+        self.s_wpq.grid(row=21, column=3, columnspan=2, sticky="nw", pady=self.pady)
+        self.b_wpq.grid(row=21, column=1, columnspan=2, sticky="nw", pady=self.pady)
 
+    def wltarget(self, s):
+        val = round(getvalue(getaddress("pzt0_d", "wl_target"), "u", "m")["value"],2)
+        s.configure(text = val)
+
+    def pwrtarget(self, s):
+        val = round(getvalue(getaddress("pzt0_d", "pwr_target"), "u", "m")["value"], 2)
+        s.configure(text = val)
     def wpaq(self, master, b):
 
         self.padyy = 5

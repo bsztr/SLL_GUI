@@ -70,7 +70,8 @@ def Logger_wrap(modules, name):
               "REG_PZTx_DPhD1_VOLTAGE": "DPhD 1",
               "REG_TECx_OUT_CURRENT": "Current",
               "REG_TECx_CURRENT_T": "Temperature",
-              "REG_LD_CO_CURRENT": "Laser Driver Current"}
+              "REG_LD_CO_CURRENT": "Laser Driver Current",
+              "PCB_TEMP": "PCB Temperature"}
 
     results = {}
 
@@ -87,6 +88,7 @@ def Logger_wrap(modules, name):
     for ld in lds:
         for measurement in ld_measurements:
             field_names.append(f"{ld} - {labels[measurement]}")
+    field_names.append("PCB temperature")
 
     if Globals.logoff == 2:
         with open(file, "a", newline="") as f:
@@ -113,6 +115,7 @@ def Logger_wrap(modules, name):
                 results[f"{ld} - {labels[measurement]}"] = get_value(ld, measurement)["value"]
 
         results["time"] = datetime.now()
+        results["PCB temperature"] = getvalue("0x1654", "u", "1")["value"]
 
         with open(file, "a", newline="") as f:
             csv_writer = DictWriter(f, fieldnames=field_names)

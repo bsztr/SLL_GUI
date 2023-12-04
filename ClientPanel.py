@@ -484,14 +484,17 @@ class ClientPanel(tk.Frame):
                     if readbit(source, eval("indicator[item]")["green"]) == "1":
 
                         exec("Globals." + itemo + " = Colours['green']")
-                    elif item == "pzt1" or item == "pzt0":
-                        if readbit (source, eval("indicator[item]")["blue"]) == "1":
-                            exec("Globals." + itemo + " = Colours['blue']")
-                        elif readbit (source, eval("indicator[item]")["orange"]) == "1":
-                            exec("Globals." + itemo + " = Colours['orange']")
-                        else:
-                            exec("Globals." + itemo + " = Colours['amber']")
                     else:
+                        exec("Globals." + itemo + " = Colours['amber']")
+
+                elif item == "pzt1" or item == "pzt0":
+                    if readbit (source, eval("indicator[item]")["blue"]) == "1":
+                        exec("Globals." + itemo + " = Colours['blue']")
+                    elif readbit (source, eval("indicator[item]")["orange"]) == "1":
+                        exec("Globals." + itemo + " = Colours['orange']")
+                    elif readbit(source, eval("indicator[item]")["green"]) == "1":
+                        exec("Globals." + itemo + " = Colours['green']")
+                    elif readbit(source, eval("indicator[item]")["amber"]) == "1":
                         exec("Globals." + itemo + " = Colours['amber']")
                 else:
                     exec("Globals." + itemo + " = Colours['darkgrey']")

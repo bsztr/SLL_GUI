@@ -553,7 +553,7 @@ pztAddr = {
     "REG_PZTx_DPhD_ABS_GCOR": [10, "f", "1"],
     "REG_PZTx_DPhD_VOLTAGE": [80, "u", "1"],
     "REG_PZTx_DPhD1_VOLTAGE": [81, "u", "1"],
-    "REG_PZTx_OV": [82, "u", "1"],
+    "REG_PZTx_OV": [83, "u", "m"],
     "REG_PZTx_OV_ABS_OFF": [13, "i", "u"],
     "REG_PZTx_OV_ABS_GCOR": [14, "f", "1"],
     "REG_PZTx_TARGET_V": [15, "i", "u"],

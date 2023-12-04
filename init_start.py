@@ -37,10 +37,12 @@ def retrieve(instance):
     return input
 
 def submit(self, b, rel, thresh = "", min = "", max = ""):
+
     instance=eval("self.t_"+rel)
     label=eval("self.s_"+rel)
     arg1=eval(base[b][1])[rel][1]
     arg2=eval(base[b][1])[rel][2]
+
     if min == "" and max == "":
         exc=setvalue(getaddress(b,rel), retrieve(instance), arg1, arg2)
         if exc['success'] == 1:
