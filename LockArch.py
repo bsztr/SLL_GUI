@@ -156,16 +156,16 @@ class LockArch(tk.Frame):
         #                              bg=Background['submit'],
         #                              command=lambda: submit_r(self, base + "_d", "dpotb_amp",0,255))
 
-        self.l_dpot_sampl = tk.Label(master, text="DPOT0 Sampling (ms)", font=fonts['main'], bg=Background['main'])
+        self.l_dpot_sampl = tk.Label(master, text="Intensity Sampling (ms)", font=fonts['main'], bg=Background['main'])
         self.t_dpot_sampl = tk.Text(master, width=6, height=1)
         self.b_dpot_sampl = tk.Button(master, width=3, height=1, text="Plot", font=fonts['submit'],
                                   bg=Background['plot'], fg="white",
-                                  command=lambda: self.plot(base, "PD0 power", "dpot0", self.t_dpot_sampl))
-        self.l_dpot_sampl2 = tk.Label(master, text="DPOT1 Sampling (ms)", font=fonts['main'], bg=Background['main'])
+                                  command=lambda: self.plot(base, "INTENSITY power", "dpot0", self.t_dpot_sampl))
+        self.l_dpot_sampl2 = tk.Label(master, text="Etalon Sampling (ms)", font=fonts['main'], bg=Background['main'])
         self.t_dpot_sampl2 = tk.Text(master, width=6, height=1)
         self.b_dpot_sampl2 = tk.Button(master, width=3, height=1, text="Plot", font=fonts['submit'],
                                   bg=Background['plot'], fg="white",
-                                  command=lambda: self.plot(base, "PD1 power", "dpot1", self.t_dpot_sampl2))
+                                  command=lambda: self.plot(base, "LOCK power", "dpot1", self.t_dpot_sampl2))
 
 
         self.l_clptitle = tk.Label(master, text="CLP Photodiode Settings", font=fonts['title'], bg=Background['main'])
@@ -177,11 +177,11 @@ class LockArch(tk.Frame):
         self.b_dpot2 = tk.Button(master, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
                                  command=lambda: submit_r(self, "dphd", "dpot2", 0, 255))
 
-        self.l_dpot_sampl3 = tk.Label(master, text="DPOT2 Sampling (ms)", font=fonts['main'], bg=Background['main'])
+        self.l_dpot_sampl3 = tk.Label(master, text="CLP Sampling (ms)", font=fonts['main'], bg=Background['main'])
         self.t_dpot_sampl3 = tk.Text(master, width=6, height=1)
         self.b_dpot_sampl3 = tk.Button(master, width=3, height=1, text="Plot", font=fonts['submit'],
                                       bg=Background['plot'], fg="white",
-                                      command=lambda: self.plot(base, "PD2 power", "dpot2", self.t_dpot_sampl3))
+                                      command=lambda: self.plot(base, "CLP power", "dpot2", self.t_dpot_sampl3))
         
         self.l_clp_cal = tk.Label(master, text="CLP calibration", font=fonts['main'], bg=Background['main'])
         self.t_clp_cal = tk.Text(master, width=6, height=1)
@@ -1183,6 +1183,42 @@ class advdata(tk.Frame):
         self.s_wpq = tk.Label(self, text="-", font=fonts['main'], bg=Background['main'])
         self.b_wpq = tk.Button(self, text="Power target", bg=Background['submit'], width=35, font=fonts['main'],
                                 command=lambda: self.pwrtarget(self.s_wpq))
+        
+        self.title3 = tk.Label(self, text="PD Configuration", font=fonts['title'], bg=Background['main'])
+
+        self.l_int_ch = tk.Label(self, text="Intensity PD", font=fonts['main'], bg=Background['main'])
+        self.t_int_ch = tk.Text(self, width=6, height=1)
+        self.s_int_ch = pzt_label(self)
+        try:
+            self.s_int_ch.update_status(getaddress(b + "_d", "int_ch"), "int_ch", "driver")
+        except:
+            self.s_int_ch.configure(text="NA")
+        self.b_int_ch = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                         bg=Background['submit'],
+                                         command=lambda: submit(self, b + "_d", "int_ch"))
+        
+        self.l_lock_ch = tk.Label(self, text="Etalon PD", font=fonts['main'], bg=Background['main'])
+        self.t_lock_ch = tk.Text(self, width=6, height=1)
+        self.s_lock_ch = pzt_label(self)
+        try:
+            self.s_lock_ch.update_status(getaddress(b + "_d", "lock_ch"), "lock_ch", "driver")
+        except:
+            self.s_lock_ch.configure(text="NA")
+        self.b_lock_ch = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                         bg=Background['submit'],
+                                         command=lambda: submit(self, b + "_d", "lock_ch"))
+        
+        self.l_clp_ch = tk.Label(self, text="CLP PD", font=fonts['main'], bg=Background['main'])
+        self.t_clp_ch = tk.Text(self, width=6, height=1)
+        self.s_clp_ch = pzt_label(self)
+        try:
+            self.s_clp_ch.update_status(getaddress(b + "_d", "clp_ch"), "clp_ch", "driver")
+        except:
+            self.s_clp_ch.configure(text="NA")
+        self.b_clp_ch = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'],
+                                         bg=Background['submit'],
+                                         command=lambda: submit(self, b + "_d", "clp_ch"))
+        
 
         self.title.grid(row=1, column=1, columnspan=2, sticky="nw", pady=self.pady)
 
@@ -1269,7 +1305,23 @@ class advdata(tk.Frame):
 
         self.s_wpq.grid(row=21, column=3, columnspan=2, sticky="nw", pady=self.pady)
         self.b_wpq.grid(row=21, column=1, columnspan=2, sticky="nw", pady=self.pady)
+        
+        self.title3.grid(row=22, column=1, columnspan=2, sticky="nw", pady=self.pady)
 
+        self.l_int_ch.grid(row=23, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_int_ch.grid(row=23, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_int_ch.grid(row=23, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_int_ch.grid(row=23, column=4, columnspan=1, sticky="nw", pady=self.pady)
+
+        self.l_lock_ch.grid(row=24, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_lock_ch.grid(row=24, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_lock_ch.grid(row=24, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_lock_ch.grid(row=24, column=4, columnspan=1, sticky="nw", pady=self.pady)
+        
+        self.l_clp_ch.grid(row=25, column=1, columnspan=1, sticky="nw", pady=self.pady)
+        self.t_clp_ch.grid(row=25, column=2, columnspan=1, sticky="nw", pady=self.pady)
+        self.s_clp_ch.grid(row=25, column=3, columnspan=1, sticky="nw", pady=self.pady)
+        self.b_clp_ch.grid(row=25, column=4, columnspan=1, sticky="nw", pady=self.pady)
     def wltarget(self, s):
         val = round(getvalue(getaddress("pzt0_d", "wl_target"), "u", "m")["value"],2)
         s.configure(text = val)

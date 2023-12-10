@@ -257,7 +257,10 @@ pzt_d = {
     'pwr_init': [36, 'u', '1'],
     'pwr_delay': [37, 'u', '1'],
     'pwr_thresh': [38, 'f', '1'],
-    'pwr_target': [86, 'u', 'm']
+    'pwr_target': [86, 'u', 'm'],
+    'int_ch': [40, 'u', '1'],
+    'lock_ch': [41, 'u', '1'],
+    'clp_ch': [42, 'u', '1']
 }
 
 
