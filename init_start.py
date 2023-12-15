@@ -254,14 +254,24 @@ def getnames_init():
     Names={}
     Names['low'] = getvalue(getaddress("gui", "low"), "u", "u")["value"]
     ###DPOT INIT
-    dp0 = getvalue(getaddress("gui", "dpot0"))["value"]
-    dp1 = getvalue(getaddress("gui", "dpot1"))["value"]
-    if dp0 > 255:
-        dp0 = 255
-    if dp1 > 255:
-        dp1 = 255
-    setvalue(getaddress("dphd", "dpot0"),dp0)
-    setvalue(getaddress("dphd", "dpot1"),dp1)
+    # dp0 = getvalue(getaddress("gui", "dpot0"))["value"]
+    # dp1 = getvalue(getaddress("gui", "dpot1"))["value"]
+    # dp2 = getvalue(getaddress("gui", "dpot2"))["value"]
+    #
+    # if dp0 > 255:
+    #     dp0 = 255
+    # if dp1 > 255:
+    #     dp1 = 255
+    # if dp2 > 255:
+    #     dp2 = 255
+    #
+    # setvalue(getaddress("dphd", "dpot0"),dp0)
+    # setvalue(getaddress("dphd", "dpot1"),dp1)
+    # setvalue(getaddress("dphd", "dpot2"),dp2)
+    #
+    # dp0 = getvalue(getaddress("gui", "dpot0"))["value"]
+    # dp1 = getvalue(getaddress("gui", "dpot1"))["value"]
+    # dp2 = getvalue(getaddress("gui", "dpot2"))["value"]
 
     ###LD INIT
     if Names['low'] > 4:

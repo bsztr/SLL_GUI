@@ -96,6 +96,12 @@ class GeneralPanel(tk.Frame):
         self.b_dpot1 = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
                                  command=lambda: submit_r(self, "gui", "dpot1", 0, 255))
 
+        self.l_dpot2 = tk.Label(self, text="DPOT2 default:", font=fonts['main'], bg=Background['main'])
+        self.t_dpot2 = tk.Text(self, font=fonts['main'], width=10, height=1)
+        self.s_dpot2 = gui_label(self)
+        self.s_dpot2.update_status(getaddress("gui", "dpot2"), "dpot2")
+        self.b_dpot2 = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+                                 command=lambda: submit_r(self, "gui", "dpot2", 0, 255))
         # self.l_trial = tk.Label(self, text="Trial On(1), Off(0):", font=fonts['main'], bg=Background['main'])
         # self.t_trial = tk.Text(self, font=fonts['main'], width=10, height=1)
         # self.s_trial = gui_label(self)
@@ -263,6 +269,10 @@ class GeneralPanel(tk.Frame):
         self.t_dpot1.grid(row=11, column=2, columnspan=1, sticky="ne", pady=5)
         self.s_dpot1.grid(row=11, column=3, columnspan=1, sticky="ne", pady=5)
         self.b_dpot1.grid(row=11, column=4, columnspan=1, sticky="nw", pady=5)
+        self.l_dpot2.grid(row=12, column=1, columnspan=1, sticky="nw", pady=5)
+        self.t_dpot2.grid(row=12, column=2, columnspan=1, sticky="ne", pady=5)
+        self.s_dpot2.grid(row=12, column=3, columnspan=1, sticky="ne", pady=5)
+        self.b_dpot2.grid(row=12, column=4, columnspan=1, sticky="nw", pady=5)
         # self.l_trial.grid(row=11, column=1, columnspan=1, sticky="nw", pady=5)
         # self.t_trial.grid(row=11, column=2, columnspan=1, sticky="ne", pady=5)
         # self.s_trial.grid(row=11, column=3, columnspan=1, sticky="ne", pady=5)

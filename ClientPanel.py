@@ -822,23 +822,6 @@ class ClientPanel(tk.Frame):
         return self.actual
 
     def laser_on(self):
-        if Globals.tec_stab == 1:
-            self.ld_on()
-        else:
-            self.activation()
-            self.actual = Globals.status_bit
-
-            self.message_trigger("System is powering up. \n")
-
-            #self.actual=getvalue(control["address"])['value']
-
-            if readbit(self.actual, 10) == "0":
-                 addvalue(control["address"], control["tec"])
-                 self.message_trigger("TECs are initialising, this will take some time. \n")
-
-            self.tec_on()
-
-    def laser_on(self):
         if Globals.disconnect == 1:
             self.connect()
         if Globals.tec_stab == 1:
@@ -849,13 +832,10 @@ class ClientPanel(tk.Frame):
 
             self.message_trigger("System is powering up. \n")
 
-            # self.actual=getvalue(control["address"])['value']
+            #self.actual=getvalue(control["address"])['value']
 
-            if getbit(status["address"], status["STATUS_OK"]) == "1" and getbit(status["address"],
-                                                                                status["TEC_WARMING_UP"]) == "0":
-                addvalue(control['address'],
-                         2 ** control["tec0"] + 2 ** control["tec1"] + 2 ** control["tec2"] + 2 ** control[
-                             "tec3"] + 2 ** control["tec4"] + 2 ** control["tec5"])
+            if getbit(status["address"], status["STATUS_OK"]) == "1" and getbit(status["address"],status["TEC_WARMING_UP"]) == "0":
+                addvalue(control['address'],2 ** control["tec0"] + 2 ** control["tec1"] + 2 ** control["tec2"] + 2 ** control["tec3"] + 2 ** control["tec4"] + 2 ** control["tec5"])
                 self.message_trigger("TECs are turning on.\n")
 
             self.tec_on()
