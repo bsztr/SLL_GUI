@@ -148,10 +148,10 @@ def setvalue(address, val, type="u", conv="1"):
 
     arg="0x"+str(address.lower())
     ser.write(("SET$"+arg+"$"+str(val)+chr(13)).encode())
-    print("SET$"+arg+"$"+str(val)+chr(13))
+    #print("SET$"+arg+"$"+str(val)+chr(13))
     result = dict()
     reply = str(ser.read(8))
-    print(reply)
+    #print(reply)
     check=getvalue(address, type, conv)
     if check["success"]==1:
             result['success']=1

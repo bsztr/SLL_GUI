@@ -67,7 +67,7 @@ global errorno
 global pztreset
 
 fwver = "0"
-guiver = "3.5.1"
+guiver = "3.5.2"
 #Fixed analogue pzt driver bugs.
 
 

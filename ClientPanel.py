@@ -213,8 +213,10 @@ class ClientPanel(tk.Frame):
         self.b_loff = tk.Button(self.gui, text="SYSTEM OFF", bg=Colours['red'], fg="white",
                                 command=lambda: self.laser_off(), font=fonts['subbutton'], height=1, width=10)
         if Globals.opmsetting == 1:
-            self.b_lock = tk.Button(self.gui, text="Lock Power", fg=Colours["darkgrey"], bg=Colours['grey'], command="",
-                                    font=fonts['subbutton'], height=1, width=10)
+            self.b_lock = tk.Button(self.gui, text="RELOCK", fg=Colours["darkgrey"], bg=Colours['grey'], command="",
+                                        font=fonts['subbutton'], height=1, width=10)
+        #     self.b_lock = tk.Button(self.gui, text="Lock Power", fg=Colours["darkgrey"], bg=Colours['grey'], command="",
+        #                             font=fonts['subbutton'], height=1, width=10)
 
 
         self.b_alignment = tk.Button(self.gui, text="EXT ALIGNMENT", fg="black", bg=Colours['lightgrey'],
@@ -250,15 +252,21 @@ class ClientPanel(tk.Frame):
 
             self.l_reg_scale = tk.Label(self.gui, text="Output power regulation", font=fonts['main'],
                                      bg=Background['main'])
-            self.ld_scale = tk.Scale(self.gui, from_=0, to=100, tickinterval= False,
+            self.ld_scale = tk.Scale(self.gui, from_=0, to=200, tickinterval= False,
                                      resolution=1, orient=tk.HORIZONTAL,
                                      bg=Background["main"], font=fonts["main"], command="")
             current_ld = getvalue(getaddress("ld_d", "curr"), "u", "u")["value"]
-            stepy =Globals.shiftldrange/100
-            orig = Globals.shiftmincurrent #+ Globals.shiftldrange/2
-            opmstep = int(((current_ld -orig)/Globals.shiftldrange)*100)
+            low_ld = getvalue(getaddress("gui", "low"), "u", "u")["value"]
+            high_ld = getvalue(getaddress("gui", "high"), "u", "u")["value"]
+            ld_range = high_ld - low_ld
+            steps = 200
+            stepy =ld_range/steps
+            orig = low_ld
+            opmstep = int(((current_ld -orig)/ld_range)*steps)
+            Globals.shiftldrange = ld_range
+            Globals.shiftmincurrent = low_ld
 
-            if abs(opmstep) > 100 or abs(opmstep) < 0:
+            if abs(opmstep) > 200 or abs(opmstep) < 0:
                 opmstep = 0
             self.ld_scale.set(opmstep)
             self.b_plus_reg = tk.Button(self.gui, text="+", bg=Colours['grey'],
@@ -271,12 +279,12 @@ class ClientPanel(tk.Frame):
             self.ld_scale.grid(row=22, column=1, columnspan=4, rowspan=1, sticky="nwes", padx=(3, 3), pady=(2, 2))
 
 
-            if opmstep > 95:
-                self.b_shiftbutton = tk.Button(self.gui, text="Shift", fg="red",bg=Colours['grey'],
-                                           command=lambda: self.startshift(), font=fonts['title'], height=1,
-                                           width=5)
-                self.b_shiftbutton.grid(row=29, column=3, columnspan=2, rowspan=1, sticky="nwse", pady=(0,6), padx=6)
-
+            # if opmstep > 95:
+            #     self.b_shiftbutton = tk.Button(self.gui, text="Shift", fg="red",bg=Colours['grey'],
+            #                                command=lambda: self.startshift(), font=fonts['title'], height=1,
+            #                                width=5)
+            #     self.b_shiftbutton.grid(row=29, column=3, columnspan=2, rowspan=1, sticky="nwse", pady=(0,6), padx=6)
+            #
 
 
         # Grid - Info pan
@@ -871,11 +879,31 @@ class ClientPanel(tk.Frame):
                     self.message_trigger("Pump LD is turning on. \n")
                     self.gui.after_cancel(self.ld_after)
                     self.pzt_on()
-                    setvalue(getaddress("ld_d", "curr"), Globals.Names['high'], "u", "u")
+                    if Globals.opmsetting == 1:
+                        setting = getvalue(getaddress("ld_d", "curr"), "u", "u")["value"]
+                        if setting < Globals.Names['high'] and setting > Globals.Names['low']:
+                            TARGET_CURR = setting
+                        elif setting <= Globals.Names['low']:
+                            TARGET_CURR = Globals.Names['high']
+                        else:
+                            TARGET_CURR = Globals.Names['high']
+                    else:
+                        TARGET_CURR = Globals.Names['high']
+                    setvalue(getaddress("ld_d", "curr"), TARGET_CURR, "u", "u")
                 if readbit(self.actual, status["TEC_READY"]) == "1" and Globals.laser_turnhigh == 1:
                     Globals.ramp_enabled = 0
                     Globals.laser_turnhigh = 0
-                    setvalue(getaddress("ld_d", "curr"), Globals.Names['high'], "u", "u")
+                    if Globals.opmsetting == 1:
+                        setting = getvalue(getaddress("ld_d", "curr"), "u", "u")["value"]
+                        if setting < Globals.Names['high'] and setting > Globals.Names['low']:
+                            TARGET_CURR = setting
+                        elif setting <= Globals.Names['low']:
+                            TARGET_CURR = Globals.Names['high']
+                        else:
+                            TARGET_CURR = Globals.Names['high']
+                    else:
+                        TARGET_CURR = Globals.Names['high']
+                    setvalue(getaddress("ld_d", "curr"), TARGET_CURR, "u", "u")
                     self.lock_on()
 
             else:
@@ -1282,29 +1310,21 @@ class ClientPanel(tk.Frame):
         if hasattr(self, "ld_scale"):
             result = float(self.ld_scale.get())
 
-            if result > 100:
-                result = 100
-                self.message_trigger("Power offset limit reached at +100. \n")
+            if result > 200:
+                result = 200
+                self.message_trigger("Power offset limit reached at +200. \n")
             if result < 0:
                 result = 0
                 self.message_trigger("Power offset limit reached at 0. \n")
 
-            #self.ld_scale.set(result)
-            if result > 95:
-                if not hasattr(self, "b_shiftbutton"):
-                    self.b_shiftbutton = tk.Button(self.gui, text="Shift", fg="red", bg=Colours['grey'],
-                                                   command=lambda: self.startshift(), font=fonts['title'], height=1,
-                                                   width=5)
-                    self.b_shiftbutton.grid(row=29, column=3, columnspan=2, rowspan=1, sticky="nwse", pady=(0, 6),
-                                            padx=6)
-                    self.message_trigger("Crystal can be shifted to new position.\n")
-
-            step = Globals.shiftldrange / 100
+            step = Globals.shiftldrange / 200
             orig = Globals.shiftmincurrent
 
             result = orig + step * result
-            #print(result)
-            setvalue(getaddress("ld_d", "curr"), result, "u", "u")
+            if getbit(status["address"], status["LD_STABLE"]) == "1":
+                setvalue(getaddress("ld_d", "curr"), result, "u", "u")
+            else:
+                self.message_trigger("LD needs to stabilise first.\n")
 
     def ldoffset(self, x):
         if x == 1:
@@ -1314,21 +1334,21 @@ class ClientPanel(tk.Frame):
 
         result = float(self.ld_scale.get()) + addv
 
-        if result > 100:
-            result = 100
-            self.message_trigger("Power offset limit reached at +100. \n")
+        if result > 200:
+            result = 200
+            self.message_trigger("Power offset limit reached at +200. \n")
         if result < 0:
             result = 0
             self.message_trigger("Power offset limit reached at 0. \n")
 
         self.ld_scale.set(result)
-        if result > 95:
-            if not hasattr(self, "b_shiftbutton"):
-                self.b_shiftbutton = tk.Button(self.gui, text="Shift", fg="red", bg=Colours['grey'],
-                                               command=lambda: self.startshift(), font=fonts['title'], height=1,
-                                               width=5)
-                self.b_shiftbutton.grid(row=29, column=3, columnspan=2, rowspan=1, sticky="nwse", pady=(0, 6), padx=6)
-                self.message_trigger("Crystal can be shifted to new position.\n")
+        # if result > 95:
+        #     if not hasattr(self, "b_shiftbutton"):
+        #         self.b_shiftbutton = tk.Button(self.gui, text="Shift", fg="red", bg=Colours['grey'],
+        #                                        command=lambda: self.startshift(), font=fonts['title'], height=1,
+        #                                        width=5)
+        #         self.b_shiftbutton.grid(row=29, column=3, columnspan=2, rowspan=1, sticky="nwse", pady=(0, 6), padx=6)
+        #         self.message_trigger("Crystal can be shifted to new position.\n")
 
 
         step = Globals.shiftldrange / 100
@@ -1336,7 +1356,10 @@ class ClientPanel(tk.Frame):
 
         result = orig + step*result
 
-       # setvalue(getaddress("ld_d", "curr"), result)
+        if getbit(status["address"], status["LD_STABLE"]) == "1":
+            setvalue(getaddress("ld_d", "curr"), result, "u", "u")
+        else:
+            self.message_trigger("LD needs to stabilise first.\n")
 
 
     def opm_on(self):

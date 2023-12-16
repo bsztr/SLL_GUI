@@ -361,6 +361,7 @@ def init():
                 available.append(item.upper())
     getnames_init()
     print(available)
+    Globals.opmsetting = getvalue(getaddress("gui", "power_enable"), "u", "1")["value"]
 
 
     # if Globals.shiftenabled > 0:
@@ -377,8 +378,7 @@ def init():
     #     if Globals.shiftldrange < 0:
     #         Globals.shiftldrange = 0
     #
-    #     Globals.opmsetting = getvalue(getaddress("gui", "opm_setting"), "u", "u")["value"]
-    #     #print("opm set to", Globals.opmsetting)
+
     # #comm_reset()
     # #print(available)
     return available
