@@ -1351,11 +1351,10 @@ class ClientPanel(tk.Frame):
         #         self.message_trigger("Crystal can be shifted to new position.\n")
 
 
-        step = Globals.shiftldrange / 100
+        step = Globals.shiftldrange / 200
         orig = Globals.shiftmincurrent
 
         result = orig + step*result
-
         if getbit(status["address"], status["LD_STABLE"]) == "1":
             setvalue(getaddress("ld_d", "curr"), result, "u", "u")
         else:

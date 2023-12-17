@@ -181,7 +181,13 @@ class pzt_label(tk.Label):
         else:
             nd="_d"
 
-        self.result = round(getvalue(address, eval("pzt"+nd)[rel][1], eval("pzt"+nd)[rel][2])['value'], 2)
+        self.result = round(getvalue(address, eval("pzt"+nd)[rel][1], eval("pzt"+nd)[rel][2])['value'], 6)
+
+        if abs(self.result) < 0.02:
+            if self.result != 0:
+                self.result = sci(self.result)
+        else:
+            self.result = round(self.result, 2)
         self.configure(text=str(self.result), fg=Colours['darkgrey'], font=fonts['status'],
                         bg=Background['main'])
 

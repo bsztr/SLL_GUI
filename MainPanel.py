@@ -1336,7 +1336,7 @@ class MainPanel(tk.Frame):
         #         self.message_trigger("Crystal can be shifted to new position.\n")
 
 
-        step = Globals.shiftldrange / 100
+        step = Globals.shiftldrange / 200
         orig = Globals.shiftmincurrent
 
         result = orig + step*result
