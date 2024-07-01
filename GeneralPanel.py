@@ -88,6 +88,13 @@ class GeneralPanel(tk.Frame):
         self.s_power_enable.update_status(getaddress("gui", "power_enable"), "power_enable")
         self.b_power_enable = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
                                   command=lambda: submit_r(self, "gui", "power_enable", 0, 255))
+        
+        self.l_clock_zero = tk.Label(self, text="Shiipped clock:", font=fonts['main'], bg=Background['main'])
+        self.t_clock_zero = tk.Text(self, font=fonts['main'], width=10, height=1)
+        self.s_clock_zero = gui_label(self)
+        self.s_clock_zero.update_status(getaddress("gui", "clock_zero"), "clock_zero")
+        self.b_clock_zero = tk.Button(self, width=3, height=1, text="OK", font=fonts['submit'], bg=Background['submit'],
+                                  command=lambda: submit_r(self, "gui", "clock_zero", 0, 15000))
 
         # self.l_dpot0 = tk.Label(self, text="DPOT0 default:", font=fonts['main'], bg=Background['main'])
         # self.t_dpot0 = tk.Text(self, font=fonts['main'], width=10, height=1)
@@ -272,6 +279,10 @@ class GeneralPanel(tk.Frame):
         self.t_power_enable.grid(row=10, column=2, columnspan=1, sticky="ne", pady=5)
         self.s_power_enable.grid(row=10, column=3, columnspan=1, sticky="ne", pady=5)
         self.b_power_enable.grid(row=10, column=4, columnspan=1, sticky="nw", pady=5)
+        self.l_clock_zero.grid(row=11, column=1, columnspan=1, sticky="nw", pady=5)
+        self.t_clock_zero.grid(row=11, column=2, columnspan=1, sticky="ne", pady=5)
+        self.s_clock_zero.grid(row=11, column=3, columnspan=1, sticky="ne", pady=5)
+        self.b_clock_zero.grid(row=11, column=4, columnspan=1, sticky="nw", pady=5)
         # self.l_dpot1.grid(row=11, column=1, columnspan=1, sticky="nw", pady=5)
         # self.t_dpot1.grid(row=11, column=2, columnspan=1, sticky="ne", pady=5)
         # self.s_dpot1.grid(row=11, column=3, columnspan=1, sticky="ne", pady=5)

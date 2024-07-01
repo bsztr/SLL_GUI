@@ -62,11 +62,16 @@ class MainPanel(tk.Frame):
         #self.l_info=tk.Label(self.gui, text="Solo 640", fg=Colours['solo'], font=fonts['model'], bg=Background['main'])
         self.l_info=Logo(self.gui)
         self.l_info.update_logo()
+        self.hour_s = round(getvalue(getaddress("gui","clock_zero"),"u","1")["value"]/6,1)
+        if self.hour_s > 150000:
+            self.hour_s = 0
+        self.hour = round(getvalue("0x0005", "u", "1")["value"]/6,1)
+        self.clock_disp = str(round(self.hour-self.hour_s))
         try:
             self.serialnumber=str(getvalue(getaddress("lh", "serial"),lh['serial'][1],lh['serial'][2])['value'])
         except:
             self.serialnumber = "TEST_ENV"
-        self.l_serial=tk.Label(self.gui, text="S/N: " + self.serialnumber, font=fonts['detection'], fg="grey", bg=Background['main'])
+        self.l_serial=tk.Label(self.gui, text="S/N: " + self.serialnumber + ", " + self.clock_disp, font=fonts['detection'], fg="grey", bg=Background['main'])
         self.l_power=tk.Label(self.gui, text="Power status", font=fonts['indicator'], bg=Background['main'])
         self.l_tec=tk.Label(self.gui, text="TEC status", font=fonts['indicator'], bg=Background['main'])
         self.l_laser=tk.Label(self.gui, text="Pump LD status", font=fonts['indicator'], bg=Background['main'])
@@ -892,7 +897,10 @@ class MainPanel(tk.Frame):
                     else:
                         TARGET_CURR = Globals.Names['high']
                     setvalue(getaddress("ld_d", "curr"), TARGET_CURR, "u", "u")
-                    self.lock_on()
+                    if TARGET_CURR < 0.95*Globals.Names['high'] and TARGET_CURR > Globals.Names['low']:
+                        self.park_on()
+                    else:
+                        self.lock_on()
 
             else:
                 self.message_trigger("TECs not stabilised yet.")
@@ -928,34 +936,39 @@ class MainPanel(tk.Frame):
             if getbit(status["address"], status["LD_STABLE"]) == "1":
                 addvalue(control['address'], 2 ** control['pzt0'] + 2 ** control['pzt1'])
                 time.sleep(3)
-                #self.ramp_enabled()
+                # self.ramp_enabled()
             self.pzt_after = self.gui.after(1000, self.pzt_on)
             Globals.runnning_PROC.append(self.pzt_after)
             if getbit(status["address"], status["LD_STABLE"]) == "1":
 
                 if getbit(status["address"], status["LD_STABLE"]) == "1":
                     self.message_trigger("Pump LD has stabilised, locking will be initiated \n")
-                    if "PZT0" in Globals.available:
-                        control_bit = getvalue(control["address"])["value"]
-                        if readbit(control_bit, control["pzt0_lock"]) == "1":
-                            resvalue(control["address"], 2 ** control["pzt0_lock"])
-                        if readbit(control_bit, control["pzt0_ramp"]) == "1":
-                            resvalue(control["address"], 2 ** control["pzt0_ramp"])
-                        if readbit(control_bit, control["pzt0_park"]) == "1":
-                            resvalue(control["address"], 2 ** control["pzt0_park"])
-                        if readbit(control_bit, control["pzt0_tune"]) != "1":
-                            addvalue(control["address"], 2 ** control["pzt0_tune"])
-
-                    if "PZT1" in Globals.available:
-                        control_bit = getvalue(control["address"])["value"]
-                        if readbit(control_bit, control["pzt1_lock"]) == "1":
-                            resvalue(control["address"], 2 ** control["pzt1_lock"])
-                        if readbit(control_bit, control["pzt1_ramp"]) == "1":
-                            resvalue(control["address"], 2 ** control["pzt1_ramp"])
-                        if readbit(control_bit, control["pzt1_park"]) == "1":
-                            resvalue(control["address"], 2 ** control["pzt1_park"])
-                        if readbit(control_bit, control["pzt1_tune"]) != "1":
-                            addvalue(control["address"], 2 ** control["pzt1_tune"])
+                    TARGET_CURR = getvalue(getaddress("ld_d", "curr"), "u", "u")["value"]
+                    if TARGET_CURR < 0.95 * Globals.Names['high'] and TARGET_CURR > Globals.Names['low']:
+                        self.park_on()
+                    else:
+                        self.lock_on()
+                    # if "PZT0" in Globals.available:
+                    #     control_bit = getvalue(control["address"])["value"]
+                    #     if readbit(control_bit, control["pzt0_lock"]) == "1":
+                    #         resvalue(control["address"], 2 ** control["pzt0_lock"])
+                    #     if readbit(control_bit, control["pzt0_ramp"]) == "1":
+                    #         resvalue(control["address"], 2 ** control["pzt0_ramp"])
+                    #     if readbit(control_bit, control["pzt0_park"]) == "1":
+                    #         resvalue(control["address"], 2 ** control["pzt0_park"])
+                    #     if readbit(control_bit, control["pzt0_tune"]) != "1":
+                    #         addvalue(control["address"], 2 ** control["pzt0_tune"])
+                    #
+                    # if "PZT1" in Globals.available:
+                    #     control_bit = getvalue(control["address"])["value"]
+                    #     if readbit(control_bit, control["pzt1_lock"]) == "1":
+                    #         resvalue(control["address"], 2 ** control["pzt1_lock"])
+                    #     if readbit(control_bit, control["pzt1_ramp"]) == "1":
+                    #         resvalue(control["address"], 2 ** control["pzt1_ramp"])
+                    #     if readbit(control_bit, control["pzt1_park"]) == "1":
+                    #         resvalue(control["address"], 2 ** control["pzt1_park"])
+                    #     if readbit(control_bit, control["pzt1_tune"]) != "1":
+                    #         addvalue(control["address"], 2 ** control["pzt1_tune"])
 
                     self.gui.after_cancel(self.pzt_after)
                     self.lock()
@@ -1143,6 +1156,35 @@ class MainPanel(tk.Frame):
             self.gui.after_cancel(self.update_messages_after)
         # ser.close()
 
+    def park_on(self):
+
+        if getbit(status["address"], status["LD_STABLE"]) == "1":
+            self.message_trigger("PZT is now parked.\n")
+            if "PZT0" in Globals.available:
+                control_bit = getvalue(control["address"])["value"]
+                if readbit(control_bit, control["pzt0_lock"]) == "1":
+                    resvalue(control["address"], 2 ** control["pzt0_lock"])
+                if readbit(control_bit, control["pzt0_ramp"]) == "1":
+                    resvalue(control["address"], 2 ** control["pzt0_ramp"])
+                if readbit(control_bit, control["pzt0_tune"]) == "1":
+                    resvalue(control["address"], 2 ** control["pzt0_tune"])
+                if readbit(control_bit, control["pzt0_park"]) != "1":
+                    addvalue(control["address"], 2 ** control["pzt0_park"])
+
+            if "PZT1" in Globals.available:
+                control_bit = getvalue(control["address"])["value"]
+                if readbit(control_bit, control["pzt1_lock"]) == "1":
+                    resvalue(control["address"], 2 ** control["pzt1_lock"])
+                if readbit(control_bit, control["pzt1_ramp"]) == "1":
+                    resvalue(control["address"], 2 ** control["pzt1_ramp"])
+                if readbit(control_bit, control["pzt1_tune"]) == "1":
+                    resvalue(control["address"], 2 ** control["pzt1_tune"])
+                if readbit(control_bit, control["pzt1_park"]) != "1":
+                    addvalue(control["address"], 2 ** control["pzt1_park"])
+            else:
+                self.message_trigger("PZT is not switched on.\n")
+        else:
+            self.message_trigger("Pump is not switched on.\n")
 
     def lock_on(self):
 
@@ -1302,6 +1344,11 @@ class MainPanel(tk.Frame):
                 result = 0
                 self.message_trigger("Power offset limit reached at 0. \n")
 
+            if result < 195:
+                self.park_on()
+            else:
+                self.lock_on()
+
             step = Globals.shiftldrange / 200
             orig = Globals.shiftmincurrent
 
@@ -1335,6 +1382,10 @@ class MainPanel(tk.Frame):
         #         self.b_shiftbutton.grid(row=29, column=3, columnspan=2, rowspan=1, sticky="nwse", pady=(0, 6), padx=6)
         #         self.message_trigger("Crystal can be shifted to new position.\n")
 
+        if result < 195:
+            self.park_on()
+        else:
+            self.lock_on()
 
         step = Globals.shiftldrange / 200
         orig = Globals.shiftmincurrent
